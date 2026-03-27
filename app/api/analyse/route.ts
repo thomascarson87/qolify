@@ -58,14 +58,26 @@ export async function POST(req: NextRequest) {
   console.log('[analyse] start — db:', _dbUrl.slice(0, 45), '| pooler:', _dbUrl.includes('pooler'))
 
   // --- 1. Cache check ---
-  const [cached] = await sql<{ id: string; composite_indicators: unknown; tvi_score: number | null; expires_at: string }[]>`
-    SELECT id, composite_indicators, tvi_score, expires_at
-    FROM analysis_cache
-    WHERE source_url = ${url}
-      AND expires_at > NOW()
-    LIMIT 1
-  `
-  console.log('[analyse] cache check done', Date.now() - _t0, 'ms')
+  // Wrap in a 6-second timeout to surface connection errors before Vercel's 10s function limit
+  let cached: { id: string; composite_indicators: unknown; tvi_score: number | null; expires_at: string } | undefined
+  try {
+    const timeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('DB_TIMEOUT: cache check exceeded 6s')), 6000)
+    )
+    const rows = sql<{ id: string; composite_indicators: unknown; tvi_score: number | null; expires_at: string }[]>`
+      SELECT id, composite_indicators, tvi_score, expires_at
+      FROM analysis_cache
+      WHERE source_url = ${url}
+        AND expires_at > NOW()
+      LIMIT 1
+    `
+    const result = await Promise.race([rows, timeout])
+    cached = result[0]
+    console.log('[analyse] cache check done', Date.now() - _t0, 'ms')
+  } catch (dbErr) {
+    console.error('[analyse] cache check FAILED:', String(dbErr))
+    return NextResponse.json({ error: 'DB connection failed', detail: String(dbErr) }, { status: 500 })
+  }
 
   if (cached) {
     return NextResponse.json({
