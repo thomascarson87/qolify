@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Raiz | Hidden DNA Report</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;family=DM+Mono:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-surface": "#2d3134",
+                        "tertiary": "#300900",
+                        "surface-bright": "#f7fafe",
+                        "outline": "#74777f",
+                        "error": "#ba1a1a",
+                        "secondary-fixed": "#70fda8",
+                        "on-tertiary-fixed": "#390c00",
+                        "surface-tint": "#465f85",
+                        "primary-container": "#0d2b4e",
+                        "on-surface": "#181c1f",
+                        "on-primary-fixed": "#001c3b",
+                        "on-tertiary-fixed-variant": "#832700",
+                        "primary": "#001631",
+                        "secondary-container": "#70fda8",
+                        "tertiary-fixed-dim": "#ffb59c",
+                        "secondary-fixed-dim": "#51df8e",
+                        "on-secondary-fixed": "#00210e",
+                        "surface-dim": "#d7dade",
+                        "surface-variant": "#e0e3e7",
+                        "surface-container-highest": "#e0e3e7",
+                        "surface": "#f7fafe",
+                        "on-primary-fixed-variant": "#2e486c",
+                        "on-secondary": "#ffffff",
+                        "inverse-primary": "#aec8f3",
+                        "surface-container": "#ebeef2",
+                        "on-error": "#ffffff",
+                        "on-surface-variant": "#43474e",
+                        "on-tertiary-container": "#f16735",
+                        "surface-container-low": "#f1f4f8",
+                        "primary-fixed-dim": "#aec8f3",
+                        "inverse-on-surface": "#eef1f5",
+                        "on-primary-container": "#7993bc",
+                        "primary-fixed": "#d5e3ff",
+                        "on-secondary-container": "#007440",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#c4c6cf",
+                        "tertiary-fixed": "#ffdbd0",
+                        "background": "#f7fafe",
+                        "surface-container-high": "#e5e8ec",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#00522c",
+                        "surface-container-lowest": "#ffffff",
+                        "on-background": "#181c1f",
+                        "secondary": "#34C97A",
+                        "tertiary-container": "#531500"
+                    },
+                    fontFamily: {
+                        "headline": ["Newsreader", "serif"],
+                        "body": ["Manrope", "sans-serif"],
+                        "label": ["Manrope", "sans-serif"],
+                        "mono": ["DM Mono", "monospace"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        @keyframes ring-reveal {
+            from { stroke-dasharray: 0 100; }
+            to { stroke-dasharray: 84 100; }
+        }
+        .animate-ring {
+            animation: ring-reveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-secondary-container">
+<!-- Top Navigation Anchor -->
+<header class="bg-[#0D2B4E] text-white flex justify-between items-center w-full px-6 py-4 fixed top-0 z-50">
+<div class="text-2xl font-serif italic text-white">Raiz</div>
+<nav class="hidden md:flex gap-8 items-center">
+<a class="text-white border-b-2 border-secondary pb-1 font-bold" href="#">Analyse</a>
+<a class="text-slate-300 font-medium hover:text-secondary transition-colors duration-200" href="#">Compare</a>
+<a class="text-slate-300 font-medium hover:text-secondary transition-colors duration-200" href="#">Intelligence</a>
+<a class="text-slate-300 font-medium hover:text-secondary transition-colors duration-200" href="#">Pricing</a>
+</nav>
+<button class="bg-primary text-white px-6 py-2 rounded-lg font-bold hover:opacity-90 transition-all scale-[0.98]">Get Started</button>
+</header>
+<main class="pt-24 pb-32 px-4 md:px-8 max-w-7xl mx-auto space-y-12">
+<!-- Section: Emotional Reveal & TVI Ring -->
+<section class="flex flex-col md:flex-row items-center gap-12 py-12">
+<div class="relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="2.5"></path>
+<path class="animate-ring" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#34C97A" stroke-linecap="round" stroke-width="2.5"></path>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="font-mono text-5xl font-medium">84</span>
+<span class="text-xs tracking-widest uppercase font-bold opacity-60">TVI Score</span>
+</div>
+</div>
+<div class="flex-1 space-y-4 text-center md:text-left">
+<h1 class="font-headline text-5xl md:text-6xl text-primary leading-tight">Your Hidden DNA Report: <br/><span class="italic font-light">Calle de Almagro, 12</span></h1>
+<p class="text-on-surface-variant text-lg max-w-2xl font-headline italic">We’ve audited 4,200+ data points to reveal the invisible forces shaping this asset's future. This isn't a valuation; it's an autopsy.</p>
+</div>
+</section>
+<!-- Section: Advisor-Style AlertPills -->
+<section class="space-y-4">
+<h3 class="font-headline text-2xl">Priority Briefing</h3>
+<div class="flex flex-wrap gap-3">
+<!-- Critical -->
+<div class="group relative bg-error-container/30 border-l-4 border-error px-4 py-2 rounded-lg cursor-help transition-all hover:bg-error-container/50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-error text-sm">warning</span>
+<span class="text-sm font-bold text-on-error-container">Structural Deficit Found</span>
+<span class="text-xs italic text-on-error-container/70 ml-4 group-hover:underline">What does this mean?</span>
+</div>
+</div>
+<!-- Warning -->
+<div class="group relative bg-tertiary-fixed/30 border-l-4 border-on-tertiary-container px-4 py-2 rounded-lg cursor-help transition-all hover:bg-tertiary-fixed/50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-tertiary-container text-sm">priority_high</span>
+<span class="text-sm font-bold text-on-tertiary-container">VUT Concentration Warning</span>
+<span class="text-xs italic text-on-tertiary-container/70 ml-4 group-hover:underline">What does this mean?</span>
+</div>
+</div>
+<!-- Positive -->
+<div class="group relative bg-secondary-container/30 border-l-4 border-secondary px-4 py-2 rounded-lg cursor-help transition-all hover:bg-secondary-container/50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm">check_circle</span>
+<span class="text-sm font-bold text-on-secondary-container">High Rental Liquidity</span>
+<span class="text-xs italic text-on-secondary-container/70 ml-4 group-hover:underline">What does this mean?</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 1: Financial Anatomy -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<div class="lg:col-span-2 space-y-8">
+<div class="bg-surface-container-lowest p-8 rounded-2xl shadow-sm border border-outline-variant/10">
+<h4 class="font-headline text-xl mb-6">Negotiation Gap Gauge</h4>
+<div class="relative pt-12">
+<div class="h-2 w-full bg-surface-container rounded-full overflow-hidden flex">
+<div class="h-full bg-error/20 w-1/4"></div>
+<div class="h-full bg-secondary w-1/2"></div>
+<div class="h-full bg-primary w-1/4"></div>
+</div>
+<div class="absolute top-0 left-[62%] -translate-x-1/2 flex flex-col items-center">
+<div class="w-4 h-4 bg-primary rounded-full ring-4 ring-white shadow-md"></div>
+<span class="font-mono text-sm mt-2 font-bold">-12.4%</span>
+</div>
+<div class="flex justify-between mt-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50">
+<span>Overpriced</span>
+<span>Fair Value Zone</span>
+<span>Strong Buy</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-8 rounded-2xl">
+<div class="flex justify-between items-start mb-8">
+<div>
+<h4 class="font-headline text-xl">Monthly Cost Breakdown</h4>
+<p class="text-sm text-on-surface-variant">Estimated running costs vs revenue</p>
+</div>
+<div class="bg-secondary/10 text-secondary px-4 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">trending_up</span>
+                            Optimal Growth Path
+                        </div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<span class="text-sm">Mortgage Estimate</span>
+<span class="font-mono font-medium">€1,450.00</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm">Maintenance / IBI</span>
+<span class="font-mono font-medium">€185.00</span>
+</div>
+<div class="pt-4 border-t border-outline-variant/20 flex justify-between items-center">
+<span class="font-bold">Total Monthly Outflow</span>
+<span class="font-mono font-bold text-primary">€1,635.00</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl space-y-4 flex flex-col justify-center">
+<p class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Buy vs Renting</p>
+<div class="flex items-end gap-2">
+<span class="font-mono text-3xl font-bold text-secondary">+€420</span>
+<span class="text-sm pb-1 opacity-60">monthly net gain</span>
+</div>
+<p class="text-sm italic text-on-surface-variant">The market rent for this typology currently exceeds mortgage obligations by 25%.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-primary text-white p-8 rounded-2xl flex flex-col justify-between">
+<div>
+<span class="bg-secondary text-primary px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-tighter">95% Financing</span>
+<h4 class="font-headline text-3xl mt-4 leading-snug">ICO Eligibility Protocol</h4>
+<p class="mt-4 text-slate-300 text-sm leading-relaxed">This property meets 14/15 criteria for official state-backed guarantees, reducing your required down-payment to 5%.</p>
+</div>
+<div class="mt-12">
+<div class="text-[4rem] font-mono leading-none tracking-tighter text-secondary">A+</div>
+<p class="font-mono text-xs opacity-50 uppercase mt-2">Creditworthiness Score</p>
+</div>
+</div>
+</section>
+<!-- Section 2: Risk Audit -->
+<section class="space-y-6">
+<h3 class="font-headline text-2xl">Risk Audit Matrix</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1">
+<div class="bg-surface-container p-8">
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">ITE Status</span>
+<div class="mt-6 flex items-baseline gap-2">
+<span class="font-mono text-3xl font-bold">FAVORABLE</span>
+</div>
+<p class="text-xs mt-2 text-on-surface-variant">Valid until 2029. No structural pathologies detected.</p>
+</div>
+<div class="bg-surface-container p-8">
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">Flood Risk</span>
+<div class="mt-6 flex items-baseline gap-2">
+<span class="font-mono text-3xl font-bold text-secondary">NONE</span>
+</div>
+<p class="text-xs mt-2 text-on-surface-variant">Located outside the 500-year recurrence zone.</p>
+</div>
+<div class="bg-surface-container p-8">
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">Energy Cert</span>
+<div class="mt-6 flex items-baseline gap-2">
+<span class="font-mono text-3xl font-bold text-amber-600">D</span>
+</div>
+<p class="text-xs mt-2 text-on-surface-variant">Retrofit suggested for tax credit eligibility.</p>
+</div>
+<div class="bg-surface-container p-8">
+<span class="text-xs font-bold opacity-40 uppercase tracking-widest">VUT Density</span>
+<div class="mt-6 flex items-baseline gap-2">
+<span class="font-mono text-3xl font-bold text-error">18%</span>
+</div>
+<p class="text-xs mt-2 text-on-surface-variant">Saturation limit near. Licensing unlikely.</p>
+</div>
+</div>
+</section>
+<!-- Section 3: Raiz Intelligence Indicators -->
+<section class="space-y-8">
+<div class="flex justify-between items-end">
+<h3 class="font-headline text-3xl">Proprietary Intelligence</h3>
+<button class="text-primary font-headline italic hover:underline">Unlock full report →</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Open Card -->
+<div class="bg-surface-container-lowest p-8 rounded-2xl shadow-sm border border-outline-variant/10 group cursor-pointer hover:bg-surface-bright transition-colors">
+<h5 class="font-bold mb-2">Gentrification Velocity</h5>
+<p class="text-sm text-on-surface-variant mb-6 leading-relaxed">Measures the speed at which luxury commercial permits are replacing traditional retail within a 500m radius.</p>
+<div class="flex items-end justify-between">
+<span class="font-mono text-2xl font-bold text-secondary">High</span>
+<div class="h-10 w-24 bg-surface-container rounded flex items-end p-1 gap-1">
+<div class="w-full bg-secondary h-1/4"></div>
+<div class="w-full bg-secondary h-2/4"></div>
+<div class="w-full bg-secondary h-3/4"></div>
+<div class="w-full bg-secondary h-full"></div>
+</div>
+</div>
+</div>
+<!-- Locked Card -->
+<div class="relative bg-surface-container-lowest p-8 rounded-2xl shadow-sm border border-outline-variant/10 overflow-hidden">
+<div class="absolute inset-0 bg-white/40 backdrop-blur-md z-10 flex flex-col items-center justify-center p-8 text-center">
+<span class="material-symbols-outlined text-primary mb-2">lock</span>
+<p class="text-xs font-bold uppercase tracking-tighter">Premium Indicator</p>
+</div>
+<h5 class="font-bold mb-2">Yield Asymmetry</h5>
+<p class="text-sm text-on-surface-variant mb-6 blur-[4px]">This indicator tells you whether this area is improving faster than the market has noticed.</p>
+<div class="flex items-end justify-between blur-[4px]">
+<span class="font-mono text-2xl font-bold">4.2%</span>
+<div class="h-2 w-full bg-surface-container rounded"></div>
+</div>
+</div>
+<!-- Locked Card -->
+<div class="relative bg-surface-container-lowest p-8 rounded-2xl shadow-sm border border-outline-variant/10 overflow-hidden">
+<div class="absolute inset-0 bg-white/40 backdrop-blur-md z-10 flex flex-col items-center justify-center p-8 text-center">
+<span class="material-symbols-outlined text-primary mb-2">lock</span>
+<p class="text-xs font-bold uppercase tracking-tighter">Premium Indicator</p>
+</div>
+<h5 class="font-bold mb-2">Zoning Stability</h5>
+<p class="text-sm text-on-surface-variant mb-6 blur-[4px]">Analyzes pending legislative changes in the district that could affect future heights or density.</p>
+<div class="flex items-end justify-between blur-[4px]">
+<span class="font-mono text-2xl font-bold">Stable</span>
+<div class="h-2 w-full bg-surface-container rounded"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 4: Life Proximity -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center py-12">
+<div class="space-y-6">
+<h3 class="font-headline text-3xl">Life Proximity Index</h3>
+<p class="text-on-surface-variant leading-relaxed">Proximity isn't just distance; it's the quality of the ecosystem within a 12-minute walk.</p>
+<div class="flex gap-3 overflow-x-auto no-scrollbar pb-4">
+<div class="bg-surface-container-high px-6 py-3 rounded-full whitespace-nowrap text-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-base">local_cafe</span>
+                        Specialty Coffee (4)
+                    </div>
+<div class="bg-surface-container-high px-6 py-3 rounded-full whitespace-nowrap text-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-base">park</span>
+                        Retiro Park (8min)
+                    </div>
+<div class="bg-surface-container-high px-6 py-3 rounded-full whitespace-nowrap text-sm font-bold flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-base">train</span>
+                        Metro L4 (2min)
+                    </div>
+</div>
+</div>
+<div class="flex justify-center">
+<!-- Abstract Radar Representation -->
+<div class="w-64 h-64 relative">
+<div class="absolute inset-0 border border-outline-variant/30 rounded-full"></div>
+<div class="absolute inset-8 border border-outline-variant/30 rounded-full"></div>
+<div class="absolute inset-16 border border-outline-variant/30 rounded-full"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="w-px h-full bg-outline-variant/30"></div>
+<div class="h-px w-full bg-outline-variant/30 absolute"></div>
+<svg class="w-full h-full relative z-10 overflow-visible" viewbox="0 0 100 100">
+<polygon fill="rgba(52, 201, 122, 0.2)" points="50,10 90,40 70,85 20,70 10,30" stroke="#34C97A" stroke-width="2"></polygon>
+<circle cx="50" cy="10" fill="#34C97A" r="3"></circle>
+<circle cx="90" cy="40" fill="#34C97A" r="3"></circle>
+<circle cx="70" cy="85" fill="#34C97A" r="3"></circle>
+<circle cx="20" cy="70" fill="#34C97A" r="3"></circle>
+<circle cx="10" cy="30" fill="#34C97A" r="3"></circle>
+</svg>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 5: Asset Performance Pillars -->
+<section class="bg-primary-container p-12 rounded-[40px] text-white overflow-hidden relative">
+<div class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-12">
+<div class="space-y-6">
+<span class="font-mono text-sm opacity-60">01 / STABILITY</span>
+<h4 class="font-headline text-2xl">Liquidity Floor</h4>
+<div class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-full transform translate-x-[-15%] transition-transform duration-1000"></div>
+</div>
+<p class="text-sm text-slate-400">Low risk of devaluation due to prestige sub-district location.</p>
+</div>
+<div class="space-y-6">
+<span class="font-mono text-sm opacity-60">02 / GROWTH</span>
+<h4 class="font-headline text-2xl">Equity Upside</h4>
+<div class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-full transform translate-x-[-40%] transition-transform duration-1000 delay-200"></div>
+</div>
+<p class="text-sm text-slate-400">Forced appreciation potential through minor cosmetic renovation.</p>
+</div>
+<div class="space-y-6">
+<span class="font-mono text-sm opacity-60">03 / YIELD</span>
+<h4 class="font-headline text-2xl">Rental Alpha</h4>
+<div class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-full transform translate-x-[-25%] transition-transform duration-1000 delay-400"></div>
+</div>
+<p class="text-sm text-slate-400">Current market underpricing suggests immediate yield optimization.</p>
+</div>
+</div>
+</section>
+<!-- Section 6: Future View Timeline -->
+<section class="py-12 space-y-12">
+<h3 class="font-headline text-3xl">The 10-Year Outlook</h3>
+<div class="relative">
+<div class="absolute left-0 top-0 bottom-0 w-px bg-outline-variant/30 ml-4 md:ml-0 md:left-1/2"></div>
+<div class="space-y-12">
+<!-- Year 1 -->
+<div class="relative flex flex-col md:flex-row items-center gap-8 group">
+<div class="hidden md:block md:flex-1 text-right">
+<h5 class="font-bold">Entry Phase</h5>
+<p class="text-sm text-on-surface-variant">Tax optimization &amp; basic retrofitting.</p>
+</div>
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold z-10 ring-8 ring-background">1</div>
+<div class="flex-1">
+<h5 class="font-bold md:hidden">Entry Phase</h5>
+<span class="font-mono text-xs font-bold text-secondary uppercase tracking-widest">Year 0-2</span>
+<div class="bg-surface-container p-6 rounded-xl mt-4">
+<p class="text-sm leading-relaxed">Acquisition below market average. Eligibility for ITP tax reduction in progress.</p>
+</div>
+</div>
+</div>
+<!-- Year 5 -->
+<div class="relative flex flex-col md:flex-row items-center gap-8 group">
+<div class="flex-1 text-right order-3 md:order-1">
+<h5 class="font-bold md:hidden">Maturation</h5>
+<span class="font-mono text-xs font-bold text-secondary uppercase tracking-widest">Year 3-7</span>
+<div class="bg-surface-container p-6 rounded-xl mt-4">
+<p class="text-sm leading-relaxed">Zone consolidation. Metro expansion nearby complete. Significant rent escalation period.</p>
+</div>
+</div>
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold z-10 ring-8 ring-background order-2">5</div>
+<div class="hidden md:block md:flex-1 order-3">
+<h5 class="font-bold">Maturation</h5>
+<p class="text-sm text-on-surface-variant">Market capture of surrounding infrastructure projects.</p>
+</div>
+</div>
+<!-- Year 10 -->
+<div class="relative flex flex-col md:flex-row items-center gap-8 group">
+<div class="hidden md:block md:flex-1 text-right">
+<h5 class="font-bold">Peak Liquidity</h5>
+<p class="text-sm text-on-surface-variant">Optimal exit window based on cycle analysis.</p>
+</div>
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-bold z-10 ring-8 ring-background">10</div>
+<div class="flex-1">
+<h5 class="font-bold md:hidden">Peak Liquidity</h5>
+<span class="font-mono text-xs font-bold text-secondary uppercase tracking-widest">Year 8-10</span>
+<div class="bg-surface-container p-6 rounded-xl mt-4">
+<p class="text-sm leading-relaxed">Asset reaches peak valuation maturity. Recommended divestment or refinancing.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#CFDAF0] text-[#0D2B4E] w-full py-12 px-8 flex flex-col md:flex-row justify-between items-start gap-8">
+<div class="space-y-4">
+<div class="text-xl font-serif italic text-[#0D2B4E]">Raiz</div>
+<p class="font-headline text-sm max-w-xs">Property Intelligence for the informed curator. We see what the market misses.</p>
+<p class="text-xs font-medium opacity-60">© 2024 Raiz Property Intelligence</p>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-12">
+<div class="space-y-3 flex flex-col">
+<span class="text-xs font-bold uppercase tracking-widest opacity-40">Intelligence</span>
+<a class="text-sm font-medium hover:underline underline-offset-4 decoration-secondary" href="#">Methodology</a>
+<a class="text-sm font-medium hover:underline underline-offset-4 decoration-secondary" href="#">Data Sources</a>
+</div>
+<div class="space-y-3 flex flex-col">
+<span class="text-xs font-bold uppercase tracking-widest opacity-40">Legal</span>
+<a class="text-sm font-medium hover:underline underline-offset-4 decoration-secondary" href="#">Privacy</a>
+<a class="text-sm font-medium hover:underline underline-offset-4 decoration-secondary" href="#">Terms</a>
+</div>
+<div class="space-y-3 flex flex-col">
+<span class="text-xs font-bold uppercase tracking-widest opacity-40">Company</span>
+<a class="text-sm font-medium hover:underline underline-offset-4 decoration-secondary" href="#">Contact</a>
+</div>
+</div>
+</footer>
+<!-- Mobile Navigation Shell -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-white/80 backdrop-blur-xl flex justify-around items-center px-4 pb-6 pt-3 z-50 rounded-t-[24px] shadow-[0_-4px_20px_0_rgba(0,0,0,0.05)] border-t border-outline-variant/10">
+<div class="flex flex-col items-center justify-center text-[#0D2B4E] font-bold">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-[11px] font-medium">Analyse</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400">
+<span class="material-symbols-outlined">compare_arrows</span>
+<span class="text-[11px] font-medium">Compare</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400">
+<span class="material-symbols-outlined">description</span>
+<span class="text-[11px] font-medium">Reports</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[11px] font-medium">Profile</span>
+</div>
+</nav>
+</body></html>

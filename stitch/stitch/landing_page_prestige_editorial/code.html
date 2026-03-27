@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Raiz | Property Intelligence</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;family=DM+Mono:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "inverse-surface": "#2d3134",
+              "tertiary": "#300900",
+              "surface-bright": "#f7fafe",
+              "outline": "#74777f",
+              "error": "#ba1a1a",
+              "secondary-fixed": "#70fda8",
+              "on-tertiary-fixed": "#390c00",
+              "surface-tint": "#465f85",
+              "primary-container": "#0d2b4e",
+              "on-surface": "#181c1f",
+              "on-primary-fixed": "#001c3b",
+              "on-tertiary-fixed-variant": "#832700",
+              "primary": "#001631",
+              "secondary-container": "#70fda8",
+              "tertiary-fixed-dim": "#ffb59c",
+              "secondary-fixed-dim": "#51df8e",
+              "on-secondary-fixed": "#00210e",
+              "surface-dim": "#d7dade",
+              "surface-variant": "#e0e3e7",
+              "surface-container-highest": "#e0e3e7",
+              "surface": "#f7fafe",
+              "on-primary-fixed-variant": "#2e486c",
+              "on-secondary": "#ffffff",
+              "inverse-primary": "#aec8f3",
+              "surface-container": "#ebeef2",
+              "on-error": "#ffffff",
+              "on-surface-variant": "#43474e",
+              "on-tertiary-container": "#f16735",
+              "surface-container-low": "#f1f4f8",
+              "primary-fixed-dim": "#aec8f3",
+              "inverse-on-surface": "#eef1f5",
+              "on-primary-container": "#7993bc",
+              "primary-fixed": "#d5e3ff",
+              "on-secondary-container": "#007440",
+              "on-tertiary": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-primary": "#ffffff",
+              "outline-variant": "#c4c6cf",
+              "tertiary-fixed": "#ffdbd0",
+              "background": "#f7fafe",
+              "surface-container-high": "#e5e8ec",
+              "on-error-container": "#93000a",
+              "on-secondary-fixed-variant": "#00522c",
+              "surface-container-lowest": "#ffffff",
+              "on-background": "#181c1f",
+              "secondary": "#34C97A",
+              "tertiary-container": "#531500"
+            },
+            fontFamily: {
+              "headline": ["Newsreader", "serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"],
+              "mono": ["DM Mono", "monospace"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .dot-grid {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .editorial-shadow {
+            box-shadow: 0 24px 48px -12px rgba(0, 22, 49, 0.08);
+        }
+        .scrolling-report {
+            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+        }
+    </style>
+</head>
+<body class="bg-background font-body text-on-background antialiased selection:bg-secondary/30">
+<!-- TopAppBar -->
+<header class="bg-[#0D2B4E] dark:bg-slate-950 docked full-width top-0 z-50">
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
+<div class="text-2xl font-serif italic text-white dark:text-slate-100">Raiz</div>
+<nav class="hidden md:flex items-center space-x-8">
+<a class="text-white border-b-2 border-emerald-500 pb-1 font-bold transition-colors duration-200" href="#">Analyse</a>
+<a class="text-slate-300 dark:text-slate-400 font-medium hover:text-emerald-400 transition-colors duration-200" href="#">Compare</a>
+<a class="text-slate-300 dark:text-slate-400 font-medium hover:text-emerald-400 transition-colors duration-200" href="#">Intelligence</a>
+<a class="text-slate-300 dark:text-slate-400 font-medium hover:text-emerald-400 transition-colors duration-200" href="#">Pricing</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="bg-secondary text-primary font-bold px-5 py-2 rounded-lg hover:opacity-90 transition-all scale-[1.02] active:scale-[0.98] font-label">Get Started</button>
+</div>
+</div>
+</header>
+<main>
+<!-- Hero Section -->
+<section class="relative bg-[#0D2B4E] overflow-hidden pt-20 pb-32">
+<div class="absolute inset-0 dot-grid opacity-100"></div>
+<div class="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
+<div class="space-y-10">
+<h1 class="font-headline text-5xl md:text-7xl text-white leading-[1.1] font-medium">
+                        The data that <span class="italic font-light">Idealista</span> won't show you.
+                    </h1>
+<p class="text-on-primary-container text-xl md:text-2xl max-w-lg font-light leading-relaxed">
+                        Uncover the hidden history, structural risks, and valuation gaps of any property in Spain before you visit.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-6 pt-4">
+<button class="bg-secondary text-primary px-8 py-4 rounded-lg font-bold text-lg hover:opacity-90 transition-all flex items-center justify-center gap-2">
+                            Analyse a property – free
+                            <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<button class="text-white bg-white/5 border border-white/10 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white/10 transition-all">
+                            See an example report
+                        </button>
+</div>
+</div>
+<div class="relative hidden lg:block">
+<div class="bg-surface-container-lowest rounded-2xl p-6 editorial-shadow h-[600px] overflow-hidden scrolling-report">
+<div class="space-y-8 animate-pulse">
+<div class="flex justify-between items-center border-b border-surface-container pb-4">
+<span class="font-mono text-sm uppercase tracking-widest text-on-surface-variant">Report #8821-XP</span>
+<span class="bg-secondary/10 text-secondary px-3 py-1 rounded-full text-xs font-bold">LIVE DATA</span>
+</div>
+<div class="space-y-4">
+<div class="h-8 bg-surface-container-low rounded-md w-3/4"></div>
+<div class="grid grid-cols-3 gap-4">
+<div class="h-20 bg-surface-container-low rounded-xl"></div>
+<div class="h-20 bg-surface-container-low rounded-xl"></div>
+<div class="h-20 bg-surface-container-low rounded-xl"></div>
+</div>
+</div>
+<div class="space-y-6">
+<div class="p-6 bg-surface-container-low rounded-2xl space-y-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary">warning</span>
+<h4 class="font-headline text-xl italic">Structural Risk Detected</h4>
+</div>
+<div class="h-4 bg-surface-variant rounded w-full"></div>
+<div class="h-4 bg-surface-variant rounded w-5/6"></div>
+</div>
+<div class="p-6 bg-[#0D2B4E] rounded-2xl text-white space-y-4">
+<h4 class="font-headline text-xl">Valuation DNA</h4>
+<div class="flex justify-between items-end">
+<div class="space-y-1">
+<span class="text-slate-400 text-xs font-mono uppercase">Asking Price</span>
+<div class="text-2xl font-mono">€ 425.000</div>
+</div>
+<div class="text-right space-y-1">
+<span class="text-secondary text-xs font-mono uppercase">Raiz Valuation</span>
+<div class="text-2xl font-mono text-secondary">€ 388.400</div>
+</div>
+</div>
+<div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[85%]"></div>
+</div>
+</div>
+</div>
+<div class="h-40 bg-surface-container-low rounded-xl"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- How it Works -->
+<section class="py-32 bg-surface-container-low">
+<div class="max-w-7xl mx-auto px-6">
+<div class="mb-20 space-y-4">
+<h2 class="font-headline text-4xl md:text-5xl text-primary max-w-2xl">The curate approach to property intelligence.</h2>
+<p class="text-on-surface-variant text-lg max-w-xl">We aggregate 42+ data sources into a single, editorial-grade briefing.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+<div class="space-y-6">
+<span class="font-headline italic text-7xl text-primary/10 block leading-none">01.</span>
+<h3 class="font-headline text-2xl text-primary">Input Address</h3>
+<p class="text-on-surface-variant leading-relaxed">Enter any Spanish catastral reference or portal link. Our engine begins parsing local datasets immediately.</p>
+</div>
+<div class="space-y-6">
+<span class="font-headline italic text-7xl text-primary/10 block leading-none">02.</span>
+<h3 class="font-headline text-2xl text-primary">Cross-Examination</h3>
+<p class="text-on-surface-variant leading-relaxed">We verify urbanistic plans, ITE records, and historical price gaps that portals often suppress to speed up sales.</p>
+</div>
+<div class="space-y-6">
+<span class="font-headline italic text-7xl text-primary/10 block leading-none">03.</span>
+<h3 class="font-headline text-2xl text-primary">The Raiz Verdict</h3>
+<p class="text-on-surface-variant leading-relaxed">Receive a PDF report with a clear Buy, Negotiate, or Walk away signal backed by hard data.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Insights Grid -->
+<section class="py-32 bg-surface-container-lowest">
+<div class="max-w-7xl mx-auto px-6">
+<div class="text-center mb-20 space-y-4">
+<h2 class="font-headline text-4xl md:text-5xl text-primary">What portals don't tell you.</h2>
+<p class="text-on-surface-variant text-lg">Detailed layers of data rarely seen by individual buyers.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Card 1 -->
+<div class="p-8 bg-surface-container rounded-2xl space-y-6 hover:bg-surface-bright transition-colors group">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary text-3xl">domain</span>
+<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">High Risk</span>
+</div>
+<h4 class="font-headline text-2xl group-hover:italic transition-all">ITE Expiry Alerts</h4>
+<p class="text-on-surface-variant">Technical building inspections. Know when major facade or structural repairs are mandated by the city.</p>
+</div>
+<!-- Card 2 -->
+<div class="p-8 bg-surface-container rounded-2xl space-y-6 hover:bg-surface-bright transition-colors group">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary text-3xl">water_drop</span>
+<span class="bg-secondary/10 text-secondary px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Safety Signal</span>
+</div>
+<h4 class="font-headline text-2xl group-hover:italic transition-all">Flood Zone Mapping</h4>
+<p class="text-on-surface-variant">Precise geographic risk assessment for 50, 100, and 500-year flood events in urban areas.</p>
+</div>
+<!-- Card 3 -->
+<div class="p-8 bg-surface-container rounded-2xl space-y-6 hover:bg-surface-bright transition-colors group">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary text-3xl">difference</span>
+<span class="bg-tertiary/10 text-tertiary px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Pricing Gap</span>
+</div>
+<h4 class="font-headline text-2xl group-hover:italic transition-all">Catastro Gap</h4>
+<p class="text-on-surface-variant">Discrepancy between the official registered square meters and the portal's advertised size.</p>
+</div>
+<!-- Card 4 -->
+<div class="p-8 bg-surface-container rounded-2xl space-y-6 hover:bg-surface-bright transition-colors group">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary text-3xl">noise_control_off</span>
+<span class="bg-secondary/10 text-secondary px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">NTI Level</span>
+</div>
+<h4 class="font-headline text-2xl group-hover:italic transition-all">Noise Impact (NTI)</h4>
+<p class="text-on-surface-variant">Calculated street noise exposure and environmental pollution indices per floor height.</p>
+</div>
+<!-- Card 5 -->
+<div class="p-8 bg-surface-container rounded-2xl space-y-6 hover:bg-surface-bright transition-colors group">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary text-3xl">timeline</span>
+<span class="bg-secondary/10 text-secondary px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Market Data</span>
+</div>
+<h4 class="font-headline text-2xl group-hover:italic transition-all">Real Sale Price</h4>
+<p class="text-on-surface-variant">Access to actual notary transaction data in the neighborhood, not just listing averages.</p>
+</div>
+<!-- Card 6 -->
+<div class="p-8 bg-surface-container rounded-2xl space-y-6 hover:bg-surface-bright transition-colors group">
+<div class="flex justify-between items-start">
+<span class="material-symbols-outlined text-primary text-3xl">receipt_long</span>
+<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded text-xs font-bold uppercase tracking-wider">Legal Risk</span>
+</div>
+<h4 class="font-headline text-2xl group-hover:italic transition-all">VPO Restrictions</h4>
+<p class="text-on-surface-variant">Identify if the property is social housing (VPO) with government-mandated price caps or sell limits.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Pricing Section -->
+<section class="py-32 bg-surface-container-low">
+<div class="max-w-7xl mx-auto px-6">
+<div class="text-center mb-20">
+<h2 class="font-headline text-4xl md:text-5xl text-primary">Intelligence for every level.</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Standard -->
+<div class="bg-surface-container-lowest p-10 rounded-2xl flex flex-col h-full">
+<div class="mb-8">
+<h3 class="font-headline text-2xl mb-2">Basic</h3>
+<div class="font-mono text-4xl font-medium text-primary">€ 0</div>
+<div class="text-on-surface-variant text-sm mt-1 uppercase font-bold tracking-tighter">Per Report</div>
+</div>
+<ul class="space-y-4 flex-grow mb-10">
+<li class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+                                Catastral History
+                            </li>
+<li class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+                                Surface Verification
+                            </li>
+<li class="flex items-center gap-2 text-on-surface-variant opacity-40">
+<span class="material-symbols-outlined">block</span>
+                                ITE structural records
+                            </li>
+</ul>
+<button class="w-full py-4 bg-surface-container text-primary rounded-lg font-bold hover:bg-surface-container-high transition-colors">Start for free</button>
+</div>
+<!-- Pro -->
+<div class="bg-surface-container-lowest p-10 rounded-2xl flex flex-col h-full ring-2 ring-secondary relative editorial-shadow scale-105 z-10">
+<div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-secondary text-primary px-4 py-1 rounded-full text-xs font-bold uppercase">Most Popular</div>
+<div class="mb-8">
+<h3 class="font-headline text-2xl mb-2">Pro</h3>
+<div class="font-mono text-4xl font-medium text-primary">€ 49</div>
+<div class="text-on-surface-variant text-sm mt-1 uppercase font-bold tracking-tighter">Per Report</div>
+</div>
+<ul class="space-y-4 flex-grow mb-10">
+<li class="flex items-center gap-2 text-primary font-medium">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+                                Everything in Basic
+                            </li>
+<li class="flex items-center gap-2 text-primary font-medium">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+                                ITE &amp; Structural Risks
+                            </li>
+<li class="flex items-center gap-2 text-primary font-medium">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+                                Urban Planning Restrictions
+                            </li>
+<li class="flex items-center gap-2 text-primary font-medium">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+                                Valuations Gap (Notary Data)
+                            </li>
+</ul>
+<button class="w-full py-4 bg-primary text-white rounded-lg font-bold hover:opacity-95 transition-all">Get Pro Report</button>
+</div>
+<!-- Intelligence -->
+<div class="bg-[#0D2B4E] p-10 rounded-2xl flex flex-col h-full text-white">
+<div class="mb-8">
+<div class="flex justify-between items-start">
+<h3 class="font-headline text-2xl mb-2 italic">Intelligence</h3>
+<span class="material-symbols-outlined text-[#D4820A]" style="font-variation-settings: 'FILL' 1;">stars</span>
+</div>
+<div class="font-mono text-4xl font-medium">€ 199</div>
+<div class="text-slate-400 text-sm mt-1 uppercase font-bold tracking-tighter">Monthly (Unlimited)</div>
+</div>
+<ul class="space-y-4 flex-grow mb-10">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+                                API Access
+                            </li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+                                Market Heatmaps
+                            </li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+                                Investor Risk Score
+                            </li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+                                Direct Notary Database
+                            </li>
+</ul>
+<button class="w-full py-4 bg-white/10 text-white border border-white/20 rounded-lg font-bold hover:bg-white/20 transition-all">Contact Sales</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#CFDAF0] dark:bg-slate-800">
+<div class="w-full py-20 px-8 flex flex-col md:flex-row justify-between items-start gap-8 max-w-7xl mx-auto">
+<div class="space-y-6 max-w-sm">
+<div class="text-3xl font-serif italic text-[#0D2B4E] dark:text-white">Raiz</div>
+<p class="font-headline text-lg text-[#0D2B4E]/80">The data behind the door.</p>
+<div class="text-sm font-body text-slate-600 dark:text-slate-400">© 2024 Raiz Property Intelligence</div>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-12">
+<div class="flex flex-col gap-3">
+<span class="font-bold text-[#0D2B4E] uppercase text-xs tracking-widest font-body">Product</span>
+<a class="text-slate-600 dark:text-slate-400 font-body hover:underline underline-offset-4 decoration-emerald-500" href="#">Methodology</a>
+<a class="text-slate-600 dark:text-slate-400 font-body hover:underline underline-offset-4 decoration-emerald-500" href="#">Data Sources</a>
+<a class="text-slate-600 dark:text-slate-400 font-body hover:underline underline-offset-4 decoration-emerald-500" href="#">Pricing</a>
+</div>
+<div class="flex flex-col gap-3">
+<span class="font-bold text-[#0D2B4E] uppercase text-xs tracking-widest font-body">Legal</span>
+<a class="text-slate-600 dark:text-slate-400 font-body hover:underline underline-offset-4 decoration-emerald-500" href="#">Privacy</a>
+<a class="text-slate-600 dark:text-slate-400 font-body hover:underline underline-offset-4 decoration-emerald-500" href="#">Terms</a>
+<a class="text-slate-600 dark:text-slate-400 font-body hover:underline underline-offset-4 decoration-emerald-500" href="#">Cookies</a>
+</div>
+<div class="flex flex-col gap-3">
+<span class="font-bold text-[#0D2B4E] uppercase text-xs tracking-widest font-body">Connect</span>
+<a class="text-slate-600 dark:text-slate-400 font-body hover:underline underline-offset-4 decoration-emerald-500" href="#">Contact</a>
+<a class="text-slate-600 dark:text-slate-400 font-body hover:underline underline-offset-4 decoration-emerald-500" href="#">LinkedIn</a>
+</div>
+</div>
+</div>
+</footer>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_-4px_20px_0_rgba(0,0,0,0.05)] rounded-t-[24px] z-50">
+<a class="flex flex-col items-center justify-center text-[#0D2B4E] dark:text-emerald-400 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors p-2 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[24px]">analytics</span>
+<span class="text-[11px] font-medium font-body mt-1">Analyse</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors p-2 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[24px]">compare_arrows</span>
+<span class="text-[11px] font-medium font-body mt-1">Compare</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors p-2 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[24px]">description</span>
+<span class="text-[11px] font-medium font-body mt-1">Reports</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors p-2 active:scale-95" href="#">
+<span class="material-symbols-outlined text-[24px]">person</span>
+<span class="text-[11px] font-medium font-body mt-1">Profile</span>
+</a>
+</nav>
+</body></html>

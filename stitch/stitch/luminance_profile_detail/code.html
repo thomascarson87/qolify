@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0..72,200..800;1..72,200..800&amp;family=Manrope:wght@200..800&amp;family=DM+Mono:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary": "#465f85",
+              "surface-tint": "#006d3c",
+              "inverse-on-surface": "#ebf1ff",
+              "secondary-fixed-dim": "#aec8f3",
+              "surface-container-low": "#eff3ff",
+              "on-tertiary-fixed": "#390c00",
+              "tertiary-fixed": "#ffdbd0",
+              "on-secondary-fixed-variant": "#2e486c",
+              "primary-fixed": "#70fda8",
+              "on-tertiary": "#ffffff",
+              "inverse-primary": "#51df8e",
+              "on-error": "#ffffff",
+              "surface-container-high": "#dde9ff",
+              "on-tertiary-fixed-variant": "#832700",
+              "surface-variant": "#d8e3f9",
+              "error-container": "#ffdad6",
+              "on-surface-variant": "#3d4a3f",
+              "on-error-container": "#93000a",
+              "on-secondary-fixed": "#001c3b",
+              "on-surface": "#111c2c",
+              "outline-variant": "#bccabc",
+              "on-secondary": "#ffffff",
+              "surface-container-lowest": "#ffffff",
+              "secondary-fixed": "#d5e3ff",
+              "background": "#f9f9ff",
+              "tertiary-fixed-dim": "#ffb59c",
+              "surface-container-highest": "#d8e3f9",
+              "surface-dim": "#cfdaf0",
+              "secondary-container": "#b9d3ff",
+              "on-primary-fixed": "#00210e",
+              "on-primary-fixed-variant": "#00522c",
+              "on-background": "#111c2c",
+              "primary": "#006d3c",
+              "on-primary": "#ffffff",
+              "on-primary-container": "#004f2a",
+              "primary-fixed-dim": "#51df8e",
+              "surface-container": "#e6eeff",
+              "outline": "#6d7b6e",
+              "tertiary-container": "#ff9571",
+              "inverse-surface": "#263141",
+              "primary-container": "#34c97a",
+              "on-secondary-container": "#415b80",
+              "error": "#ba1a1a",
+              "surface": "#f9f9ff",
+              "tertiary": "#ab3601",
+              "surface-bright": "#f9f9ff",
+              "on-tertiary-container": "#7e2500"
+            },
+            fontFamily: {
+              "headline": ["Newsreader", "serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"],
+              "mono": ["DM Mono", "monospace"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary-container/30">
+<!-- TopAppBar -->
+<header class="bg-slate-50/70 dark:bg-slate-950/70 backdrop-blur-xl docked full-width top-0 sticky z-50 shadow-xl shadow-slate-900/5 dark:shadow-none">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-serif italic text-emerald-900 dark:text-emerald-100">Estate Humanist</span>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition-colors" href="#">Portfolio</a>
+<a class="text-emerald-700 dark:text-emerald-400 font-bold border-b-2 border-emerald-600 pb-1" href="#">Insights</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition-colors" href="#">Signals</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition-colors" href="#">Reports</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-on-surface-variant hover:bg-emerald-50/50 transition-all rounded-full">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-emerald-50/50 transition-all rounded-full">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<img alt="User profile avatar" class="w-8 h-8 rounded-full border border-outline-variant/20" data-alt="Close up professional headshot of a person" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkXNOiQR3aj_TEvz-CR-IcrL9dH8SjO0RCSnIJxt3wgdvGg3pDszKppr3C_ztsEIAxuROFHgHiTHg9Nljcqi1stg6yoCu-8BUziokuDmlEsKvBLTYgKigX_xkyOmPRIj1KnCO_olfmcj4FANVG7dIJdRw2LmhVtkwb_nR6CJylfs53iFhRFRUUMfm9njHCSITKEKdTny0oGcHfiVYjRmN8R1OiRWJbVm96YTXeq4YVaAe8V81bBPQcS0T-QUAfV6_DDKG4WdJTWb0"/>
+</div>
+</div>
+</header>
+<main class="max-w-screen-2xl mx-auto px-8 py-12 lg:pl-72 flex flex-col gap-12">
+<!-- Breadcrumb / Task context -->
+<div class="flex items-center gap-2 text-label-sm uppercase tracking-widest text-[10px] text-on-surface-variant/70">
+<span>Property Signals</span>
+<span class="material-symbols-outlined text-[12px]" data-icon="chevron_right">chevron_right</span>
+<span class="text-primary">Luminance Profile</span>
+</div>
+<!-- Hero Editorial Section -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+<div class="lg:col-span-8 flex flex-col gap-6">
+<h1 class="font-headline text-5xl md:text-7xl text-on-surface leading-[1.1]">
+                    High solar gain potential for <span class="italic text-primary">winter months.</span>
+</h1>
+<p class="text-lg text-on-surface-variant max-w-2xl leading-relaxed">
+                    A technical analysis of seasonal light and shadow patterns reveals that the south-facing facade offers a <span class="font-bold text-on-surface">10-15% passive heating benefit</span> during colder cycles. This precision orientation minimizes dependency on active HVAC systems.
+                </p>
+<div class="flex gap-4 mt-4">
+<div class="px-6 py-3 bg-surface-container-low rounded-3xl flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary" data-icon="light_mode">light_mode</span>
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-tighter opacity-60">Brightest month</span>
+<span class="font-mono font-medium">July</span>
+</div>
+</div>
+<div class="px-6 py-3 bg-surface-container-low rounded-3xl flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="dark_mode">dark_mode</span>
+<div class="flex flex-col">
+<span class="text-[10px] uppercase tracking-tighter opacity-60">Darkest month</span>
+<span class="font-mono font-medium">December</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Bento Grid Analysis -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Sun Hours Chart Card -->
+<div class="lg:col-span-2 bg-surface-container-lowest p-8 rounded-3xl shadow-xl shadow-slate-900/5 flex flex-col gap-8">
+<div class="flex justify-between items-end">
+<div>
+<h3 class="font-headline text-2xl">Sun Hours</h3>
+<p class="text-sm text-on-surface-variant italic">Cumulative solar radiation per month</p>
+</div>
+<div class="font-mono text-sm text-primary bg-primary/10 px-3 py-1 rounded-lg">kWh/m²</div>
+</div>
+<div class="h-64 flex items-end gap-2 sm:gap-4 px-2">
+<!-- Dynamic Bars: Amber for Summer, Emerald for Winter -->
+<div class="flex-1 flex flex-col items-center gap-2 group">
+<div class="w-full bg-primary/20 rounded-t-xl h-[40%] group-hover:bg-primary/40 transition-colors relative">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 font-mono text-[10px] opacity-0 group-hover:opacity-100">120</div>
+</div>
+<span class="font-mono text-[10px] opacity-60">JAN</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2 group">
+<div class="w-full bg-primary/30 rounded-t-xl h-[48%] group-hover:bg-primary/50 transition-colors relative"></div>
+<span class="font-mono text-[10px] opacity-60">FEB</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2 group">
+<div class="w-full bg-primary/50 rounded-t-xl h-[60%] group-hover:bg-primary/70 transition-colors relative"></div>
+<span class="font-mono text-[10px] opacity-60">MAR</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2 group">
+<div class="w-full bg-tertiary-container/40 rounded-t-xl h-[75%] group-hover:bg-tertiary-container/60 transition-colors relative"></div>
+<span class="font-mono text-[10px] opacity-60">APR</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2 group">
+<div class="w-full bg-tertiary-container/60 rounded-t-xl h-[85%] group-hover:bg-tertiary-container/80 transition-colors relative"></div>
+<span class="font-mono text-[10px] opacity-60">MAY</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2 group">
+<div class="w-full bg-tertiary-container/80 rounded-t-xl h-[95%] group-hover:bg-tertiary-container/100 transition-colors relative"></div>
+<span class="font-mono text-[10px] opacity-60 text-tertiary font-bold">JUN</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2 group">
+<div class="w-full bg-tertiary-container/70 rounded-t-xl h-[92%] group-hover:bg-tertiary-container/90 transition-colors relative"></div>
+<span class="font-mono text-[10px] opacity-60">JUL</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2 group">
+<div class="w-full bg-tertiary-container/50 rounded-t-xl h-[82%] group-hover:bg-tertiary-container/70 transition-colors relative"></div>
+<span class="font-mono text-[10px] opacity-60">AUG</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2 group">
+<div class="w-full bg-primary/60 rounded-t-xl h-[65%] group-hover:bg-primary/80 transition-colors relative"></div>
+<span class="font-mono text-[10px] opacity-60">SEP</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2 group">
+<div class="w-full bg-primary/40 rounded-t-xl h-[50%] group-hover:bg-primary/60 transition-colors relative"></div>
+<span class="font-mono text-[10px] opacity-60">OCT</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2 group">
+<div class="w-full bg-primary/20 rounded-t-xl h-[35%] group-hover:bg-primary/40 transition-colors relative"></div>
+<span class="font-mono text-[10px] opacity-60">NOV</span>
+</div>
+<div class="flex-1 flex flex-col items-center gap-2 group">
+<div class="w-full bg-primary/10 rounded-t-xl h-[30%] group-hover:bg-primary/30 transition-colors relative"></div>
+<span class="font-mono text-[10px] opacity-60">DEC</span>
+</div>
+</div>
+</div>
+<!-- Compass Card -->
+<div class="bg-surface-dim p-8 rounded-3xl flex flex-col items-center justify-between text-center overflow-hidden relative">
+<div class="z-10">
+<h3 class="font-headline text-2xl">Solar Orientation</h3>
+<p class="text-sm opacity-70">Compass trajectory relative to structure</p>
+</div>
+<!-- Compass Visualization -->
+<div class="relative w-48 h-48 my-8">
+<div class="absolute inset-0 rounded-full border border-on-surface/10"></div>
+<div class="absolute inset-4 rounded-full border border-on-surface/5"></div>
+<!-- Compass Indicators -->
+<span class="absolute top-0 left-1/2 -translate-x-1/2 text-[10px] font-mono">N</span>
+<span class="absolute bottom-0 left-1/2 -translate-x-1/2 text-[10px] font-mono text-primary font-bold">S</span>
+<span class="absolute left-0 top-1/2 -translate-y-1/2 text-[10px] font-mono">W</span>
+<span class="absolute right-0 top-1/2 -translate-y-1/2 text-[10px] font-mono">E</span>
+<!-- Sun Path Arc -->
+<svg class="absolute inset-0 -rotate-90" viewbox="0 0 100 100">
+<path d="M 50,50 m -40,0 a 40,40 0 1,1 80,0" fill="none" stroke="url(#sun-gradient)" stroke-dasharray="2 4" stroke-linecap="round" stroke-width="2"></path>
+<defs>
+<lineargradient id="sun-gradient" x1="0%" x2="100%" y1="0%" y2="0%">
+<stop offset="0%" stop-color="#ab3601"></stop>
+<stop offset="50%" stop-color="#34c97a"></stop>
+<stop offset="100%" stop-color="#ab3601"></stop>
+</lineargradient>
+</defs>
+</svg>
+<!-- Property Axis -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[2px] h-32 bg-primary/30 rotate-[15deg]">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-4 h-4 bg-primary rounded-full border-4 border-surface shadow-lg"></div>
+</div>
+</div>
+<div class="z-10 bg-surface-container-lowest/50 backdrop-blur-md px-4 py-2 rounded-2xl">
+<span class="font-mono text-sm">182° SOUTH-SOUTH-WEST</span>
+</div>
+</div>
+</section>
+<!-- Insights / Details -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+<div class="bg-surface-container-low p-8 rounded-3xl flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<h4 class="font-headline text-xl">Winter Efficiency</h4>
+</div>
+<p class="text-on-surface-variant leading-relaxed">
+                    By leveraging lower-angle winter sun, the primary living spaces receive maximum penetration during the December–February cycle. This natural thermal mass absorption results in a quantifiable reduction in energy overhead.
+                </p>
+</div>
+<div class="bg-surface-container-low p-8 rounded-3xl flex flex-col gap-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary" data-icon="wb_sunny" style="font-variation-settings: 'FILL' 1;">wb_sunny</span>
+<h4 class="font-headline text-xl">Summer Mitigation</h4>
+</div>
+<p class="text-on-surface-variant leading-relaxed">
+                    Extended roof overhangs and strategically placed deciduous foliage are recommended for the western elevation to mitigate excessive July exposure, maintaining the unhurried interior temperature profile.
+                </p>
+</div>
+</section>
+</main>
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 hidden lg:flex flex-col bg-slate-100 dark:bg-slate-900 py-8 pr-4">
+<div class="px-6 mb-12">
+<span class="font-serif text-xl italic text-emerald-900 dark:text-emerald-100">Property Signals</span>
+<p class="font-sans Manrope uppercase tracking-widest text-[10px] opacity-60">Proprietary Intelligence</p>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="text-slate-500 dark:text-slate-400 py-3 pl-6 hover:translate-x-1 transition-transform flex items-center gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="bolt">bolt</span>
+<span class="font-sans Manrope uppercase tracking-widest text-[10px]">Grid Stability</span>
+</a>
+<a class="bg-white dark:bg-slate-800 text-emerald-800 dark:text-emerald-300 shadow-sm rounded-l-none rounded-r-full py-3 pl-6 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="wb_sunny">wb_sunny</span>
+<span class="font-sans Manrope uppercase tracking-widest text-[10px]">Luminance Profile</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 py-3 pl-6 hover:translate-x-1 transition-transform flex items-center gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="router">router</span>
+<span class="font-sans Manrope uppercase tracking-widest text-[10px]">Fiber Nodes</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 py-3 pl-6 hover:translate-x-1 transition-transform flex items-center gap-3" href="#">
+<span class="material-symbols-outlined" data-icon="park">park</span>
+<span class="font-sans Manrope uppercase tracking-widest text-[10px]">Urban Canopy</span>
+</a>
+</nav>
+<div class="mt-auto px-6">
+<button class="w-full bg-primary text-on-primary py-3 px-4 rounded-full text-xs font-bold uppercase tracking-widest transition-transform active:scale-95">
+                Download Full Report
+            </button>
+</div>
+</aside>
+<!-- BottomNavBar (Mobile) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl lg:hidden z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.04)]">
+<a class="flex flex-col items-center justify-center bg-emerald-100/50 dark:bg-emerald-900/30 text-emerald-900 dark:text-emerald-100 rounded-2xl px-5 py-2" href="#">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="font-sans Manrope font-medium text-[11px]">Signals</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2" href="#">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-sans Manrope font-medium text-[11px]">Maps</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2" href="#">
+<span class="material-symbols-outlined" data-icon="compare_arrows">compare_arrows</span>
+<span class="font-sans Manrope font-medium text-[11px]">Compare</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2" href="#">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-sans Manrope font-medium text-[11px]">Vault</span>
+</a>
+</nav>
+<!-- Decorative Ghost Element (Editorial Design) -->
+<div class="fixed top-1/4 -right-24 w-96 h-96 bg-primary/5 rounded-full blur-[120px] pointer-events-none"></div>
+</body></html>

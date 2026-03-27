@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Raiz Hidden DNA Report</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;family=DM+Mono:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-fixed-variant": "#832700",
+              "secondary-container": "#b9d3ff",
+              "on-primary": "#ffffff",
+              "on-tertiary-container": "#7e2500",
+              "primary": "#006d3c",
+              "inverse-on-surface": "#ebf1ff",
+              "inverse-surface": "#263141",
+              "surface-dim": "#cfdaf0",
+              "secondary": "#465f85",
+              "on-surface": "#111c2c",
+              "tertiary-fixed": "#ffdbd0",
+              "primary-fixed-dim": "#51df8e",
+              "surface-container": "#e6eeff",
+              "secondary-fixed": "#d5e3ff",
+              "on-secondary-fixed": "#001c3b",
+              "surface": "#f9f9ff",
+              "surface-tint": "#006d3c",
+              "error-container": "#ffdad6",
+              "on-secondary-fixed-variant": "#2e486c",
+              "surface-container-lowest": "#ffffff",
+              "on-primary-fixed-variant": "#00522c",
+              "inverse-primary": "#51df8e",
+              "primary-fixed": "#70fda8",
+              "outline-variant": "#bccabc",
+              "on-error-container": "#93000a",
+              "tertiary": "#ab3601",
+              "on-tertiary": "#ffffff",
+              "on-tertiary-fixed": "#390c00",
+              "on-secondary": "#ffffff",
+              "on-primary-container": "#004f2a",
+              "tertiary-container": "#ff9571",
+              "primary-container": "#34c97a",
+              "error": "#ba1a1a",
+              "on-primary-fixed": "#00210e",
+              "surface-container-high": "#dde9ff",
+              "on-background": "#111c2c",
+              "surface-container-low": "#eff3ff",
+              "on-surface-variant": "#3d4a3f",
+              "on-secondary-container": "#415b80",
+              "background": "#f9f9ff",
+              "surface-variant": "#d8e3f9",
+              "outline": "#6d7b6e",
+              "secondary-fixed-dim": "#aec8f3",
+              "tertiary-fixed-dim": "#ffb59c",
+              "surface-bright": "#f9f9ff",
+              "surface-container-highest": "#d8e3f9",
+              "on-error": "#ffffff"
+            },
+            fontFamily: {
+              "headline": ["Newsreader", "serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"],
+              "mono": ["DM Mono", "monospace"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      }
+      .circular-gauge {
+        background: conic-gradient(from 180deg, #34c97a 0%, #34c97a 84%, transparent 84%);
+      }
+    </style>
+</head>
+<body class="bg-surface font-body text-on-surface">
+<!-- TopAppBar -->
+<header class="bg-[#001b3d] dark:bg-[#000d1f] docked full-width top-0 z-50 bg-opacity-90 backdrop-blur-xl no-border shadow-2xl shadow-navy-900/20">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-headline italic text-white">Raiz</span>
+<nav class="hidden md:flex gap-6">
+<a class="text-[#34c97a] border-b-2 border-[#34c97a] pb-1 font-medium transition-all duration-150 ease-in-out" href="#">Analyse</a>
+<a class="text-slate-300 hover:text-white transition-colors" href="#">Compare</a>
+<a class="text-slate-300 hover:text-white transition-colors" href="#">Intelligence</a>
+<a class="text-slate-300 hover:text-white transition-colors" href="#">Pricing</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-white px-4 py-2 hover:bg-white/10 rounded-lg transition-colors">Sign In</button>
+<button class="bg-primary hover:bg-primary-container text-white px-6 py-2 rounded-full font-bold transition-all duration-150 ease-in-out transform active:scale-95">Get Started</button>
+</div>
+</div>
+</header>
+<!-- Sticky Property Header -->
+<div class="sticky top-[72px] z-40 bg-surface-container-lowest border-b border-outline-variant/10 shadow-sm">
+<div class="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-center gap-4">
+<img class="w-12 h-12 rounded-xl object-cover" data-alt="Modern penthouse exterior view" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDviwm7_vu9a_SEX4pNMQBaYqx7GaaJGs4y4Ssdi-TlZRmeIpWjoeEHXkD_MkAH9a81ZYGzfpbTaiAT_GM_ZEXLhLH_EMQ4BvrJQVHeL7Z-nEkaaZWq92K1Vub-CXIYKX4tjQuq6V9fRUM89uaSIA-E4pdzY8xDtcAE9WzoUbx04N5tT_4tBVgOlQvzMKeSanaC3PipgTZiDA2kxpXSrlfdcfpIwdMdDF_CNHiPv-ffaQA-9BxYwHl6ODgv59vdkMosreAmlzsp0TA"/>
+<div>
+<h1 class="text-lg font-bold tracking-tight">Calle de Velázquez, 42</h1>
+<p class="text-sm text-on-surface-variant flex items-center gap-2">
+                        €1,240,000 <span class="w-1 h-1 bg-outline rounded-full"></span> 3 bed, 2 bath
+                    </p>
+</div>
+</div>
+<div class="flex items-center gap-12">
+<div class="hidden lg:flex items-center gap-3">
+<span class="text-[10px] font-label uppercase tracking-widest text-on-surface-variant font-bold">Total Value Index</span>
+<div class="relative w-20 h-20 flex items-center justify-center">
+<div class="absolute inset-0 rounded-full border-4 border-surface-container"></div>
+<div class="absolute inset-0 rounded-full border-4 border-primary border-t-transparent border-r-transparent rotate-[135deg] circular-gauge"></div>
+<span class="font-mono text-2xl font-bold text-on-primary-container">84</span>
+</div>
+</div>
+<div class="flex flex-col items-end">
+<div class="flex items-center gap-2 bg-surface-container px-3 py-1 rounded-full">
+<span class="material-symbols-outlined text-sm text-on-secondary-container" data-icon="travel_explore">travel_explore</span>
+<span class="text-[11px] font-label font-bold uppercase tracking-tight text-on-secondary-container">Idealista Verified</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Content Canvas -->
+<main class="max-w-7xl mx-auto px-6 pt-12 space-y-20">
+<!-- Alert Banner -->
+<section class="flex flex-wrap gap-3">
+<div class="flex items-center gap-2 bg-red-50 text-red-700 px-4 py-2 rounded-full border border-red-100 shadow-sm">
+<span class="material-symbols-outlined text-lg" data-icon="warning" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span class="text-xs font-bold uppercase tracking-wide">High Risk: Flooding Zone</span>
+</div>
+<div class="flex items-center gap-2 bg-amber-50 text-amber-700 px-4 py-2 rounded-full border border-amber-100 shadow-sm">
+<span class="material-symbols-outlined text-lg" data-icon="info" style="font-variation-settings: 'FILL' 1;">info</span>
+<span class="text-xs font-bold uppercase tracking-wide">Amber: ITE Expiration 2025</span>
+</div>
+<div class="flex items-center gap-2 bg-emerald-50 text-primary px-4 py-2 rounded-full border border-primary/10 shadow-sm">
+<span class="material-symbols-outlined text-lg" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-xs font-bold uppercase tracking-wide">Green: High Rental Yield potential</span>
+</div>
+</section>
+<!-- Section 1: Financial DNA -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<div class="lg:col-span-12 mb-4">
+<h2 class="font-headline text-3xl italic">Financial Anatomy</h2>
+<p class="text-on-surface-variant font-light mt-1">Deep-dive into negotiation margins and liquidity potential.</p>
+</div>
+<!-- Negotiation Gap Gauge -->
+<div class="lg:col-span-4 bg-surface-container-low p-8 rounded-3xl space-y-8">
+<div class="flex justify-between items-center">
+<span class="text-sm font-bold uppercase tracking-tighter">Negotiation Gap</span>
+<span class="font-mono text-primary font-bold text-xl">-12.4%</span>
+</div>
+<div class="relative h-12 w-full flex items-center">
+<div class="absolute w-full h-1.5 bg-outline-variant/30 rounded-full"></div>
+<div class="absolute left-[15%] right-[40%] h-1.5 bg-primary/20 rounded-full"></div>
+<!-- Diamond Marker -->
+<div class="absolute left-[35%] w-4 h-4 bg-primary rotate-45 border-2 border-white shadow-lg"></div>
+<!-- Legend -->
+<div class="absolute -bottom-8 left-0 text-[10px] text-on-surface-variant uppercase font-bold">List Price</div>
+<div class="absolute -bottom-8 right-0 text-[10px] text-on-surface-variant uppercase font-bold">Market Avg</div>
+</div>
+<p class="text-sm text-on-surface-variant leading-relaxed pt-4">Current listing is priced aggressively. Expected closing gap between €1.08M and €1.15M.</p>
+</div>
+<!-- Monthly Cost Breakdown Card -->
+<div class="lg:col-span-5 bg-surface-container-lowest p-8 rounded-3xl shadow-xl shadow-navy-900/5 border border-outline-variant/5">
+<h3 class="text-lg font-bold mb-6">Monthly Cost Breakdown</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center group">
+<span class="text-sm text-on-surface-variant">Mortgage (3.2% APR)</span>
+<span class="font-mono font-medium">€4,120</span>
+</div>
+<div class="flex justify-between items-center group">
+<span class="text-sm text-on-surface-variant">IBI &amp; Taxes</span>
+<span class="font-mono font-medium">€245</span>
+</div>
+<div class="flex justify-between items-center group">
+<span class="text-sm text-on-surface-variant">Energy &amp; Utilities</span>
+<span class="font-mono font-medium">€180</span>
+</div>
+<div class="flex justify-between items-center group">
+<span class="text-sm text-on-surface-variant">Comunidad Fee</span>
+<span class="font-mono font-medium">€310</span>
+</div>
+<div class="pt-6 mt-6 border-t border-dashed border-outline-variant flex items-center justify-between">
+<div>
+<span class="text-[11px] font-label font-bold uppercase tracking-wider text-primary">Monthly Ownership</span>
+<div class="text-2xl font-mono font-bold">€4,855</div>
+</div>
+<div class="text-right">
+<span class="text-[11px] font-label font-bold uppercase tracking-wider text-on-surface-variant">vs. Local Rent</span>
+<div class="text-xl font-mono text-secondary-fixed-variant line-through opacity-40">€5,200</div>
+</div>
+</div>
+</div>
+</div>
+<!-- ICO Eligibility -->
+<div class="lg:col-span-3 bg-primary text-white p-8 rounded-3xl relative overflow-hidden">
+<div class="relative z-10 space-y-4">
+<span class="material-symbols-outlined text-4xl opacity-50" data-icon="account_balance">account_balance</span>
+<h3 class="text-xl font-headline italic">ICO Eligibility</h3>
+<p class="text-sm text-white/80 leading-relaxed">This asset qualifies for the 20% ICO Public Guarantee for first-time buyers under 35.</p>
+<button class="w-full bg-white text-primary py-3 rounded-full font-bold text-sm hover:bg-surface transition-colors mt-4">Check Eligibility</button>
+</div>
+<div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+</div>
+</section>
+<!-- Section 2: Risk Audit Bento -->
+<section class="space-y-8">
+<h2 class="font-headline text-3xl italic">Risk Audit</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- ITE Health -->
+<div class="bg-surface-container-low p-6 rounded-3xl flex flex-col justify-between aspect-square">
+<div class="space-y-1">
+<h4 class="text-[11px] font-label font-bold uppercase tracking-widest text-on-surface-variant">Building Health</h4>
+<p class="text-lg font-bold">ITE Status</p>
+</div>
+<div class="text-center">
+<div class="text-5xl font-mono font-bold text-amber-600">FAV</div>
+<span class="text-xs text-amber-700 bg-amber-100 px-2 py-1 rounded-md mt-2 inline-block">Favorable with deficiencies</span>
+</div>
+<div class="text-[11px] text-on-surface-variant leading-tight">Last inspection: March 2021. Structural reinforcement required in 2026.</div>
+</div>
+<!-- Flood & Climate -->
+<div class="bg-surface-container-low p-6 rounded-3xl flex flex-col justify-between aspect-square">
+<div class="space-y-1">
+<h4 class="text-[11px] font-label font-bold uppercase tracking-widest text-on-surface-variant">Environmental</h4>
+<p class="text-lg font-bold">Flood Risk</p>
+</div>
+<div class="relative flex items-center justify-center">
+<span class="material-symbols-outlined text-8xl text-red-100" data-icon="flood" style="font-variation-settings: 'FILL' 1;">flood</span>
+<span class="absolute text-2xl font-mono font-bold text-red-600">HIGH</span>
+</div>
+<p class="text-xs text-on-surface-variant">Located in a 100-year return period flood zone. Expect higher insurance premiums.</p>
+</div>
+<!-- Energy Certificate -->
+<div class="bg-surface-container-low p-6 rounded-3xl flex flex-col justify-between aspect-square">
+<div class="space-y-1">
+<h4 class="text-[11px] font-label font-bold uppercase tracking-widest text-on-surface-variant">Efficiency</h4>
+<p class="text-lg font-bold">Energy Rating</p>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-2">
+<div class="w-8 h-6 bg-emerald-600 rounded flex items-center justify-center text-white font-mono font-bold text-xs">A</div>
+<div class="flex-1 h-1.5 bg-outline-variant/20 rounded-full"></div>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-10 h-6 bg-primary rounded flex items-center justify-center text-white font-mono font-bold text-xs">B</div>
+<div class="flex-1 h-1.5 bg-outline-variant/20 rounded-full"></div>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-12 h-6 bg-lime-500 rounded flex items-center justify-center text-white font-mono font-bold text-xs">C</div>
+<div class="flex-1 h-1.5 bg-primary rounded-full"></div>
+</div>
+<div class="flex items-center gap-2 opacity-30">
+<div class="w-14 h-6 bg-amber-400 rounded flex items-center justify-center text-white font-mono font-bold text-xs">D</div>
+<div class="flex-1 h-1.5 bg-outline-variant/20 rounded-full"></div>
+</div>
+</div>
+<p class="text-xs text-on-surface-variant">Annual CO2 Emissions: 24.3 kg/m²</p>
+</div>
+<!-- Community & VUT -->
+<div class="bg-surface-container-low p-6 rounded-3xl flex flex-col justify-between aspect-square">
+<div class="space-y-1">
+<h4 class="text-[11px] font-label font-bold uppercase tracking-widest text-on-surface-variant">Sociability</h4>
+<p class="text-lg font-bold">VUT Density</p>
+</div>
+<div class="grid grid-cols-4 gap-2">
+<div class="aspect-square bg-primary rounded-md"></div>
+<div class="aspect-square bg-primary rounded-md"></div>
+<div class="aspect-square bg-primary-container rounded-md"></div>
+<div class="aspect-square bg-primary-container rounded-md"></div>
+<div class="aspect-square bg-outline-variant/20 rounded-md"></div>
+<div class="aspect-square bg-outline-variant/20 rounded-md"></div>
+<div class="aspect-square bg-outline-variant/20 rounded-md"></div>
+<div class="aspect-square bg-outline-variant/20 rounded-md"></div>
+</div>
+<p class="text-xs text-on-surface-variant">25% of building units are registered as tourist rentals (VUT).</p>
+</div>
+</div>
+</section>
+<!-- Section 3: Raiz Intelligence Signal Grid -->
+<section class="space-y-12">
+<div class="flex items-end justify-between">
+<div>
+<h2 class="font-headline text-3xl italic">Raiz Intelligence</h2>
+<p class="text-on-surface-variant font-light mt-1">Proprietary signals detected through algorithmic analysis.</p>
+</div>
+<div class="hidden md:flex gap-4">
+<div class="bg-primary/5 p-4 rounded-2xl flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome">auto_awesome</span>
+<div>
+<div class="text-[10px] font-bold uppercase text-on-surface-variant">Asset Score</div>
+<div class="font-mono font-bold text-xl">AA+</div>
+</div>
+</div>
+<div class="bg-tertiary/5 p-4 rounded-2xl flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary" data-icon="show_chart">show_chart</span>
+<div>
+<div class="text-[10px] font-bold uppercase text-on-surface-variant">Growth Index</div>
+<div class="font-mono font-bold text-xl">+4.8%</div>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+<!-- 15 Signals Grid -->
+<!-- Active Signal -->
+<div class="bg-surface-container-lowest p-4 rounded-2xl border border-primary/20 shadow-sm flex flex-col items-center text-center gap-3 group hover:border-primary transition-all">
+<span class="material-symbols-outlined text-primary" data-icon="home_health">home_health</span>
+<span class="text-[10px] font-bold uppercase leading-tight">Healthy Foundation</span>
+</div>
+<!-- Locked Signal -->
+<div class="bg-surface-container-low p-4 rounded-2xl border border-transparent flex flex-col items-center text-center gap-3 relative grayscale opacity-60">
+<span class="material-symbols-outlined" data-icon="visibility_off">visibility_off</span>
+<span class="text-[10px] font-bold uppercase leading-tight">Dark Kitchen Proximity</span>
+<div class="absolute inset-0 flex items-center justify-center bg-surface/10 backdrop-blur-[1px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 shadow-sm flex flex-col items-center text-center gap-3 group hover:border-primary transition-all">
+<span class="material-symbols-outlined text-secondary" data-icon="groups">groups</span>
+<span class="text-[10px] font-bold uppercase leading-tight">Community Sentiment</span>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 shadow-sm flex flex-col items-center text-center gap-3 group hover:border-primary transition-all">
+<span class="material-symbols-outlined text-primary" data-icon="park">park</span>
+<span class="text-[10px] font-bold uppercase leading-tight">Urban Canopy Coverage</span>
+</div>
+<!-- Locked Signal -->
+<div class="bg-surface-container-low p-4 rounded-2xl border border-transparent flex flex-col items-center text-center gap-3 relative grayscale opacity-60">
+<span class="material-symbols-outlined" data-icon="noise_control_off">noise_control_off</span>
+<span class="text-[10px] font-bold uppercase leading-tight">Acoustic Resonance</span>
+<div class="absolute inset-0 flex items-center justify-center bg-surface/10 backdrop-blur-[1px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+</div>
+<!-- Repeat for 15 total -->
+<div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 shadow-sm flex flex-col items-center text-center gap-3 group hover:border-primary transition-all">
+<span class="material-symbols-outlined text-tertiary" data-icon="trending_up">trending_up</span>
+<span class="text-[10px] font-bold uppercase leading-tight">Equity Appreciation</span>
+</div>
+<div class="bg-surface-container-low p-4 rounded-2xl border border-transparent flex flex-col items-center text-center gap-3 relative grayscale opacity-60">
+<span class="material-symbols-outlined" data-icon="location_city">location_city</span>
+<span class="text-[10px] font-bold uppercase leading-tight">Zoning Resilience</span>
+<div class="absolute inset-0 flex items-center justify-center bg-surface/10 backdrop-blur-[1px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 shadow-sm flex flex-col items-center text-center gap-3 group hover:border-primary transition-all">
+<span class="material-symbols-outlined text-on-primary-fixed-variant" data-icon="wb_sunny">wb_sunny</span>
+<span class="text-[10px] font-bold uppercase leading-tight">Luminance Profile</span>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 shadow-sm flex flex-col items-center text-center gap-3 group hover:border-primary transition-all">
+<span class="material-symbols-outlined text-primary" data-icon="verified">verified</span>
+<span class="text-[10px] font-bold uppercase leading-tight">Legal Safeguard</span>
+</div>
+<div class="bg-surface-container-low p-4 rounded-2xl border border-transparent flex flex-col items-center text-center gap-3 relative grayscale opacity-60">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="text-[10px] font-bold uppercase leading-tight">Title Trace</span>
+<div class="absolute inset-0 flex items-center justify-center bg-surface/10 backdrop-blur-[1px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 shadow-sm flex flex-col items-center text-center gap-3 group hover:border-primary transition-all">
+<span class="material-symbols-outlined text-primary" data-icon="payments">payments</span>
+<span class="text-[10px] font-bold uppercase leading-tight">IBI Efficiency</span>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 shadow-sm flex flex-col items-center text-center gap-3 group hover:border-primary transition-all">
+<span class="material-symbols-outlined text-primary" data-icon="bolt">bolt</span>
+<span class="text-[10px] font-bold uppercase leading-tight">Grid Stability</span>
+</div>
+<div class="bg-surface-container-low p-4 rounded-2xl border border-transparent flex flex-col items-center text-center gap-3 relative grayscale opacity-60">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+<span class="text-[10px] font-bold uppercase leading-tight">Crime Overlay</span>
+<div class="absolute inset-0 flex items-center justify-center bg-surface/10 backdrop-blur-[1px]">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="lock" style="font-variation-settings: 'FILL' 1;">lock</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 shadow-sm flex flex-col items-center text-center gap-3 group hover:border-primary transition-all">
+<span class="material-symbols-outlined text-primary" data-icon="router">router</span>
+<span class="text-[10px] font-bold uppercase leading-tight">Fiber Optic Node</span>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-2xl border border-outline-variant/10 shadow-sm flex flex-col items-center text-center gap-3 group hover:border-primary transition-all">
+<span class="material-symbols-outlined text-primary" data-icon="medical_services">medical_services</span>
+<span class="text-[10px] font-bold uppercase leading-tight">Emergency Access</span>
+</div>
+</div>
+</section>
+<!-- Section 4: Life Proximity -->
+<section class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+<div class="relative aspect-square flex items-center justify-center bg-surface-container-low rounded-full overflow-hidden">
+<!-- Mock Radar Chart SVG -->
+<svg class="w-full h-full p-12 overflow-visible" viewbox="0 0 400 400">
+<circle class="text-outline-variant/20" cx="200" cy="200" fill="none" r="150" stroke="currentColor" stroke-dasharray="4 4"></circle>
+<circle class="text-outline-variant/20" cx="200" cy="200" fill="none" r="100" stroke="currentColor" stroke-dasharray="4 4"></circle>
+<circle class="text-outline-variant/20" cx="200" cy="200" fill="none" r="50" stroke="currentColor" stroke-dasharray="4 4"></circle>
+<path class="text-outline-variant/40" d="M200 50 L350 200 L200 350 L50 200 Z" fill="none" stroke="currentColor"></path>
+<!-- Plotting Area -->
+<path d="M200 80 L310 200 L200 320 L120 180 Z" fill="#34c97a" fill-opacity="0.2" stroke="#006d3c" stroke-width="2"></path>
+<!-- Labels -->
+<text class="text-[10px] font-bold font-label uppercase fill-on-surface-variant" text-anchor="middle" x="200" y="40">Connectivity</text>
+<text class="text-[10px] font-bold font-label uppercase fill-on-surface-variant" text-anchor="start" x="360" y="205">Green Space</text>
+<text class="text-[10px] font-bold font-label uppercase fill-on-surface-variant" text-anchor="middle" x="200" y="375">Education</text>
+<text class="text-[10px] font-bold font-label uppercase fill-on-surface-variant" text-anchor="end" x="40" y="205">Retail</text>
+</svg>
+</div>
+<div class="space-y-8">
+<div>
+<h2 class="font-headline text-3xl italic">Life Proximity</h2>
+<p class="text-on-surface-variant font-light mt-1">Walkability and access to essential infrastructure.</p>
+</div>
+<div class="flex flex-wrap gap-3 max-h-[400px] overflow-y-auto pr-4 scrollbar-hide">
+<div class="bg-surface-container-highest px-4 py-2 rounded-xl flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="train">train</span>
+<span class="text-xs font-bold">Metro Velázquez (2 min)</span>
+</div>
+<div class="bg-surface-container-highest px-4 py-2 rounded-xl flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="park">park</span>
+<span class="text-xs font-bold">Retiro Park (5 min)</span>
+</div>
+<div class="bg-surface-container-highest px-4 py-2 rounded-xl flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="shopping_basket">shopping_basket</span>
+<span class="text-xs font-bold">Mercado de la Paz (8 min)</span>
+</div>
+<div class="bg-surface-container-highest px-4 py-2 rounded-xl flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="school">school</span>
+<span class="text-xs font-bold">Colegio Loreto (12 min)</span>
+</div>
+<div class="bg-surface-container-highest px-4 py-2 rounded-xl flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="local_hospital">local_hospital</span>
+<span class="text-xs font-bold">Hospital Gregorio Marañón (15 min)</span>
+</div>
+<div class="bg-surface-container-highest px-4 py-2 rounded-xl flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="restaurant">restaurant</span>
+<span class="text-xs font-bold">Michelin Star Row (4 min)</span>
+</div>
+<div class="bg-surface-container-highest px-4 py-2 rounded-xl flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="fitness_center">fitness_center</span>
+<span class="text-xs font-bold">Reebok Sports Club (6 min)</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 5: Pillar Scores -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-12 bg-surface-container-low p-12 rounded-[40px]">
+<div class="lg:col-span-8 space-y-6">
+<h2 class="font-headline text-3xl italic mb-8">Asset Performance Pillars</h2>
+<div class="space-y-6">
+<!-- Score Bar 1 -->
+<div class="space-y-2">
+<div class="flex justify-between text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">
+<span>Structural Integrity</span>
+<span class="font-mono">72%</span>
+</div>
+<div class="h-2 w-full bg-outline-variant/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[72%] rounded-full"></div>
+</div>
+</div>
+<!-- Score Bar 2 -->
+<div class="space-y-2">
+<div class="flex justify-between text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">
+<span>Financial Yield</span>
+<span class="font-mono">89%</span>
+</div>
+<div class="h-2 w-full bg-outline-variant/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[89%] rounded-full"></div>
+</div>
+</div>
+<!-- Score Bar 3 -->
+<div class="space-y-2">
+<div class="flex justify-between text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">
+<span>Regulatory Security</span>
+<span class="font-mono">65%</span>
+</div>
+<div class="h-2 w-full bg-outline-variant/20 rounded-full overflow-hidden">
+<div class="h-full bg-tertiary w-[65%] rounded-full"></div>
+</div>
+</div>
+<!-- Plus 6 more bars conceptually... rendering few more for density -->
+<div class="space-y-2">
+<div class="flex justify-between text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">
+<span>Climate Resilience</span>
+<span class="font-mono">42%</span>
+</div>
+<div class="h-2 w-full bg-outline-variant/20 rounded-full overflow-hidden">
+<div class="h-full bg-red-500 w-[42%] rounded-full"></div>
+</div>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between text-[11px] font-bold uppercase tracking-widest text-on-surface-variant">
+<span>Neighborhood Evolution</span>
+<span class="font-mono">94%</span>
+</div>
+<div class="h-2 w-full bg-outline-variant/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[94%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="lg:col-span-4 flex flex-col items-center justify-center border-l border-outline-variant/20 pl-12">
+<div class="relative w-48 h-48 flex items-center justify-center">
+<svg class="transform -rotate-90" viewbox="0 0 100 100">
+<circle class="text-surface-container" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="40" stroke-width="8"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="text-4xl font-mono font-bold">84</span>
+<span class="text-[10px] font-bold uppercase text-on-surface-variant">Overall</span>
+</div>
+</div>
+<p class="text-center text-sm text-on-surface-variant mt-8 max-w-[200px]">Asset is performing in the <strong>top 15%</strong> of its municipal class.</p>
+</div>
+</section>
+<!-- Section 6: Future View Timeline -->
+<section class="space-y-8 pb-32">
+<h2 class="font-headline text-3xl italic">Future View</h2>
+<div class="relative">
+<div class="absolute left-4 top-0 bottom-0 w-0.5 bg-outline-variant/20"></div>
+<div class="space-y-12 pl-12">
+<div class="relative">
+<div class="absolute -left-12 top-2 w-4 h-4 bg-primary rounded-full border-4 border-surface"></div>
+<span class="text-[10px] font-mono font-bold text-primary">Q4 2024</span>
+<h4 class="text-lg font-bold">Project Canalejas Phase II Completion</h4>
+<p class="text-sm text-on-surface-variant">Opening of premium luxury retail hub within 800m. Expected +2% neighborhood appreciation.</p>
+</div>
+<div class="relative">
+<div class="absolute -left-12 top-2 w-4 h-4 bg-primary-container rounded-full border-4 border-surface"></div>
+<span class="text-[10px] font-mono font-bold text-primary-container">Q2 2025</span>
+<h4 class="text-lg font-bold">Metro Line 11 Expansion</h4>
+<p class="text-sm text-on-surface-variant">New connection hub at Conde de Casal. Improving transit scores for eastern district assets.</p>
+</div>
+<div class="relative">
+<div class="absolute -left-12 top-2 w-4 h-4 bg-outline-variant rounded-full border-4 border-surface"></div>
+<span class="text-[10px] font-mono font-bold text-on-surface-variant">2026</span>
+<h4 class="text-lg font-bold">Madrid Nuevo Norte - South Node</h4>
+<p class="text-sm text-on-surface-variant">Primary arterial renovations. Possible construction noise impact for 18 months.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#cfdaf0] dark:bg-[#000d1f] w-full rounded-t-[40px] mt-20 tonal-shift-from-surface">
+<div class="max-w-7xl mx-auto px-12 py-16 flex flex-col md:flex-row justify-between items-start gap-12">
+<div class="space-y-4">
+<span class="font-headline text-lg text-[#001b3d] dark:text-white italic">Raiz</span>
+<p class="text-slate-600 dark:text-slate-500 max-w-xs text-sm">Empowering property decisions through deep forensic data analysis and predictive intelligence.</p>
+</div>
+<div class="flex flex-wrap gap-8">
+<a class="text-slate-600 dark:text-slate-500 text-sm hover:underline decoration-[#34c97a] underline-offset-4 transition-all duration-300" href="#">Methodology</a>
+<a class="text-slate-600 dark:text-slate-500 text-sm hover:underline decoration-[#34c97a] underline-offset-4 transition-all duration-300" href="#">Data Sources</a>
+<a class="text-slate-600 dark:text-slate-500 text-sm hover:underline decoration-[#34c97a] underline-offset-4 transition-all duration-300" href="#">Privacy</a>
+<a class="text-slate-600 dark:text-slate-500 text-sm hover:underline decoration-[#34c97a] underline-offset-4 transition-all duration-300" href="#">Terms</a>
+<a class="text-slate-600 dark:text-slate-500 text-sm hover:underline decoration-[#34c97a] underline-offset-4 transition-all duration-300" href="#">Contact</a>
+</div>
+</div>
+<div class="max-w-7xl mx-auto px-12 pb-8">
+<p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold">© 2024 Raiz Property Intelligence. All rights reserved.</p>
+</div>
+</footer>
+<!-- Mobile Sticky Bottom Bar -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 bg-surface-container-lowest border-t border-outline-variant/10 px-6 py-4 flex items-center justify-between z-50 shadow-2xl">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
+<span class="font-mono text-primary font-bold">84</span>
+</div>
+<div>
+<div class="text-[10px] font-bold uppercase text-on-surface-variant">Guide Price</div>
+<div class="text-sm font-bold">€1.24M</div>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="p-3 bg-surface-container rounded-full text-on-surface">
+<span class="material-symbols-outlined text-lg" data-icon="share">share</span>
+</button>
+<button class="p-3 bg-surface-container rounded-full text-on-surface">
+<span class="material-symbols-outlined text-lg" data-icon="favorite">favorite</span>
+</button>
+<button class="bg-primary text-white px-6 py-2 rounded-full font-bold text-sm">Save</button>
+</div>
+</div>
+<!-- BottomNavBar (Hidden on desktop, logic filter: this is a detail screen, navigation suppressed by shell visibility rule) -->
+<!-- But we keep the mobile footer for CTA -->
+</body></html>

@@ -1,0 +1,9 @@
+psycopg2-binary>=2.9
+requests>=2.31
+pandas>=2.1
+python-dotenv>=1.0
+tqdm>=4.66
+shapely>=2.0
+pyproj>=3.6        # EPSG:25830 → WGS84 reprojection (Madrid VUT)
+openpyxl>=3.1      # Read .xlsx files (Madrid VUT)
+xlrd>=2.0          # Read legacy .xls files (Madrid VUT fallback)

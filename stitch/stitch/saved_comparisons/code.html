@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;family=DM+Mono:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-secondary-container": "#415b80",
+              "on-secondary": "#ffffff",
+              "tertiary": "#ab3601",
+              "surface-container-lowest": "#ffffff",
+              "tertiary-fixed": "#ffdbd0",
+              "error-container": "#ffdad6",
+              "tertiary-container": "#ff9571",
+              "on-secondary-fixed": "#001c3b",
+              "surface-variant": "#d8e3f9",
+              "surface-tint": "#006d3c",
+              "secondary-fixed": "#d5e3ff",
+              "on-error-container": "#93000a",
+              "secondary-container": "#b9d3ff",
+              "on-primary-fixed-variant": "#00522c",
+              "background": "#f9f9ff",
+              "on-surface-variant": "#3d4a3f",
+              "surface-container-low": "#eff3ff",
+              "outline": "#6d7b6e",
+              "primary-fixed": "#70fda8",
+              "primary": "#006d3c",
+              "tertiary-fixed-dim": "#ffb59c",
+              "secondary-fixed-dim": "#aec8f3",
+              "secondary": "#465f85",
+              "inverse-on-surface": "#ebf1ff",
+              "outline-variant": "#bccabc",
+              "on-primary-container": "#004f2a",
+              "on-error": "#ffffff",
+              "surface-dim": "#cfdaf0",
+              "on-secondary-fixed-variant": "#2e486c",
+              "inverse-surface": "#263141",
+              "surface-container": "#e6eeff",
+              "inverse-primary": "#51df8e",
+              "on-tertiary": "#ffffff",
+              "surface-bright": "#f9f9ff",
+              "on-primary": "#ffffff",
+              "surface-container-highest": "#d8e3f9",
+              "on-tertiary-fixed-variant": "#832700",
+              "primary-fixed-dim": "#51df8e",
+              "on-tertiary-fixed": "#390c00",
+              "on-tertiary-container": "#7e2500",
+              "error": "#ba1a1a",
+              "surface": "#f9f9ff",
+              "primary-container": "#34c97a",
+              "on-primary-fixed": "#00210e",
+              "on-background": "#111c2c",
+              "surface-container-high": "#dde9ff",
+              "on-surface": "#111c2c"
+            },
+            fontFamily: {
+              "headline": ["Newsreader", "serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"],
+              "mono": ["DM Mono", "monospace"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #F4F7FB;
+        }
+    </style>
+</head>
+<body class="font-body text-on-surface antialiased">
+<!-- SideNavBar (Shared Component) -->
+<aside class="hidden md:block h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-slate-50 dark:bg-slate-950 z-40">
+<div class="flex flex-col gap-2 p-6 h-full">
+<div class="mb-8">
+<h1 class="text-xl font-serif italic text-emerald-800 dark:text-emerald-100">Raiz Intelligence</h1>
+<p class="text-xs font-semibold uppercase tracking-widest font-label text-slate-500 mt-1">Premium Tier</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-transform duration-200 hover:translate-x-1 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-xs font-semibold uppercase tracking-widest font-label">Dashboard</span>
+</a>
+<!-- Active Tab: Portfolio / Comparisons fits here best -->
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 rounded-xl shadow-sm transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+<span class="text-xs font-semibold uppercase tracking-widest font-label">Portfolio</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-transform duration-200 hover:translate-x-1 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+<span class="text-xs font-semibold uppercase tracking-widest font-label">Market Trends</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-transform duration-200 hover:translate-x-1 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+<span class="text-xs font-semibold uppercase tracking-widest font-label">Risk Reports</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-transform duration-200 hover:translate-x-1 rounded-xl" href="#">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+<span class="text-xs font-semibold uppercase tracking-widest font-label">Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-6">
+<button class="w-full py-4 px-4 bg-primary text-on-primary rounded-full font-bold text-sm transition-all hover:scale-95 duration-200 ease-in-out">
+                    Upgrade Insights
+                </button>
+</div>
+</div>
+</aside>
+<!-- TopNavBar (Shared Component) -->
+<header class="md:pl-64 w-full sticky top-0 z-30 transition-all duration-200">
+<div class="flex justify-between items-center w-full px-8 py-4 mx-auto bg-white/70 backdrop-blur-xl shadow-sm">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-serif italic text-emerald-900">Raiz</span>
+<nav class="hidden lg:flex items-center gap-6">
+<a class="text-slate-600 font-medium hover:text-emerald-600 transition-colors" href="#">Analyse</a>
+<a class="text-slate-600 font-medium hover:text-emerald-600 transition-colors" href="#">Map</a>
+<a class="text-emerald-700 font-bold border-b-2 border-emerald-600 transition-colors" href="#">Intelligence</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-600 hover:text-emerald-600 transition-colors">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="p-2 text-slate-600 hover:text-emerald-600 transition-colors">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-surface-container overflow-hidden">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="Professional user profile headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLY0sVxyfb9qTq_LeIdHrEHvTwz4h_Y6XCTPfdr5bvtXs5Bv2AJKLv_e1Q1EuBjEW3y_F1_E5EnniARMPMdg54wwGgBc7KlI7PuwsueMxwVB2fKkYu7R6W-mIYXqK52_Yomis3xiI71s8vVgSYFxnpqPvOPcjYs74cuNeM_l5bHef7_iNIe9wfmkX_fiA4zvKQdT_CF8jsA-EW4tsmcrS4e9uffPNJ7sYvuwZPMbYHRLHFM241LhGSMb6tQKEWRbOFDk_MxSeaa74"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="md:pl-64 min-h-screen">
+<div class="max-w-7xl mx-auto px-12 py-16">
+<!-- Page Header -->
+<header class="mb-20">
+<h2 class="text-5xl font-headline font-medium text-on-surface mb-4">Your Comparisons</h2>
+<p class="text-xl font-headline italic text-on-surface-variant">Review and refine your property shortlists.</p>
+</header>
+<!-- Comparisons Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-12">
+<!-- Create New Comparison (Ghost Card) -->
+<button class="group relative flex flex-col items-center justify-center p-12 min-h-[420px] rounded-2xl border-2 border-dashed border-outline-variant bg-transparent hover:bg-white/50 transition-all duration-300">
+<span class="text-6xl font-headline text-emerald-900/20 group-hover:text-emerald-600 transition-colors mb-4">+</span>
+<span class="text-xl font-headline italic text-emerald-900/40 group-hover:text-emerald-900 transition-colors">Create New Comparison</span>
+</button>
+<!-- Comparison Card 1 -->
+<div class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="inline-flex px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase bg-emerald-50 text-emerald-700 mb-3">Shortlisted</span>
+<h3 class="text-3xl font-headline text-on-surface group-hover:text-primary transition-colors">Málaga Family Homes</h3>
+<p class="text-sm font-mono text-on-surface-variant mt-1">Updated 12 Oct, 2023</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] font-bold tracking-widest uppercase text-on-surface-variant mb-1">Avg TVI</p>
+<p class="text-3xl font-mono text-emerald-700">84.2</p>
+</div>
+</div>
+<!-- Property Thumbnails -->
+<div class="grid grid-cols-4 gap-3 mb-8">
+<div class="aspect-square rounded-xl overflow-hidden bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Modern Spanish villa exterior" src="https://lh3.googleusercontent.com/aida-public/AB6AXuApgscSnm4qKDwvWDJbL-8xvELeInlQbblnXNNQmZzqzeHKCDUp-UJQmTVpYjvLDl-EoR0yXiXSv-D4stSTXVgQIh-4G7a9rFKF1btz0_-0blPL4ZrQJo7cGUHy0cHmtz1RuooWGtyq8LfU_qAQ03CaWSEfRTvdEKGg_J1Hud9wq7-KzNJDhibB2OANXFOXalj5qWd0iaZJUv_s2wCpUxPaoh5pZieEcw_d2XC4dVOVfMSWKdSu1xgl9oYXIORMyQWbuDTVlG4VNKQ"/>
+</div>
+<div class="aspect-square rounded-xl overflow-hidden bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Luxurious coastal apartment terrace" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBJFruanlwz2YdWBqJYTKu4raOjRDsXI9k5FMliOzXbeELysn7MXa15tsE6liwZ-LNykIJma3PvkIOxWkUEh4rfRBX9EBuPbFIbzSNRRWEVe0TovOVovN11q1Y3OFXObc4CTG17JxNe3hVSB3SZCk49Ox6rd-S0IbtjkktpVw2yLOeQrpZdGqql4u9zAl46MnXa5y4hbDaeDsqpaxk6JNGe3q_qorTrwUlKHYpO5N7JLzx11MuPYksWCq_M1jEDIeG6KWX4y-IXm0"/>
+</div>
+<div class="aspect-square rounded-xl overflow-hidden bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Traditional renovated townhouse courtyard" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjgjSugbO8CbOT80WLtrh9144M9cmPBBZKzTCBzB_9pPxhz1_yAwFFnnbuWF7RHgVu1qbkPdm7uj5ww3t2GWQsgy7EzNb9HiE0zNUSU2duqISITB3JidRY-NQFLUwKEsN-BWUtNMELWZ_pb1RUUDW4Oa0XYiSIYfkJSait4n_05AS41pVzLoY9pJSzSZb_p4xEkWisQoEF7UlnirlJYuFLGID89FIx7lALqd1wNF06rPuB3E9OWf6nZdWxkeHPXRwVpMxn5HcdXDs"/>
+</div>
+<div class="aspect-square rounded-xl overflow-hidden bg-slate-100 relative">
+<img class="w-full h-full object-cover opacity-40" data-alt="Contemporary open plan living area" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNs8vKbj2ZixYhavHn1-ZYsDtiDOxVQmwe1nfBsM4gyuNZrFeL_jkQAGEuWRtv_PfycsdIwfS8Jztlf9QHuKGUvSfRsUEjat2whEUxaaa8oe95Lu32QDuupwIFnqVi8D-xbfnIwLUA6L3YvIKE_cTWZOaeVq00N_BRS9vM9dNEIK7s8m-ccjwhZlOg8Vcm99_fYPapzthiNphI8q5IImApJ4GJI1prl3_8bILktGLVtGOkv6besuCRzFzamSJIezEGkEolPq6k4hs"/>
+<div class="absolute inset-0 flex items-center justify-center font-mono text-sm font-bold text-on-surface">+2</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center justify-between pt-6 border-t border-slate-50">
+<div class="flex gap-4">
+<button class="flex items-center gap-2 text-sm font-bold text-primary hover:text-on-primary-fixed-variant transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="auto_awesome">auto_awesome</span>
+                                Narrative Comparison
+                            </button>
+<button class="flex items-center gap-2 text-sm font-bold text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="ios_share">ios_share</span>
+                                Share Link
+                            </button>
+</div>
+<button class="p-2 text-on-surface-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+<!-- Comparison Card 2 -->
+<div class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="inline-flex px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase bg-tertiary-container/20 text-tertiary mb-3">Decision Pending</span>
+<h3 class="text-3xl font-headline text-on-surface group-hover:text-primary transition-colors">Barcelona Investment Shortlist</h3>
+<p class="text-sm font-mono text-on-surface-variant mt-1">Updated 08 Oct, 2023</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] font-bold tracking-widest uppercase text-on-surface-variant mb-1">Avg TVI</p>
+<p class="text-3xl font-mono text-emerald-700">79.5</p>
+</div>
+</div>
+<!-- Property Thumbnails -->
+<div class="grid grid-cols-4 gap-3 mb-8">
+<div class="aspect-square rounded-xl overflow-hidden bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Modern Barcelona apartment block" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZLUxIqgo4TboCt93zmX_A5YmpvO7H-b4Cbu0s6oTMfOOMp_RrZEokOAXeSNrOMcTF7JU0OQgp4hpm7_1DcO9U__FCeN8BU56-zG2MxlNVbkpCOiQKeFdtrdE1iaKoA5uFvPq6TqfjCkYdS6P-6AK2-LqtmM2RMI9HAcq21o9jtWT15mhxc3qFdp2MIXdtIpZfimuzXfGV4ZQ4AO4kVVJIDpVLyyCCeDz9b-2vSEpuxrJ7zGT6_BalCMu40UEuRal0_kXg6aoRWfM"/>
+</div>
+<div class="aspect-square rounded-xl overflow-hidden bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Penthouse interior design" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWs4tUkO6h79Kv7kSH9k-06Re5mll_e7889QovWrxeS9G_Ryt4377fxbf4BK2w_h4uz8UloJMFBivCfmlxt8gI9H9u4DB2CBEgckYxPrMmtdOTGSvXMzOhs6q5nfWS2PSMqVzYfEGOT3bSbgdWwCu1fJdeeuaTP6R63fS9RwKxPu9Vz2SlT38HU72eWKjzxc7GFw1eBYFrZY6TT2KWWgM3Ryw0H-zZlD_EnHKoawyWigiGtAJyCXT4R-vfwMJ60s-CetMGLDRmRuE"/>
+</div>
+<div class="aspect-square rounded-xl overflow-hidden bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Investment property kitchen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeK2jNRfgOCH0bRiut78xNMAXo8w7cTvO0BmIGXvRO_ao_znmtty-rebt-gTSdKDkjSy0TR8WRLWWY51g1RdgG55cPljJmvCLMbHaPvybSIASUNeqsuM4tFm1LGCK6bTajNln5TzlNGr_UN_KDlvB4Jx2IJrjzmh5PJWgkZH-3zl0QC__diyzurXgsYzGkEm9c43nFqOAtBXwMtgoszaLWZPuJmkX289hsB1fEHCsQF398NqsGftx0nSJ1e0FLArFYYmZRAOS9Z04"/>
+</div>
+<div class="aspect-square rounded-xl overflow-hidden bg-slate-200 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400" data-icon="add">add</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center justify-between pt-6 border-t border-slate-50">
+<div class="flex gap-4">
+<button class="flex items-center gap-2 text-sm font-bold text-primary hover:text-on-primary-fixed-variant transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="auto_awesome">auto_awesome</span>
+                                Narrative Comparison
+                            </button>
+<button class="flex items-center gap-2 text-sm font-bold text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="ios_share">ios_share</span>
+                                Share Link
+                            </button>
+</div>
+<button class="p-2 text-on-surface-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+<!-- Comparison Card 3 -->
+<div class="bg-surface-container-lowest rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-6">
+<div>
+<span class="inline-flex px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase bg-emerald-50 text-emerald-700 mb-3">Shortlisted</span>
+<h3 class="text-3xl font-headline text-on-surface group-hover:text-primary transition-colors">Valencia Beach Houses</h3>
+<p class="text-sm font-mono text-on-surface-variant mt-1">Updated 24 Sep, 2023</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] font-bold tracking-widest uppercase text-on-surface-variant mb-1">Avg TVI</p>
+<p class="text-3xl font-mono text-emerald-700">91.0</p>
+</div>
+</div>
+<!-- Property Thumbnails -->
+<div class="grid grid-cols-4 gap-3 mb-8">
+<div class="aspect-square rounded-xl overflow-hidden bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Beachfront property exterior" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCcNWwJqRblqgpiMr9WXE6OF3bxGU7y2GMU7KLo8RBbhDMLtARgZMcXl3_C8jt4X2Aj77jgKyE5CQc7C_jCbX2QVCbzlzgyQIPqNeyJhUT2_SxAjAvxSBiw2WPxJnptHUmMNo_eM1GPeSWq7o8KIqnhRSGQDDQDyn0_UE9egi0F5JIZesVWJnvE6IKyE1IysUseQNUMEKsxtKAVABvQH7ubU4njL6NXkTSRuUyb6facl173Vyyho1fkFGdJYUXIIwgxcmyXgz5YatQ"/>
+</div>
+<div class="aspect-square rounded-xl overflow-hidden bg-slate-100">
+<img class="w-full h-full object-cover" data-alt="Valencian coastal sunrise view" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiiaIwBwvmjvlevYoEBOGZXwtLnVCG9YhlppoXVFnZDLCGnj74mEFjfwsgYbcSfh9OctqJAg_nP21T4CGBjj-9f1vogBcgj1nVxljwCK_InMQu7rQmCq96ADc6Q3C2kk5a8_YYQlX0BddpZkp6TplaOVi8BEwITIudZCm-0r1qISTHgLDJ1HUcw6T864hIbw-6c6Rx8Ut2lTlOUyOuF6sSoezNmKQd8WTZRzrsybTJK0dbXXcStZOG5JfI5PidYftq2Kzqf84-iHY"/>
+</div>
+<div class="aspect-square rounded-xl overflow-hidden bg-slate-200 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400" data-icon="add">add</span>
+</div>
+<div class="aspect-square rounded-xl overflow-hidden bg-slate-200 flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400" data-icon="add">add</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center justify-between pt-6 border-t border-slate-50">
+<div class="flex gap-4">
+<button class="flex items-center gap-2 text-sm font-bold text-primary hover:text-on-primary-fixed-variant transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="auto_awesome">auto_awesome</span>
+                                Narrative Comparison
+                            </button>
+<button class="flex items-center gap-2 text-sm font-bold text-on-surface-variant hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="ios_share">ios_share</span>
+                                Share Link
+                            </button>
+</div>
+<button class="p-2 text-on-surface-variant hover:text-error transition-colors">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Sunday Morning Insight Footer -->
+<footer class="mt-24 pt-12 border-t border-emerald-900/10">
+<div class="flex flex-col md:flex-row justify-between items-start gap-8">
+<div class="max-w-md">
+<h4 class="text-2xl font-headline italic text-emerald-900 mb-2">Curator's Note</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">
+                            Your shortlists are weighted using Raiz Intelligence. Total Value Insight (TVI) averages help you spot macro-trends across your saved properties. Review these collections to refine your investment strategy.
+                        </p>
+</div>
+<div class="flex gap-4">
+<div class="bg-white p-6 rounded-2xl shadow-sm">
+<p class="text-[10px] font-bold tracking-widest uppercase text-on-surface-variant mb-2">Total Shortlisted</p>
+<p class="text-4xl font-mono text-emerald-700">12 <span class="text-lg font-headline italic text-on-surface-variant">Units</span></p>
+</div>
+<div class="bg-white p-6 rounded-2xl shadow-sm">
+<p class="text-[10px] font-bold tracking-widest uppercase text-on-surface-variant mb-2">Portfolio Potential</p>
+<p class="text-4xl font-mono text-emerald-700">€4.2M</p>
+</div>
+</div>
+</div>
+</footer>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-xl flex justify-around items-center py-4 border-t border-slate-100 z-50">
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Dash</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-emerald-700">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Comps</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Market</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+<span class="text-[10px] font-bold uppercase tracking-tighter">Settings</span>
+</button>
+</nav>
+</body></html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Grid Stability Deep Dive | Estate Humanist</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Manrope:wght@400;500;600;700;800&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary": "#465f85",
+              "surface-tint": "#006d3c",
+              "inverse-on-surface": "#ebf1ff",
+              "secondary-fixed-dim": "#aec8f3",
+              "surface-container-low": "#eff3ff",
+              "on-tertiary-fixed": "#390c00",
+              "tertiary-fixed": "#ffdbd0",
+              "on-secondary-fixed-variant": "#2e486c",
+              "primary-fixed": "#70fda8",
+              "on-tertiary": "#ffffff",
+              "inverse-primary": "#51df8e",
+              "on-error": "#ffffff",
+              "surface-container-high": "#dde9ff",
+              "on-tertiary-fixed-variant": "#832700",
+              "surface-variant": "#d8e3f9",
+              "error-container": "#ffdad6",
+              "on-surface-variant": "#3d4a3f",
+              "on-error-container": "#93000a",
+              "on-secondary-fixed": "#001c3b",
+              "on-surface": "#111c2c",
+              "outline-variant": "#bccabc",
+              "on-secondary": "#ffffff",
+              "surface-container-lowest": "#ffffff",
+              "secondary-fixed": "#d5e3ff",
+              "background": "#f9f9ff",
+              "tertiary-fixed-dim": "#ffb59c",
+              "surface-container-highest": "#d8e3f9",
+              "surface-dim": "#cfdaf0",
+              "secondary-container": "#b9d3ff",
+              "on-primary-fixed": "#00210e",
+              "on-primary-fixed-variant": "#00522c",
+              "on-background": "#111c2c",
+              "primary": "#006d3c",
+              "on-primary": "#ffffff",
+              "on-primary-container": "#004f2a",
+              "primary-fixed-dim": "#51df8e",
+              "surface-container": "#e6eeff",
+              "outline": "#6d7b6e",
+              "tertiary-container": "#ff9571",
+              "inverse-surface": "#263141",
+              "primary-container": "#34c97a",
+              "on-secondary-container": "#415b80",
+              "error": "#ba1a1a",
+              "surface": "#f9f9ff",
+              "tertiary": "#ab3601",
+              "surface-bright": "#f9f9ff",
+              "on-tertiary-container": "#7e2500"
+            },
+            fontFamily: {
+              "headline": ["Newsreader", "serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"],
+              "mono": ["DM Mono", "monospace"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body antialiased">
+<!-- Top Navigation Anchor -->
+<header class="bg-slate-50/70 dark:bg-slate-950/70 backdrop-blur-xl docked full-width top-0 sticky z-50 shadow-xl shadow-slate-900/5 dark:shadow-none">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="text-2xl font-serif italic text-emerald-900 dark:text-emerald-100">Estate Humanist</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition-colors" href="#">Portfolio</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition-colors" href="#">Insights</a>
+<a class="text-emerald-700 dark:text-emerald-400 font-bold border-b-2 border-emerald-600 pb-1" href="#">Signals</a>
+<a class="text-slate-500 dark:text-slate-400 hover:text-emerald-600 transition-colors" href="#">Reports</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">settings</span>
+<div class="h-10 w-10 rounded-full bg-surface-container-high overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="User profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMK07i_7SnMAAJgJJB_tAKgYr6QZ4G1EkZgbxxvGr8E0CEgXHPRNwz9R5JwdqQkCuhvv9MsQWyPOMbZXmfAb6pLq4MyuISZOQmAJA61KvQ6MhOozaNRHEW66r5zyygo27fh8Q-_DrJp6ps1c_6ZtzVaNL4Jf6XaOo1u3vSM3uEbIDWyy0Jh_y554uhcx4o-AJy7uytVooobHODp3mewxgXScZRBDr3S60Yf2i8gqOMr8Tp0MatzKzr47GsfCfZTJjxQKg0vhZ1Xe0"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-screen-xl mx-auto px-6 py-12 md:py-20 lg:flex gap-16">
+<!-- Sidebar Shell (Hidden on Focus View to prioritize Modal content) -->
+<aside class="h-screen w-64 fixed left-0 top-0 hidden lg:flex flex-col bg-slate-100 dark:bg-slate-900 py-8 pr-4 gap-2 z-40">
+<div class="px-6 mb-8">
+<h2 class="font-serif text-xl italic text-emerald-900 dark:text-emerald-100">Property Signals</h2>
+<p class="font-sans Manrope uppercase tracking-widest text-[10px] text-slate-500">Proprietary Intelligence</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="bg-white dark:bg-slate-800 text-emerald-800 dark:text-emerald-300 shadow-sm rounded-l-none rounded-r-full py-3 pl-6 flex items-center gap-3" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="font-sans Manrope uppercase tracking-widest text-[10px]">Grid Stability</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 py-3 pl-6 hover:translate-x-1 transition-transform flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">wb_sunny</span>
+<span class="font-sans Manrope uppercase tracking-widest text-[10px]">Luminance Profile</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 py-3 pl-6 hover:translate-x-1 transition-transform flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">router</span>
+<span class="font-sans Manrope uppercase tracking-widest text-[10px]">Fiber Nodes</span>
+</a>
+<a class="text-slate-500 dark:text-slate-400 py-3 pl-6 hover:translate-x-1 transition-transform flex items-center gap-3" href="#">
+<span class="material-symbols-outlined">park</span>
+<span class="font-sans Manrope uppercase tracking-widest text-[10px]">Urban Canopy</span>
+</a>
+</nav>
+<div class="mt-auto px-6">
+<button class="w-full py-4 bg-primary text-on-primary rounded-full font-bold text-sm shadow-xl shadow-primary/20 hover:scale-105 transition-transform">
+                    Download Full Report
+                </button>
+</div>
+</aside>
+<!-- Main Content Canvas (Deep Dive Modal Content) -->
+<section class="flex-1 lg:ml-72 bg-surface-container-lowest rounded-xl p-8 md:p-12 shadow-2xl shadow-slate-900/5 relative overflow-hidden">
+<!-- Modal Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
+<div>
+<div class="flex items-center gap-2 mb-4">
+<span class="h-2 w-12 bg-primary-container rounded-full"></span>
+<span class="font-label text-xs uppercase tracking-[0.2em] text-on-surface-variant font-bold">Informed Curator Verdict</span>
+</div>
+<h1 class="font-headline text-5xl md:text-6xl text-on-surface leading-tight max-w-2xl">
+                        Stable grid with <span class="text-primary italic">zero planned upgrades</span> in 24 months.
+                    </h1>
+</div>
+<div class="flex flex-col items-start md:items-end">
+<span class="font-mono text-4xl text-primary font-medium">0.2<span class="text-xl ml-1 text-on-surface-variant">/yr</span></span>
+<span class="font-label text-[10px] uppercase tracking-widest text-on-surface-variant">Historical Outages</span>
+</div>
+</div>
+<!-- Bento Grid Section -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8 mb-16">
+<!-- Stability Gauge Card -->
+<div class="md:col-span-7 bg-surface-container-low rounded-xl p-8 flex flex-col justify-between">
+<h3 class="font-headline text-2xl mb-8">Stability Gauge</h3>
+<div class="relative py-10 flex flex-col items-center">
+<svg class="w-64 h-32" viewbox="0 0 100 50">
+<path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e6eeff" stroke-linecap="round" stroke-width="8"></path>
+<path d="M 10 50 A 40 40 0 0 1 85 20" fill="none" stroke="url(#emeraldGradient)" stroke-dasharray="125.6" stroke-dashoffset="125.6" stroke-linecap="round" stroke-width="8" style="stroke-dashoffset: 20;"></path>
+<defs>
+<lineargradient id="emeraldGradient" x1="0%" x2="100%" y1="0%" y2="0%">
+<stop offset="0%" style="stop-color:#006d3c;stop-opacity:1"></stop>
+<stop offset="100%" style="stop-color:#34c97a;stop-opacity:1"></stop>
+</lineargradient>
+</defs>
+</svg>
+<div class="mt-4 text-center">
+<p class="font-mono text-5xl text-on-surface">98.4<span class="text-2xl">%</span></p>
+<p class="font-label text-xs uppercase tracking-widest text-primary font-extrabold mt-1">Optimal Reliability</p>
+</div>
+</div>
+<div class="mt-8 pt-8 border-t border-outline-variant/20">
+<p class="text-on-surface-variant text-sm italic font-headline">"The local substation (Node-77) underwent a complete hardware refresh in Q3 of last year, ensuring peak throughput capacity."</p>
+</div>
+</div>
+<!-- Comparison Card -->
+<div class="md:col-span-5 flex flex-col gap-8">
+<div class="bg-surface-container-high rounded-xl p-8 flex-1">
+<h3 class="font-label text-xs uppercase tracking-widest text-on-surface-variant font-bold mb-6">Comparison Context</h3>
+<div class="space-y-6">
+<div class="flex justify-between items-end">
+<span class="font-body text-sm font-bold">This Property</span>
+<span class="font-mono text-lg text-primary">0.2</span>
+</div>
+<div class="h-2 w-full bg-on-surface/5 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[15%] rounded-full"></div>
+</div>
+<div class="flex justify-between items-end">
+<span class="font-body text-sm text-on-surface-variant">Provincial Avg.</span>
+<span class="font-mono text-lg text-on-surface-variant">1.4</span>
+</div>
+<div class="h-2 w-full bg-on-surface/5 rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[65%] rounded-full"></div>
+</div>
+</div>
+<p class="mt-8 text-xs text-on-surface-variant leading-relaxed">
+                            This property ranks in the <span class="font-bold text-on-surface">top 2%</span> for electrical infrastructure resilience across the province.
+                        </p>
+</div>
+</div>
+</div>
+<!-- Meaning & Analysis Section -->
+<div class="bg-background rounded-xl p-8 md:p-12 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-8">
+<span class="material-symbols-outlined text-surface-variant text-9xl select-none pointer-events-none opacity-20">verified_user</span>
+</div>
+<div class="relative z-10">
+<h3 class="font-headline text-3xl mb-6">What does this mean?</h3>
+<div class="grid md:grid-cols-2 gap-12">
+<div class="space-y-4">
+<p class="text-on-surface-variant leading-relaxed text-lg">
+                                The property is situated within a <span class="text-primary font-bold">low-risk zone</span> for brownouts and sudden power surges. This is largely due to the redundant fiber-optic switching at the neighborhood level.
+                            </p>
+<p class="text-on-surface-variant leading-relaxed">
+                                For residents, this translates to extended appliance longevity and uninterrupted high-performance computing—a critical factor for high-end home automation systems and private server environments.
+                            </p>
+</div>
+<div class="flex flex-col gap-6">
+<div class="flex items-start gap-4">
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">security</span>
+</div>
+<div>
+<h4 class="font-bold text-sm">Surge Protection</h4>
+<p class="text-xs text-on-surface-variant">Zero recorded voltage spikes exceeding 240V in 12 months.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">eco</span>
+</div>
+<div>
+<h4 class="font-bold text-sm">Grid Cleanliness</h4>
+<p class="text-xs text-on-surface-variant">Low THD (Total Harmonic Distortion) profile recorded at source.</p>
+</div>
+</div>
+<div class="flex items-start gap-4">
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">history</span>
+</div>
+<div>
+<h4 class="font-bold text-sm">Response Time</h4>
+<p class="text-xs text-on-surface-variant">Avg. restoration under 14 minutes for rare localized faults.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Visual Asset / Map Placeholder -->
+<div class="mt-12 h-64 w-full rounded-xl overflow-hidden bg-surface-container-high relative group">
+<img class="w-full h-full object-cover grayscale opacity-30 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700" data-alt="Abstract aerial view of electrical grid nodes in a city" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCJqvlG_Y_8BSOeUc0kcp0Ya1zvPTgTPVS4VqEGn7iFGFEFw-H7alJIBAqp3l6Gh7bLLXxIEf9rtxr7EAwvluBWu8Qk1PCCjUPrv6UGVzf1K_LGxeYrphG3OdNOe3MUMLW_VzZibKc9xT4iCdjRoIUfxMbetTYNfY5M_kndvvZcpOKrvAwK2Arvr7FFRX9_cB0gKxUZhFt0j52_3R5fisEpgwUx1iDd1FP3d9VV3MKUefgYXbALcaPDuFT7D4g2NedM7G5neeF7NsU"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background to-transparent pointer-events-none"></div>
+<div class="absolute bottom-6 left-6 flex items-center gap-3">
+<div class="h-3 w-3 rounded-full bg-primary animate-pulse"></div>
+<span class="font-mono text-[10px] uppercase tracking-widest text-on-surface">Live Infrastructure Feed: Passive</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell (Mobile) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl lg:hidden z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.04)] rounded-t-[2.5rem]">
+<div class="flex flex-col items-center justify-center bg-emerald-100/50 dark:bg-emerald-900/30 text-emerald-900 dark:text-emerald-100 rounded-2xl px-5 py-2 scale-90 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">insights</span>
+<span class="font-sans Manrope font-medium text-[11px]">Signals</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:scale-105 transition-transform">
+<span class="material-symbols-outlined">map</span>
+<span class="font-sans Manrope font-medium text-[11px]">Maps</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:scale-105 transition-transform">
+<span class="material-symbols-outlined">compare_arrows</span>
+<span class="font-sans Manrope font-medium text-[11px]">Compare</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:scale-105 transition-transform">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="font-sans Manrope font-medium text-[11px]">Vault</span>
+</div>
+</nav>
+<!-- Footer Space for Bottom Nav -->
+<div class="h-24 lg:hidden"></div>
+</body></html>

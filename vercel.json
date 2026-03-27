@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/zone-metrics",
+      "schedule": "0 2 * * *"
+    }
+  ]
+}

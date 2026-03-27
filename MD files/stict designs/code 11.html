@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Raiz Intelligence | Premium Tier Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;family=DM+Mono:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-secondary-container": "#415b80",
+                        "on-secondary": "#ffffff",
+                        "tertiary": "#ab3601",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed": "#ffdbd0",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#ff9571",
+                        "on-secondary-fixed": "#001c3b",
+                        "surface-variant": "#d8e3f9",
+                        "surface-tint": "#006d3c",
+                        "secondary-fixed": "#d5e3ff",
+                        "on-error-container": "#93000a",
+                        "secondary-container": "#b9d3ff",
+                        "on-primary-fixed-variant": "#00522c",
+                        "background": "#f9f9ff",
+                        "on-surface-variant": "#3d4a3f",
+                        "surface-container-low": "#eff3ff",
+                        "outline": "#6d7b6e",
+                        "primary-fixed": "#70fda8",
+                        "primary": "#006d3c",
+                        "tertiary-fixed-dim": "#ffb59c",
+                        "secondary-fixed-dim": "#aec8f3",
+                        "secondary": "#465f85",
+                        "inverse-on-surface": "#ebf1ff",
+                        "outline-variant": "#bccabc",
+                        "on-primary-container": "#004f2a",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#cfdaf0",
+                        "on-secondary-fixed-variant": "#2e486c",
+                        "inverse-surface": "#263141",
+                        "surface-container": "#e6eeff",
+                        "inverse-primary": "#51df8e",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#f9f9ff",
+                        "on-primary": "#ffffff",
+                        "surface-container-highest": "#d8e3f9",
+                        "on-tertiary-fixed-variant": "#832700",
+                        "primary-fixed-dim": "#51df8e",
+                        "on-tertiary-fixed": "#390c00",
+                        "on-tertiary-container": "#7e2500",
+                        "error": "#ba1a1a",
+                        "surface": "#f9f9ff",
+                        "primary-container": "#34c97a",
+                        "on-primary-fixed": "#00210e",
+                        "on-background": "#111c2c",
+                        "surface-container-high": "#dde9ff",
+                        "on-surface": "#111c2c"
+                    },
+                    fontFamily: {
+                        "serif": ["Newsreader", "serif"],
+                        "sans": ["Manrope", "sans-serif"],
+                        "mono": ["DM Mono", "monospace"],
+                        "headline": ["Newsreader"],
+                        "body": ["Manrope"],
+                        "label": ["Manrope"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1.5rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary-container selection:text-on-primary-container">
+<!-- SideNavBar (Shared Component) -->
+<aside class="h-screen w-64 fixed left-0 top-0 overflow-y-auto bg-slate-50 dark:bg-slate-950 flex flex-col gap-2 p-6 z-40">
+<div class="mb-10">
+<h1 class="text-xl font-serif italic text-emerald-800 dark:text-emerald-100">Raiz Intelligence</h1>
+<p class="text-xs font-semibold uppercase tracking-widest font-sans text-slate-500 mt-1">Premium Tier</p>
+</div>
+<nav class="flex flex-col gap-1 flex-1">
+<a class="flex items-center gap-3 px-4 py-3 bg-white dark:bg-slate-800 text-emerald-700 dark:text-emerald-300 rounded-xl shadow-sm transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-xs font-semibold uppercase tracking-widest">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+<span class="text-xs font-semibold uppercase tracking-widest">Portfolio</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+<span class="text-xs font-semibold uppercase tracking-widest">Market Trends</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+<span class="text-xs font-semibold uppercase tracking-widest">Risk Reports</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-transform duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined" data-icon="tune">tune</span>
+<span class="text-xs font-semibold uppercase tracking-widest">Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-6">
+<button class="w-full bg-primary text-on-primary py-4 rounded-full font-sans text-sm font-bold shadow-lg hover:opacity-90 transition-opacity">
+                Upgrade Insights
+            </button>
+</div>
+</aside>
+<!-- Main Content Shell -->
+<main class="ml-64 min-h-screen">
+<!-- TopAppBar (Shared Component) -->
+<header class="sticky top-0 z-50 bg-white/70 backdrop-blur-xl flex justify-between items-center w-full px-12 py-6 mx-auto shadow-sm">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-serif italic text-emerald-900">Raiz</span>
+<nav class="hidden md:flex gap-6">
+<a class="text-emerald-700 font-bold border-b-2 border-emerald-600 transition-colors" href="#">Analyse</a>
+<a class="text-slate-600 font-medium hover:text-emerald-600 transition-colors" href="#">Map</a>
+<a class="text-slate-600 font-medium hover:text-emerald-600 transition-colors" href="#">Intelligence</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-slate-600 hover:text-emerald-600 transition-colors"><span class="material-symbols-outlined" data-icon="notifications">notifications</span></button>
+<button class="text-slate-600 hover:text-emerald-600 transition-colors"><span class="material-symbols-outlined" data-icon="settings">settings</span></button>
+<img alt="User profile avatar" class="w-10 h-10 rounded-full border-2 border-primary-container" data-alt="Professional user profile avatar headshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeRk-peUhMpovmujJcRSf5hsy3DgSxBiwl0G-UZV7_l0gsIacHo4DBlDPapHNvUSFvX1ac1ZLjzPg-xny4OXX7a8_9rLAtXTXdwUc6Yf3GelwzJLB-pxHsacaC2F09-O7V61WIA9OJkmkJc1VPc3pfAz9eNoNwU4BMcgaLiwbiiECmOMh0M-k1xbaSR8uf3i1Bvfe0ZOJLj_CmuyMmuWTPM0uDktNoz2D1n9Qui613EoSrKcly0FbNkVnQnne_XQPdODQZNNWxyZg"/>
+</div>
+</header>
+<!-- Page Canvas -->
+<div class="px-12 py-12 max-w-[1600px] mx-auto space-y-20">
+<!-- Hero Section -->
+<section class="flex flex-col md:flex-row justify-between items-end gap-8">
+<div class="space-y-4">
+<h2 class="text-6xl font-serif text-on-surface leading-tight max-w-2xl">
+                        Market <span class="italic text-primary">Intelligence</span> Overview
+                    </h2>
+<p class="font-serif italic text-xl text-on-surface-variant opacity-80">Refined signals for the unhurried investor.</p>
+</div>
+<div class="flex gap-4 mb-2">
+<div class="bg-surface-container-low px-6 py-3 rounded-2xl flex items-center gap-3">
+<span class="text-xs font-bold uppercase tracking-widest font-sans">Global Status</span>
+<span class="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+<span class="font-mono text-primary font-bold">OPTIMAL</span>
+</div>
+</div>
+</section>
+<!-- Section 1: Investment Signals -->
+<section class="space-y-8">
+<div class="flex items-center gap-4">
+<h3 class="text-2xl font-serif text-on-surface">Investment Signals</h3>
+<div class="h-[1px] flex-1 bg-surface-container-highest"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- NTI Map Card -->
+<div class="group bg-surface-container-lowest p-6 rounded-2xl shadow-sm transition-all hover:translate-y-[-4px]">
+<div class="relative h-64 mb-6 rounded-xl overflow-hidden bg-surface-container-low">
+<img class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="Abstract satellite heat map of city streets" data-location="London" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMOcLbrwArHR1gVtmj_hqBjBhyea5cZDpTr7KR3s19dTvgUusKGqAlhR596xlUNHZpSXlTWfRGxFsXkxoZ9rHiktnULZVJvZT-7OJWeOJJzWXpHy82paNqPO-t7k3kVdmLimt0f_kLlWGjbkGj-slLlu8GTtrHOA71KQqhWQ3Ny7uxaiMACt6zVKWs-mzrNUl4mFdFbiTye5nYlPJcAiO3m08uZGk7VTDwQVOckBXP_wJAsA5AVOGg_UYG-9sMMQow59QUBLPFtII"/>
+<div class="absolute top-4 left-4 bg-primary text-on-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2 shadow-xl">
+<span class="material-symbols-outlined text-sm" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+                                Prime Buy
+                            </div>
+</div>
+<div class="space-y-2">
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Metric Focus</span>
+<h4 class="text-xl font-serif">Neighbourhood Transition Index</h4>
+<p class="text-sm text-on-surface-variant font-sans">High velocity gentrification detected in Zone 4 clusters.</p>
+</div>
+</div>
+<!-- Infrastructure Arbitrage -->
+<div class="bg-surface-container-lowest p-8 rounded-2xl shadow-sm flex flex-col justify-between">
+<div class="space-y-6">
+<div class="flex justify-between items-start">
+<span class="p-3 bg-secondary-container rounded-xl text-on-secondary-container">
+<span class="material-symbols-outlined" data-icon="train">train</span>
+</span>
+<div class="text-right">
+<span class="font-mono text-4xl text-primary font-light">+18.4%</span>
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Value Gap</p>
+</div>
+</div>
+<h4 class="text-xl font-serif">Infrastructure Arbitrage</h4>
+<p class="text-sm text-on-surface-variant font-sans">Significant price lag identified relative to the upcoming Cross-Valley rail completion.</p>
+</div>
+<div class="mt-8 h-2 bg-surface-container-low rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[72%]"></div>
+</div>
+</div>
+<!-- Motivated Seller Volume -->
+<div class="bg-surface-container-lowest p-8 rounded-2xl shadow-sm">
+<div class="flex items-center justify-between mb-8">
+<h4 class="text-xl font-serif">Seller Volume</h4>
+<span class="font-mono text-tertiary font-bold">+12% MoM</span>
+</div>
+<div class="flex items-end gap-2 h-32 mb-6">
+<div class="flex-1 bg-surface-container-low rounded-t-lg h-[40%]"></div>
+<div class="flex-1 bg-surface-container-low rounded-t-lg h-[55%]"></div>
+<div class="flex-1 bg-surface-container-low rounded-t-lg h-[45%]"></div>
+<div class="flex-1 bg-surface-container-low rounded-t-lg h-[70%]"></div>
+<div class="flex-1 bg-primary rounded-t-lg h-[90%]"></div>
+</div>
+<p class="text-sm text-on-surface-variant font-sans italic italic">Spike in 'urgent' listings within the Kensington &amp; Chelsea periphery.</p>
+</div>
+</div>
+</section>
+<!-- Section 2: Portfolio Pulse -->
+<section class="bg-surface-container-low rounded-2xl p-10 space-y-8">
+<div class="flex justify-between items-center">
+<h3 class="text-2xl font-serif text-on-surface">Portfolio Pulse</h3>
+<button class="text-sm font-bold uppercase tracking-widest text-primary hover:underline">View All Assets</button>
+</div>
+<div class="space-y-4">
+<!-- Portfolio Row 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl flex items-center justify-between group cursor-pointer transition-colors hover:bg-white">
+<div class="flex items-center gap-6">
+<div class="relative flex items-center justify-center w-14 h-14">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-high" cx="28" cy="28" fill="transparent" r="24" stroke="currentColor" stroke-width="3"></circle>
+<circle class="text-primary" cx="28" cy="28" fill="transparent" r="24" stroke="currentColor" stroke-dasharray="150" stroke-dashoffset="40" stroke-width="4"></circle>
+</svg>
+<span class="absolute font-mono text-xs font-bold">84</span>
+</div>
+<div>
+<h5 class="text-lg font-serif">The Heritage Mews</h5>
+<p class="text-xs font-sans text-on-surface-variant uppercase tracking-widest">W11 London • Residential</p>
+</div>
+</div>
+<div class="flex items-center gap-12">
+<div class="text-right">
+<p class="font-mono text-lg">£4,850,000</p>
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Asset Value</p>
+</div>
+<div class="text-right">
+<p class="font-mono text-lg text-primary">+$120k</p>
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">6M Change</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<!-- Portfolio Row 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl flex items-center justify-between group cursor-pointer transition-colors hover:bg-white">
+<div class="flex items-center gap-6">
+<div class="relative flex items-center justify-center w-14 h-14">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-surface-container-high" cx="28" cy="28" fill="transparent" r="24" stroke="currentColor" stroke-width="3"></circle>
+<circle class="text-tertiary" cx="28" cy="28" fill="transparent" r="24" stroke="currentColor" stroke-dasharray="150" stroke-dashoffset="90" stroke-width="4"></circle>
+</svg>
+<span class="absolute font-mono text-xs font-bold">42</span>
+</div>
+<div>
+<h5 class="text-lg font-serif">The Quay Development</h5>
+<p class="text-xs font-sans text-on-surface-variant uppercase tracking-widest">Bristol Harbor • Mixed Use</p>
+</div>
+</div>
+<div class="flex items-center gap-12">
+<div class="text-right">
+<p class="font-mono text-lg">£12,400,000</p>
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Asset Value</p>
+</div>
+<div class="text-right">
+<p class="font-mono text-lg text-tertiary">-$15k</p>
+<p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">6M Change</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-primary transition-colors" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 3: Macro Trends (Bento Grid) -->
+<section class="space-y-8">
+<div class="flex items-center gap-4">
+<h3 class="text-2xl font-serif text-on-surface">Macro Trends</h3>
+<div class="h-[1px] flex-1 bg-surface-container-highest"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-6 h-[600px]">
+<!-- Rental Yield Distribution -->
+<div class="md:col-span-2 md:row-span-2 bg-surface-container-lowest p-10 rounded-2xl shadow-sm flex flex-col justify-between">
+<div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant mb-2 block">City-Wide Data</span>
+<h4 class="text-3xl font-serif mb-4">Rental Yield Distribution</h4>
+<p class="text-on-surface-variant font-sans max-w-sm">Premium short-let yields are outperforming long-term residential by 3.2% in central hubs.</p>
+</div>
+<div class="space-y-6">
+<div class="flex items-end gap-1">
+<div class="w-full bg-primary/20 h-12 rounded-t-sm"></div>
+<div class="w-full bg-primary/30 h-24 rounded-t-sm"></div>
+<div class="w-full bg-primary/50 h-40 rounded-t-sm"></div>
+<div class="w-full bg-primary h-56 rounded-t-sm"></div>
+<div class="w-full bg-primary/80 h-44 rounded-t-sm"></div>
+<div class="w-full bg-primary/40 h-20 rounded-t-sm"></div>
+<div class="w-full bg-primary/10 h-10 rounded-t-sm"></div>
+</div>
+<div class="flex justify-between font-mono text-[10px] text-on-surface-variant px-2">
+<span>2.5%</span>
+<span>Yield %</span>
+<span>8.0%</span>
+</div>
+</div>
+</div>
+<!-- Flood Risk shifts -->
+<div class="bg-tertiary-container p-6 rounded-2xl flex flex-col justify-between">
+<span class="material-symbols-outlined text-on-tertiary-container" data-icon="water_drop">water_drop</span>
+<div>
+<h4 class="text-lg font-serif text-on-tertiary-container">Flood Risk shifts</h4>
+<p class="font-mono text-2xl text-on-tertiary-container font-light">+4.2% Zone A</p>
+</div>
+</div>
+<!-- Energy efficiency adoption -->
+<div class="bg-surface-container p-6 rounded-2xl flex flex-col justify-between">
+<span class="material-symbols-outlined text-primary" data-icon="eco">eco</span>
+<div>
+<h4 class="text-lg font-serif">EPC Adoption</h4>
+<p class="font-mono text-2xl text-primary font-light">68% Grade B+</p>
+</div>
+</div>
+<!-- VUT Density heatmaps -->
+<div class="md:col-span-2 bg-surface-dim p-8 rounded-2xl relative overflow-hidden flex items-center gap-8">
+<div class="relative z-10 w-1/2">
+<h4 class="text-xl font-serif mb-2">VUT Density</h4>
+<p class="text-sm font-sans text-on-surface-variant">Short-term rental density is reaching saturation in the Southern Quarter.</p>
+</div>
+<div class="relative w-1/2 h-full flex items-center justify-center">
+<div class="w-32 h-32 rounded-full bg-primary/30 blur-2xl absolute animate-pulse"></div>
+<div class="w-24 h-24 rounded-full bg-tertiary/20 blur-xl absolute top-0 right-0"></div>
+<span class="material-symbols-outlined text-4xl text-on-surface opacity-40" data-icon="blur_on">blur_on</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Floating Footer / Status -->
+<footer class="px-12 py-10 flex justify-between items-center text-[10px] font-bold uppercase tracking-widest text-on-surface-variant opacity-60">
+<span>© 2024 Raiz Global Intelligence</span>
+<div class="flex gap-8">
+<span>API Status: Stable</span>
+<span>Last Updated: 12:44 GMT</span>
+</div>
+</footer>
+</main>
+</body></html>

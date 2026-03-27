@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Raiz | Mortgage &amp; Affordability Intelligence</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&amp;family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-container": "#f16735",
+              "on-surface": "#181c1f",
+              "secondary-container": "#70fda8",
+              "primary-container": "#0d2b4e",
+              "on-tertiary": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-error": "#ffffff",
+              "on-primary": "#ffffff",
+              "on-tertiary-fixed": "#390c00",
+              "primary-fixed": "#d5e3ff",
+              "inverse-on-surface": "#eef1f5",
+              "tertiary-fixed": "#ffdbd0",
+              "primary": "#001631",
+              "tertiary-container": "#531500",
+              "surface-tint": "#465f85",
+              "on-primary-container": "#7993bc",
+              "tertiary": "#300900",
+              "inverse-surface": "#2d3134",
+              "inverse-primary": "#aec8f3",
+              "secondary": "#006d3c",
+              "on-primary-fixed": "#001c3b",
+              "surface": "#f7fafe",
+              "secondary-fixed-dim": "#51df8e",
+              "on-primary-fixed-variant": "#2e486c",
+              "primary-fixed-dim": "#aec8f3",
+              "on-secondary-container": "#007440",
+              "surface-variant": "#e0e3e7",
+              "surface-container-high": "#e5e8ec",
+              "surface-bright": "#f7fafe",
+              "on-surface-variant": "#43474e",
+              "surface-dim": "#d7dade",
+              "on-tertiary-fixed-variant": "#832700",
+              "outline": "#74777f",
+              "background": "#f7fafe",
+              "outline-variant": "#c4c6cf",
+              "on-background": "#181c1f",
+              "on-secondary-fixed-variant": "#00522c",
+              "secondary-fixed": "#70fda8",
+              "on-secondary": "#ffffff",
+              "surface-container-low": "#f1f4f8",
+              "tertiary-fixed-dim": "#ffb59c",
+              "error": "#ba1a1a",
+              "surface-container-highest": "#e0e3e7",
+              "on-error-container": "#93000a",
+              "surface-container-lowest": "#ffffff",
+              "surface-container": "#ebeef2",
+              "on-secondary-fixed": "#00210e"
+            },
+            fontFamily: {
+              "headline": ["Newsreader"],
+              "body": ["Manrope"],
+              "label": ["Manrope"],
+              "mono": ["DM Mono"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        .font-serif-italic { font-family: 'Newsreader', serif; font-style: italic; }
+        .font-mono { font-family: 'DM Mono', monospace; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-background text-on-surface antialiased selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- TopAppBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#F7FAFE]/80 dark:bg-slate-950/80 backdrop-blur-xl flex justify-between items-center w-full px-12 py-6">
+<div class="flex items-center gap-12">
+<span class="text-3xl font-serif italic text-[#0D2B4E] dark:text-white tracking-tighter">Raiz</span>
+<div class="hidden md:flex gap-8 items-center">
+<a class="text-slate-500 dark:text-slate-400 font-sans uppercase tracking-widest text-[11px] hover:text-[#001631] dark:hover:text-white transition-all duration-500" href="#">Analyse</a>
+<a class="text-slate-500 dark:text-slate-400 font-sans uppercase tracking-widest text-[11px] hover:text-[#001631] dark:hover:text-white transition-all duration-500" href="#">Map</a>
+<a class="text-[#001631] dark:text-white border-b-2 border-[#34C97A] pb-1 font-sans uppercase tracking-widest text-[11px]" href="#">Intelligence</a>
+<a class="text-slate-500 dark:text-slate-400 font-sans uppercase tracking-widest text-[11px] hover:text-[#001631] dark:hover:text-white transition-all duration-500" href="#">Pricing</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="font-['Newsreader'] italic text-lg tracking-tight text-[#001631] dark:text-slate-100 hover:text-[#34C97A] transition-colors duration-300">Sign In</button>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-lg font-body font-semibold text-sm hover:opacity-90 transition-opacity">Get Started</button>
+</div>
+</nav>
+<main class="pt-32 pb-24 px-6 md:px-12 max-w-7xl mx-auto">
+<!-- Header Section -->
+<header class="mb-16 max-w-3xl">
+<h1 class="text-5xl md:text-7xl font-headline text-primary mb-6 leading-tight">Mortgage <span class="font-serif-italic">&amp;</span> Affordability Intelligence</h1>
+<p class="text-xl text-on-surface-variant font-body leading-relaxed">
+                Beyond simple interest rates. We calculate the true cost of ownership through high-fidelity data modeling and local market benchmarks.
+            </p>
+</header>
+<!-- Main Tool Container: Tonal Layering -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Inputs Panel (Surface Container) -->
+<section class="lg:col-span-5 bg-surface-container rounded-3xl p-8 md:p-10">
+<div class="flex items-center gap-3 mb-10">
+<span class="material-symbols-outlined text-primary" data-icon="analytics">analytics</span>
+<h2 class="text-lg font-headline font-bold uppercase tracking-wider text-primary">Calculation Parameters</h2>
+</div>
+<div class="space-y-8">
+<!-- Property Price -->
+<div class="space-y-3">
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant">Property Value</label>
+<div class="relative group">
+<input class="w-full bg-surface-container-low border-none rounded-xl px-4 py-4 font-mono text-xl text-primary focus:ring-1 focus:ring-primary focus:bg-surface-container-lowest transition-all outline-none" type="text" value="450.000"/>
+<span class="absolute right-4 top-1/2 -translate-y-1/2 font-mono text-on-surface-variant">€</span>
+</div>
+</div>
+<!-- Down Payment -->
+<div class="space-y-3">
+<div class="flex justify-between items-end">
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant">Down Payment</label>
+<span class="font-mono text-sm text-secondary">20%</span>
+</div>
+<div class="relative">
+<input class="w-full bg-surface-container-low border-none rounded-xl px-4 py-4 font-mono text-xl text-primary focus:ring-1 focus:ring-primary focus:bg-surface-container-lowest transition-all outline-none" type="text" value="90.000"/>
+<span class="absolute right-4 top-1/2 -translate-y-1/2 font-mono text-on-surface-variant">€</span>
+</div>
+</div>
+<!-- Amortization & Rate Grid -->
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-3">
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant">Term (Years)</label>
+<input class="w-full bg-surface-container-low border-none rounded-xl px-4 py-4 font-mono text-xl text-primary focus:ring-1 focus:ring-primary focus:bg-surface-container-lowest transition-all outline-none" type="text" value="30"/>
+</div>
+<div class="space-y-3">
+<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant">Interest Rate</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border-none rounded-xl px-4 py-4 font-mono text-xl text-primary focus:ring-1 focus:ring-primary focus:bg-surface-container-lowest transition-all outline-none" type="text" value="3.25"/>
+<span class="absolute right-4 top-1/2 -translate-y-1/2 font-mono text-on-surface-variant">%</span>
+</div>
+</div>
+</div>
+<!-- Additional Monthly Costs (Asymmetric Layout) -->
+<div class="pt-6 border-t border-outline-variant/20 space-y-6">
+<h3 class="font-serif-italic text-lg text-primary">Monthly Operational Forecast</h3>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-low p-4 rounded-xl space-y-2">
+<label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500">IBI (Annualized)</label>
+<span class="block font-mono text-lg">€ 45.00</span>
+</div>
+<div class="bg-surface-container-low p-4 rounded-xl space-y-2">
+<label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500">Comunidad</label>
+<span class="block font-mono text-lg">€ 120.00</span>
+</div>
+<div class="bg-surface-container-low p-4 rounded-xl space-y-2">
+<label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500">Energy (Est.)</label>
+<span class="block font-mono text-lg">€ 85.00</span>
+</div>
+<div class="bg-surface-container-low p-4 rounded-xl space-y-2">
+<label class="block text-[10px] font-bold uppercase tracking-widest text-slate-500">Insurance</label>
+<span class="block font-mono text-lg">€ 32.50</span>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-10 bg-primary text-on-primary py-5 rounded-xl font-body font-bold text-sm tracking-widest uppercase hover:opacity-95 transition-opacity active:scale-[0.98]">Recalculate Model</button>
+</section>
+<!-- Results Panel (Surface Container Lowest - White) -->
+<section class="lg:col-span-7 bg-surface-container-lowest rounded-3xl p-8 md:p-12 shadow-xl shadow-primary/5 relative overflow-hidden">
+<!-- Background Decoration -->
+<div class="absolute -top-24 -right-24 w-64 h-64 bg-secondary/5 rounded-full blur-3xl"></div>
+<div class="relative z-10">
+<div class="flex justify-between items-start mb-12">
+<div>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-2">Estimated Monthly Commitment</span>
+<div class="flex items-baseline gap-3">
+<span class="text-6xl font-mono font-medium text-primary">1.849,20</span>
+<span class="text-2xl font-mono text-on-surface-variant">€</span>
+</div>
+</div>
+<div class="bg-secondary-container/30 px-4 py-2 rounded-full">
+<span class="text-secondary font-body text-xs font-bold uppercase tracking-tighter flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span>
+                                Risk Level: Low
+                            </span>
+</div>
+</div>
+<!-- The Informed Curator Verdict (Editorial Style) -->
+<div class="bg-surface-container-low rounded-2xl p-8 mb-12 relative">
+<div class="absolute top-0 left-8 -translate-y-1/2 bg-primary text-on-primary px-4 py-1 text-[10px] font-bold uppercase tracking-[0.2em] rounded">The Curator's Verdict</div>
+<p class="font-headline text-3xl text-primary leading-tight mb-4">
+                            Based on local yields, <span class="font-serif-italic">Buying saves €305/month</span> versus renting an equivalent property in this district.
+                        </p>
+<p class="font-body text-sm text-on-surface-variant leading-relaxed opacity-80">
+                            Our algorithm analyzed 42 similar properties in a 500m radius. At current Euribor rates, your equity build-up exceeds the cost of financing by year three.
+                        </p>
+</div>
+<!-- Cost Breakdown Grid -->
+<div class="space-y-6">
+<h4 class="text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-4">Granular Breakdown</h4>
+<div class="space-y-4">
+<div class="flex justify-between items-center py-2">
+<span class="font-body text-slate-500">Mortgage Principal &amp; Interest</span>
+<span class="font-mono text-primary text-lg font-medium">1.566,70 €</span>
+</div>
+<div class="flex justify-between items-center py-2">
+<span class="font-body text-slate-500">Maintenance &amp; Fees</span>
+<span class="font-mono text-primary text-lg font-medium">165,00 €</span>
+</div>
+<div class="flex justify-between items-center py-2">
+<span class="font-body text-slate-500">Energy &amp; Utility Est.</span>
+<span class="font-mono text-primary text-lg font-medium">85,00 €</span>
+</div>
+<div class="flex justify-between items-center py-2 border-t border-surface-container pt-4">
+<span class="font-headline italic text-lg text-primary">Total Monthly Carry</span>
+<span class="font-mono text-primary text-2xl font-bold">1.849,20 €</span>
+</div>
+</div>
+</div>
+<!-- Visual Visualization (Bento Style) -->
+<div class="grid grid-cols-2 gap-4 mt-12">
+<div class="bg-primary-container text-white p-6 rounded-2xl aspect-[1.5/1] flex flex-col justify-between">
+<label class="text-[10px] font-bold uppercase tracking-widest opacity-60">LTV Ratio</label>
+<div>
+<span class="block font-mono text-3xl">80.0</span>
+<span class="text-xs opacity-60">Percent Leveraged</span>
+</div>
+</div>
+<div class="bg-[#EBEEF2] dark:bg-slate-800 p-6 rounded-2xl aspect-[1.5/1] flex flex-col justify-between overflow-hidden relative">
+<label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Interest over life</label>
+<div>
+<span class="block font-mono text-3xl text-primary">204.012</span>
+<span class="text-xs text-on-surface-variant">Total Cost of Capital</span>
+</div>
+<!-- Abstract SVG line graph -->
+<div class="absolute bottom-0 left-0 w-full h-8 opacity-20">
+<svg class="w-full h-full preserve-3d" viewbox="0 0 100 20">
+<path class="text-secondary" d="M0,20 Q25,15 50,10 T100,0" fill="none" stroke="currentColor" stroke-width="2"></path>
+</svg>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Footnote / Methodology -->
+<section class="mt-20 border-t border-outline-variant/30 pt-12 max-w-2xl">
+<h5 class="text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-4">Methodology</h5>
+<p class="font-body text-xs text-on-surface-variant/70 leading-relaxed">
+                Calculations are estimates only. The "Curator's Verdict" utilizes a proprietary weighted average of rental listing data from the past 90 days within the specific cadastral zone. IBI and Comunidad figures are based on regional averages for 120m² properties. For precise financial advice, please consult with a Raiz certified advisor.
+            </p>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 px-12 mt-auto bg-[#EBEEF2] dark:bg-slate-950 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex flex-col gap-2">
+<span class="font-serif italic text-lg text-[#0D2B4E] dark:text-white">Raiz</span>
+<p class="font-['DM_Sans'] text-xs tracking-wide text-slate-500 dark:text-slate-400">© 2024 Raiz Property Intelligence. All rights reserved.</p>
+</div>
+<div class="flex gap-8">
+<a class="font-['DM_Sans'] text-xs tracking-wide text-slate-500 dark:text-slate-400 hover:text-[#34C97A] transition-colors duration-300" href="#">Privacy Policy</a>
+<a class="font-['DM_Sans'] text-xs tracking-wide text-slate-500 dark:text-slate-400 hover:text-[#34C97A] transition-colors duration-300" href="#">Terms of Service</a>
+<a class="font-['DM_Sans'] text-xs tracking-wide text-[#001631] dark:text-white underline underline-offset-4" href="#">Methodology</a>
+<a class="font-['DM_Sans'] text-xs tracking-wide text-slate-500 dark:text-slate-400 hover:text-[#34C97A] transition-colors duration-300" href="#">Contact</a>
+</div>
+</footer>
+<!-- SideNav Suppressed for Focus, but here is the logic for Top-Level interaction if needed later -->
+</body></html>

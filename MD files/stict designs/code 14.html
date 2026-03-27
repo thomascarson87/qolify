@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Raiz | Property Comparison Intelligence</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "inverse-surface": "#2d3134",
+              "tertiary": "#300900",
+              "surface-bright": "#f7fafe",
+              "outline": "#74777f",
+              "error": "#ba1a1a",
+              "secondary-fixed": "#70fda8",
+              "on-tertiary-fixed": "#390c00",
+              "surface-tint": "#465f85",
+              "primary-container": "#0d2b4e",
+              "on-surface": "#181c1f",
+              "on-primary-fixed": "#001c3b",
+              "on-tertiary-fixed-variant": "#832700",
+              "primary": "#001631",
+              "secondary-container": "#70fda8",
+              "tertiary-fixed-dim": "#ffb59c",
+              "secondary-fixed-dim": "#51df8e",
+              "on-secondary-fixed": "#00210e",
+              "surface-dim": "#d7dade",
+              "surface-variant": "#e0e3e7",
+              "surface-container-highest": "#e0e3e7",
+              "surface": "#f7fafe",
+              "on-primary-fixed-variant": "#2e486c",
+              "on-secondary": "#ffffff",
+              "inverse-primary": "#aec8f3",
+              "surface-container": "#ebeef2",
+              "on-error": "#ffffff",
+              "on-surface-variant": "#43474e",
+              "on-tertiary-container": "#f16735",
+              "surface-container-low": "#f1f4f8",
+              "primary-fixed-dim": "#aec8f3",
+              "inverse-on-surface": "#eef1f5",
+              "on-primary-container": "#7993bc",
+              "primary-fixed": "#d5e3ff",
+              "on-secondary-container": "#007440",
+              "on-tertiary": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-primary": "#ffffff",
+              "outline-variant": "#c4c6cf",
+              "tertiary-fixed": "#ffdbd0",
+              "background": "#f7fafe",
+              "surface-container-high": "#e5e8ec",
+              "on-error-container": "#93000a",
+              "on-secondary-fixed-variant": "#00522c",
+              "surface-container-lowest": "#ffffff",
+              "on-background": "#181c1f",
+              "secondary": "#006d3c",
+              "tertiary-container": "#531500"
+            },
+            fontFamily: {
+              "headline": ["Newsreader", "serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"],
+              "mono": ["DM Mono", "monospace"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+        h1, h2, h3, .serif-italic { font-family: 'Newsreader', serif; }
+        .dm-mono { font-family: 'DM Mono', monospace; }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+        }
+        .radar-grid {
+            background-image: radial-gradient(circle, #c4c6cf 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- TopAppBar -->
+<header class="bg-[#0D2B4E] dark:bg-slate-950 text-white dark:text-slate-100 docked full-width top-0 sticky z-50">
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-full mx-auto">
+<div class="text-2xl font-serif italic text-white dark:text-slate-100">Raiz</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-slate-300 dark:text-slate-400 font-medium hover:text-emerald-400 transition-colors duration-200" href="#">Analyse</a>
+<a class="text-white border-b-2 border-emerald-500 pb-1 font-bold transition-all scale-[0.98]" href="#">Compare</a>
+<a class="text-slate-300 dark:text-slate-400 font-medium hover:text-emerald-400 transition-colors duration-200" href="#">Intelligence</a>
+<a class="text-slate-300 dark:text-slate-400 font-medium hover:text-emerald-400 transition-colors duration-200" href="#">Pricing</a>
+</nav>
+<button class="bg-primary-container text-white px-6 py-2 rounded-lg font-medium hover:text-emerald-400 transition-colors duration-200">Get Started</button>
+</div>
+</header>
+<main class="max-w-7xl mx-auto pb-32">
+<!-- Sticky Comparison Header -->
+<section class="sticky top-[72px] z-40 bg-surface-container-low pt-8 pb-4">
+<div class="grid grid-cols-12 gap-6 px-6">
+<div class="col-span-12 md:col-span-3 flex flex-col justify-center">
+<h2 class="text-2xl font-headline italic text-primary">Intelligence Summary</h2>
+<p class="text-on-surface-variant text-sm">3 properties selected</p>
+</div>
+<div class="col-span-12 md:col-span-9 grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Property Item 1 -->
+<div class="bg-surface-container-lowest p-3 rounded-xl flex items-center gap-4">
+<img class="w-16 h-16 rounded-lg object-cover" data-alt="Modern house with glass facade" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpj0VKKwTBqBK1V0gnPH51CMnkhIMLXeW2ysnPNc3QhlqVvOTLejZEJ2HXIyYG463KZeIwAHF6O_dGO_FeApq2jAC4eAmh2GHHHqaF0zou9vXayTYk-BJGkwM3a9rKvVDKFGiGMr5v6HGYTYfD1Fiaqdp1qT6dZyBtWuWKO-mNw3sh7hlAKltVV8u296onDQBBtPKPkpgSI_NEpwUQCeMZo2fX2tsGYo0Z1-RoZRg8gCtaeSquMf_-nKpdleK7OP8X3psyPqc3-D0"/>
+<div class="flex-1">
+<h4 class="text-sm font-bold truncate">24 Highgate Rise</h4>
+<p class="dm-mono text-xs text-primary font-bold">£1,450,000</p>
+</div>
+<div class="w-10 h-10 rounded-full border-4 border-secondary flex items-center justify-center">
+<span class="dm-mono text-[10px] font-bold">88</span>
+</div>
+</div>
+<!-- Property Item 2 -->
+<div class="bg-surface-container-lowest p-3 rounded-xl flex items-center gap-4">
+<img class="w-16 h-16 rounded-lg object-cover" data-alt="Contemporary suburban home" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC98e0PBB7PzgP3fTXL7GnPusYyjd3qx6i_EFOB_FGGafglybEqFSGjYc-5_YK6DmnaPl-tq7VDXFd3uOKbJjZ_D-5NpGQ7GAHKRek5rAERmNjnR8LIWBim9PkuBnALw3CYXbJPddpQ-OD5UE1t62viMVFt0f-wNJf84avuAN25qktGvYN6RRfu1kWrP0qyjVmhcsVJKI-RL3N_KZnCXTS-Qq7g38yGRIAeTv1CKi5pYb6LrTflojapvdbWpvmrJehp4ayKLLqICTg"/>
+<div class="flex-1">
+<h4 class="text-sm font-bold truncate">The Old Rectory</h4>
+<p class="dm-mono text-xs text-primary font-bold">£1,275,000</p>
+</div>
+<div class="w-10 h-10 rounded-full border-4 border-secondary-fixed-dim flex items-center justify-center">
+<span class="dm-mono text-[10px] font-bold">74</span>
+</div>
+</div>
+<!-- Property Item 3 -->
+<div class="bg-surface-container-lowest p-3 rounded-xl flex items-center gap-4">
+<img class="w-16 h-16 rounded-lg object-cover" data-alt="Brick exterior luxury house" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAd9J39yHsotS_GPAm9OJI7xwINHJqm1yXRaW547Pa7pGVFKEa-vLVDgp0ywVl9OpVzIMeEi2YXgBQ5yjxljkX0pugOblbSLHr1gLII5kG42zXYgXBvEbCytVLeWPJkldPpDJUjMGdZCkzsphTgbBac7J4qOnMO1tCSPrxbfWJWNgG4FV0QZE8NcmOuYocstWNIoPTQs6qS-OcgvmOJwlZvAE6XjqmlQmXgintH3Y1m9PxX8mM2SEUv1M9mdsh_V7tK813fGA6oLKo"/>
+<div class="flex-1">
+<h4 class="text-sm font-bold truncate">7 Vale Gardens</h4>
+<p class="dm-mono text-xs text-primary font-bold">£1,590,000</p>
+</div>
+<div class="w-10 h-10 rounded-full border-4 border-secondary-fixed flex items-center justify-center">
+<span class="dm-mono text-[10px] font-bold">81</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- The Verdict -->
+<section class="mt-12 px-6">
+<h2 class="text-3xl font-headline mb-8">The Verdict</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Verdict 1 -->
+<div class="bg-surface-container-lowest p-8 rounded-2xl">
+<span class="text-secondary text-sm font-bold tracking-widest uppercase block mb-4">Top Performer</span>
+<h3 class="text-3xl font-headline italic leading-tight text-primary mb-6">Superior long-term equity growth potential</h3>
+<p class="text-on-surface-variant leading-relaxed">Highgate Rise sits in a regenerating pocket with a 12% predicted uplift over the next 36 months, significantly outpacing the local borough average.</p>
+</div>
+<!-- Verdict 2 -->
+<div class="bg-surface-container-lowest p-8 rounded-2xl">
+<span class="text-on-surface-variant text-sm font-bold tracking-widest uppercase block mb-4">Value Pick</span>
+<h3 class="text-3xl font-headline italic leading-tight text-primary mb-6">Best monthly cost to square footage</h3>
+<p class="text-on-surface-variant leading-relaxed">The Old Rectory offers the lowest price per sq ft in the selection, paired with an efficient EPC rating that minimizes overheads.</p>
+</div>
+<!-- Verdict 3 -->
+<div class="bg-surface-container-lowest p-8 rounded-2xl">
+<span class="text-on-surface-variant text-sm font-bold tracking-widest uppercase block mb-4">Lifestyle Winner</span>
+<h3 class="text-3xl font-headline italic leading-tight text-primary mb-6">Unrivalled transit and life proximity</h3>
+<p class="text-on-surface-variant leading-relaxed">7 Vale Gardens provides immediate access to the high street and Tier-1 schooling, making it the most resilient lifestyle investment.</p>
+</div>
+</div>
+</section>
+<!-- The Decisive Difference -->
+<section class="mt-16 mx-6 bg-primary-container rounded-[32px] overflow-hidden">
+<div class="grid grid-cols-1 md:grid-cols-2">
+<div class="p-12 md:p-20">
+<h2 class="text-4xl md:text-5xl font-headline italic text-white mb-8">The Decisive Difference</h2>
+<div class="space-y-6">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-emerald-400 mt-1">analytics</span>
+<div>
+<h4 class="text-white font-bold text-xl">Community Stability</h4>
+<p class="text-on-primary-container mt-2">The core variance factor identified in your comparison is the resident turnover rate. 7 Vale Gardens outperforms by 42%.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-primary p-12 flex items-center justify-center">
+<div class="text-center">
+<div class="dm-mono text-7xl font-light text-emerald-400">42%</div>
+<div class="text-on-primary-container text-sm mt-2 font-bold uppercase tracking-widest">Stability Variance</div>
+<div class="mt-12 flex gap-4">
+<div class="h-1 w-12 bg-emerald-400"></div>
+<div class="h-1 w-12 bg-white/20"></div>
+<div class="h-1 w-12 bg-white/20"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Radar Overlay & Weighting -->
+<section class="mt-16 px-6">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-12">
+<!-- Life Proximity Wheel -->
+<div class="md:col-span-7 bg-surface-container rounded-3xl p-12 flex flex-col items-center">
+<h3 class="text-2xl font-headline mb-8 text-center">Life Proximity Overlay</h3>
+<div class="w-full aspect-square max-w-md radar-grid rounded-full relative border border-outline-variant/20">
+<!-- Abstract Radar Shapes -->
+<div class="absolute inset-4 rounded-full border border-outline-variant/10"></div>
+<div class="absolute inset-12 rounded-full border border-outline-variant/10"></div>
+<div class="absolute inset-24 rounded-full border border-outline-variant/10"></div>
+<!-- Simulated Radar Paths -->
+<svg class="absolute inset-0 w-full h-full drop-shadow-xl" viewbox="0 0 100 100">
+<polygon fill="rgba(0, 22, 49, 0.15)" points="50,10 85,30 80,75 50,90 15,65 20,25" stroke="#001631" stroke-width="0.5"></polygon>
+<polygon fill="rgba(52, 201, 122, 0.15)" points="50,20 70,40 65,70 50,80 30,60 35,35" stroke="#34C97A" stroke-width="0.5"></polygon>
+<polygon fill="rgba(13, 43, 78, 0.1)" points="50,5 95,45 75,85 50,95 5,75 10,25" stroke="#0D2B4E" stroke-dasharray="2 2" stroke-width="0.5"></polygon>
+</svg>
+<div class="absolute top-2 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase text-on-surface-variant">Transit</div>
+<div class="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase text-on-surface-variant">Quiet</div>
+<div class="absolute left-2 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase text-on-surface-variant -rotate-90">Schools</div>
+<div class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase text-on-surface-variant rotate-90">Parks</div>
+</div>
+</div>
+<!-- Weighted Ranking & Sliders -->
+<div class="md:col-span-5 space-y-12">
+<div>
+<h3 class="text-2xl font-headline mb-6">Your Priorities</h3>
+<div class="space-y-8">
+<div>
+<div class="flex justify-between mb-3">
+<label class="text-sm font-bold">Investment Growth</label>
+<span class="dm-mono text-sm text-secondary">85%</span>
+</div>
+<input class="w-full h-1 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-primary" type="range"/>
+</div>
+<div>
+<div class="flex justify-between mb-3">
+<label class="text-sm font-bold">Family Proximity</label>
+<span class="dm-mono text-sm text-secondary">40%</span>
+</div>
+<input class="w-full h-1 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-primary" type="range"/>
+</div>
+<div>
+<div class="flex justify-between mb-3">
+<label class="text-sm font-bold">Resale Liquidity</label>
+<span class="dm-mono text-sm text-secondary">62%</span>
+</div>
+<input class="w-full h-1 bg-surface-container-high rounded-full appearance-none cursor-pointer accent-primary" type="range"/>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low p-8 rounded-2xl">
+<h3 class="text-xl font-headline italic mb-6">Weighted Ranking</h3>
+<div class="space-y-4">
+<div class="flex items-center gap-4 bg-surface-container-lowest p-4 rounded-xl">
+<span class="dm-mono text-2xl font-bold text-secondary">01</span>
+<div class="flex-1">
+<p class="font-bold">24 Highgate Rise</p>
+<p class="text-xs text-on-surface-variant">94.2 match score</p>
+</div>
+<span class="material-symbols-outlined text-secondary">trending_up</span>
+</div>
+<div class="flex items-center gap-4 bg-surface-container-lowest/50 p-4 rounded-xl opacity-80">
+<span class="dm-mono text-2xl font-bold text-on-surface-variant">02</span>
+<div class="flex-1">
+<p class="font-bold">7 Vale Gardens</p>
+<p class="text-xs text-on-surface-variant">88.5 match score</p>
+</div>
+</div>
+<div class="flex items-center gap-4 bg-surface-container-lowest/50 p-4 rounded-xl opacity-80">
+<span class="dm-mono text-2xl font-bold text-on-surface-variant">03</span>
+<div class="flex-1">
+<p class="font-bold">The Old Rectory</p>
+<p class="text-xs text-on-surface-variant">81.1 match score</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Risk Dashboard -->
+<section class="mt-20 px-6">
+<h2 class="text-3xl font-headline mb-8">Risk Landscape</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-1">
+<!-- Header Column -->
+<div class="hidden md:flex flex-col gap-1">
+<div class="h-12 flex items-center px-4 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Indicator</div>
+<div class="h-24 flex items-center px-4 bg-surface-container-low rounded-l-xl font-medium">Environmental</div>
+<div class="h-24 flex items-center px-4 bg-surface-container-low rounded-l-xl font-medium">Regulatory</div>
+<div class="h-24 flex items-center px-4 bg-surface-container-low rounded-l-xl font-medium">Market Volatility</div>
+</div>
+<!-- Property 1 Risk -->
+<div class="flex flex-col gap-1">
+<div class="h-12 flex items-center justify-center font-bold text-xs truncate">Highgate Rise</div>
+<div class="h-24 bg-secondary/10 flex flex-col items-center justify-center p-4 text-center">
+<span class="material-symbols-outlined text-secondary mb-1">check_circle</span>
+<span class="text-[10px] font-bold uppercase text-secondary">Clear</span>
+</div>
+<div class="h-24 bg-amber-100 flex flex-col items-center justify-center p-4 text-center">
+<span class="material-symbols-outlined text-amber-700 mb-1">warning</span>
+<span class="text-[10px] font-bold uppercase text-amber-700">Pending Planning</span>
+</div>
+<div class="h-24 bg-secondary/10 flex flex-col items-center justify-center p-4 text-center">
+<span class="material-symbols-outlined text-secondary mb-1">check_circle</span>
+<span class="text-[10px] font-bold uppercase text-secondary">Low</span>
+</div>
+</div>
+<!-- Property 2 Risk -->
+<div class="flex flex-col gap-1">
+<div class="h-12 flex items-center justify-center font-bold text-xs truncate">The Old Rectory</div>
+<div class="h-24 bg-tertiary-container/10 flex flex-col items-center justify-center p-4 text-center">
+<span class="material-symbols-outlined text-tertiary-container mb-1">error</span>
+<span class="text-[10px] font-bold uppercase text-tertiary-container">Flood Zone 2</span>
+</div>
+<div class="h-24 bg-secondary/10 flex flex-col items-center justify-center p-4 text-center">
+<span class="material-symbols-outlined text-secondary mb-1">check_circle</span>
+<span class="text-[10px] font-bold uppercase text-secondary">Clear</span>
+</div>
+<div class="h-24 bg-secondary/10 flex flex-col items-center justify-center p-4 text-center">
+<span class="material-symbols-outlined text-secondary mb-1">check_circle</span>
+<span class="text-[10px] font-bold uppercase text-secondary">Low</span>
+</div>
+</div>
+<!-- Property 3 Risk -->
+<div class="flex flex-col gap-1">
+<div class="h-12 flex items-center justify-center font-bold text-xs truncate">7 Vale Gardens</div>
+<div class="h-24 bg-secondary/10 flex flex-col items-center justify-center p-4 text-center rounded-r-xl">
+<span class="material-symbols-outlined text-secondary mb-1">check_circle</span>
+<span class="text-[10px] font-bold uppercase text-secondary">Clear</span>
+</div>
+<div class="h-24 bg-secondary/10 flex flex-col items-center justify-center p-4 text-center rounded-r-xl">
+<span class="material-symbols-outlined text-secondary mb-1">check_circle</span>
+<span class="text-[10px] font-bold uppercase text-secondary">Clear</span>
+</div>
+<div class="h-24 bg-amber-100 flex flex-col items-center justify-center p-4 text-center rounded-r-xl">
+<span class="material-symbols-outlined text-amber-700 mb-1">warning</span>
+<span class="text-[10px] font-bold uppercase text-amber-700">Med. Supply</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Side-by-Side Pillar Scores -->
+<section class="mt-20 px-6">
+<h2 class="text-3xl font-headline mb-12">Comparative Pillars</h2>
+<div class="space-y-12">
+<!-- Pillar 1 -->
+<div>
+<div class="flex justify-between items-end mb-4">
+<h4 class="font-headline italic text-xl">Investment Resilience</h4>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Score / 100</span>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-6">
+<div class="w-32 text-xs font-bold truncate">Highgate Rise</div>
+<div class="flex-1 h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 92%"></div>
+</div>
+<div class="dm-mono text-sm w-8">92</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="w-32 text-xs font-bold truncate">Old Rectory</div>
+<div class="flex-1 h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 68%"></div>
+</div>
+<div class="dm-mono text-sm w-8">68</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="w-32 text-xs font-bold truncate">Vale Gardens</div>
+<div class="flex-1 h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-on-primary-container rounded-full" style="width: 84%"></div>
+</div>
+<div class="dm-mono text-sm w-8">84</div>
+</div>
+</div>
+</div>
+<!-- Pillar 2 -->
+<div>
+<div class="flex justify-between items-end mb-4">
+<h4 class="font-headline italic text-xl">Operational Efficiency</h4>
+<span class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Score / 100</span>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-6">
+<div class="w-32 text-xs font-bold truncate">Highgate Rise</div>
+<div class="flex-1 h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full" style="width: 74%"></div>
+</div>
+<div class="dm-mono text-sm w-8">74</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="w-32 text-xs font-bold truncate">Old Rectory</div>
+<div class="flex-1 h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 95%"></div>
+</div>
+<div class="dm-mono text-sm w-8">95</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="w-32 text-xs font-bold truncate">Vale Gardens</div>
+<div class="flex-1 h-3 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-on-primary-container rounded-full" style="width: 71%"></div>
+</div>
+<div class="dm-mono text-sm w-8">71</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#CFDAF0] dark:bg-slate-800 text-[#0D2B4E] dark:text-slate-200 w-full py-12 px-8 flex flex-col md:flex-row justify-between items-start gap-8 mt-24">
+<div>
+<div class="text-xl font-serif italic text-[#0D2B4E] dark:text-white mb-4">Raiz</div>
+<p class="font-headline text-sm max-w-xs italic">Expert trust through tonal depth. Data managed with editorial elegance.</p>
+</div>
+<div class="flex flex-wrap gap-x-12 gap-y-6 font-body text-sm">
+<a class="text-slate-600 dark:text-slate-400 hover:underline underline-offset-4 decoration-emerald-500" href="#">Methodology</a>
+<a class="text-slate-600 dark:text-slate-400 hover:underline underline-offset-4 decoration-emerald-500" href="#">Data Sources</a>
+<a class="text-slate-600 dark:text-slate-400 hover:underline underline-offset-4 decoration-emerald-500" href="#">Privacy</a>
+<a class="text-slate-600 dark:text-slate-400 hover:underline underline-offset-4 decoration-emerald-500" href="#">Terms</a>
+<a class="text-slate-600 dark:text-slate-400 hover:underline underline-offset-4 decoration-emerald-500" href="#">Contact</a>
+</div>
+<div class="dm-mono text-xs text-slate-500">© 2024 Raiz Property Intelligence</div>
+</footer>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-3 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-[0_-4px_20px_0_rgba(0,0,0,0.05)] rounded-t-[24px] z-50">
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors p-2" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="text-[11px] font-medium font-body">Analyse</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#0D2B4E] dark:text-emerald-400 font-bold transition-all scale-[0.95]" href="#">
+<span class="material-symbols-outlined">compare_arrows</span>
+<span class="text-[11px] font-medium font-body">Compare</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors p-2" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="text-[11px] font-medium font-body">Reports</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors p-2" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[11px] font-medium font-body">Profile</span>
+</a>
+</nav>
+</body></html>

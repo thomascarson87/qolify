@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Raiz Intelligence | Macro Overview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,600;0,700;1,400;1,600&amp;family=Manrope:wght@400;500;600&amp;family=DM+Sans:wght@400;500&amp;family=DM+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-container": "#f16735",
+              "on-surface": "#181c1f",
+              "secondary-container": "#70fda8",
+              "primary-container": "#0d2b4e",
+              "on-tertiary": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-error": "#ffffff",
+              "on-primary": "#ffffff",
+              "on-tertiary-fixed": "#390c00",
+              "primary-fixed": "#d5e3ff",
+              "inverse-on-surface": "#eef1f5",
+              "tertiary-fixed": "#ffdbd0",
+              "primary": "#001631",
+              "tertiary-container": "#531500",
+              "surface-tint": "#465f85",
+              "on-primary-container": "#7993bc",
+              "tertiary": "#300900",
+              "inverse-surface": "#2d3134",
+              "inverse-primary": "#aec8f3",
+              "secondary": "#34C97A",
+              "on-primary-fixed": "#001c3b",
+              "surface": "#f7fafe",
+              "secondary-fixed-dim": "#51df8e",
+              "on-primary-fixed-variant": "#2e486c",
+              "primary-fixed-dim": "#aec8f3",
+              "on-secondary-container": "#007440",
+              "surface-variant": "#e0e3e7",
+              "surface-container-high": "#e5e8ec",
+              "surface-bright": "#f7fafe",
+              "on-surface-variant": "#43474e",
+              "surface-dim": "#d7dade",
+              "on-tertiary-fixed-variant": "#832700",
+              "outline": "#74777f",
+              "background": "#f7fafe",
+              "outline-variant": "#c4c6cf",
+              "on-background": "#181c1f",
+              "on-secondary-fixed-variant": "#00522c",
+              "secondary-fixed": "#70fda8",
+              "on-secondary": "#ffffff",
+              "surface-container-low": "#f1f4f8",
+              "tertiary-fixed-dim": "#ffb59c",
+              "error": "#ba1a1a",
+              "surface-container-highest": "#e0e3e7",
+              "on-error-container": "#93000a",
+              "surface-container-lowest": "#ffffff",
+              "surface-container": "#ebeef2",
+              "on-secondary-fixed": "#00210e"
+            },
+            fontFamily: {
+              "headline": ["Newsreader"],
+              "body": ["Manrope"],
+              "label": ["Manrope"],
+              "mono": ["DM Mono"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- Top Navigation Anchor -->
+<nav class="fixed top-0 w-full z-50 bg-[#F7FAFE]/80 dark:bg-slate-950/80 backdrop-blur-xl flex justify-between items-center px-12 py-6">
+<div class="text-3xl font-serif italic text-[#0D2B4E] dark:text-white tracking-tighter">Raiz</div>
+<div class="hidden md:flex items-center gap-12">
+<a class="text-slate-500 font-sans uppercase tracking-widest text-[11px] hover:text-[#001631] transition-all duration-500" href="#">Analyse</a>
+<a class="text-slate-500 font-sans uppercase tracking-widest text-[11px] hover:text-[#001631] transition-all duration-500" href="#">Map</a>
+<a class="text-[#001631] dark:text-white border-b-2 border-[#34C97A] pb-1 font-sans uppercase tracking-widest text-[11px]" href="#">Intelligence</a>
+<a class="text-slate-500 font-sans uppercase tracking-widest text-[11px] hover:text-[#001631] transition-all duration-500" href="#">Pricing</a>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-[#001631] font-['Newsreader'] italic text-lg tracking-tight">Sign In</button>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-lg font-body font-medium hover:opacity-90 transition-opacity">Get Started</button>
+</div>
+</nav>
+<!-- Side Navigation -->
+<aside class="h-screen w-72 fixed left-0 top-0 flex flex-col bg-[#F1F4F8] dark:bg-slate-900 p-6 pt-32 gap-y-2 z-40 hidden xl:flex">
+<div class="mb-8 px-4">
+<h2 class="font-serif italic text-xl text-[#0D2B4E] dark:text-white">Intelligence Dashboard</h2>
+<p class="text-xs text-slate-500 uppercase tracking-widest mt-1">Prestige Tier</p>
+</div>
+<nav class="flex-grow space-y-2">
+<a class="flex items-center gap-3 text-slate-500 px-4 py-3 hover:bg-white/50 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+<span class="font-body font-medium text-sm">Portfolio</span>
+</a>
+<a class="flex items-center gap-3 bg-white dark:bg-slate-800 text-[#001631] px-4 py-3 rounded-lg shadow-sm" href="#">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+<span class="font-body font-medium text-sm">Trends</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 px-4 py-3 hover:bg-white/50 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="gpp_maybe">gpp_maybe</span>
+<span class="font-body font-medium text-sm">Risk</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 px-4 py-3 hover:bg-white/50 transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body font-medium text-sm">Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 border-t border-outline-variant/20 space-y-2">
+<a class="flex items-center gap-3 text-slate-500 px-4 py-2 hover:text-primary" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span class="text-sm">Support</span>
+</a>
+<div class="p-4 bg-primary-container rounded-xl mt-4">
+<p class="text-white/70 text-xs mb-2">Detailed insights unlocked</p>
+<button class="w-full bg-secondary text-primary font-bold text-xs py-2 rounded-lg">Upgrade Analysis</button>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="xl:ml-72 pt-32 px-8 md:px-12 pb-24 max-w-7xl mx-auto">
+<!-- Editorial Header -->
+<header class="mb-16">
+<div class="inline-block px-3 py-1 bg-surface-container rounded-full mb-4">
+<span class="text-[10px] font-mono uppercase tracking-[0.2em] text-on-surface-variant">Macro Perspective • Q4 2024</span>
+</div>
+<h1 class="font-headline text-5xl md:text-6xl text-primary font-bold tracking-tight mb-4">Macro Intelligence Overview</h1>
+<p class="font-headline italic text-2xl text-on-surface-variant max-w-2xl leading-relaxed">
+                An editorial synthesis of the United Kingdom's evolving real estate landscape, characterized by localized yield variances and a systemic shift toward environmental compliance.
+            </p>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+<!-- Main Chart: Rental Yield Distribution -->
+<section class="md:col-span-8 bg-surface-container-lowest p-10 rounded-xl">
+<div class="flex justify-between items-end mb-12">
+<div>
+<h3 class="font-headline text-2xl font-bold text-primary mb-2">Rental Yield Distribution</h3>
+<p class="text-sm text-slate-500 font-body">Weighted average across top-tier residential postcodes</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-[10px] font-mono uppercase tracking-widest">Growth</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>
+<span class="text-[10px] font-mono uppercase tracking-widest">Risk</span>
+</div>
+</div>
+</div>
+<!-- Abstract Chart Visualization -->
+<div class="h-64 flex items-end gap-3 px-4">
+<div class="flex-1 bg-surface-container h-[40%] rounded-t-lg transition-all hover:bg-secondary/20"></div>
+<div class="flex-1 bg-surface-container h-[55%] rounded-t-lg transition-all hover:bg-secondary/20"></div>
+<div class="flex-1 bg-secondary h-[85%] rounded-t-lg relative group">
+<div class="absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-primary text-white text-[10px] px-2 py-1 rounded font-mono">7.2% Yield</div>
+</div>
+<div class="flex-1 bg-surface-container h-[65%] rounded-t-lg transition-all hover:bg-secondary/20"></div>
+<div class="flex-1 bg-surface-container h-[45%] rounded-t-lg transition-all hover:bg-secondary/20"></div>
+<div class="flex-1 bg-on-tertiary-container/30 h-[30%] rounded-t-lg transition-all hover:bg-on-tertiary-container/50"></div>
+<div class="flex-1 bg-surface-container h-[50%] rounded-t-lg transition-all hover:bg-secondary/20"></div>
+<div class="flex-1 bg-secondary h-[78%] rounded-t-lg"></div>
+<div class="flex-1 bg-surface-container h-[42%] rounded-t-lg transition-all hover:bg-secondary/20"></div>
+</div>
+<div class="flex justify-between mt-6 px-4 border-t border-outline-variant/10 pt-4">
+<span class="font-mono text-[10px] text-slate-400">NW1</span>
+<span class="font-mono text-[10px] text-slate-400">SW3</span>
+<span class="font-mono text-[10px] text-slate-400">E14</span>
+<span class="font-mono text-[10px] text-slate-400">M1</span>
+<span class="font-mono text-[10px] text-slate-400">G1</span>
+<span class="font-mono text-[10px] text-slate-400">B1</span>
+<span class="font-mono text-[10px] text-slate-400">LS1</span>
+<span class="font-mono text-[10px] text-slate-400">NG1</span>
+<span class="font-mono text-[10px] text-slate-400">OX1</span>
+</div>
+</section>
+<!-- Side Card: EPC Adoption -->
+<section class="md:col-span-4 flex flex-col gap-8">
+<div class="bg-primary p-8 rounded-xl text-white h-full relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="font-headline italic text-2xl mb-6 text-secondary">EPC Adoption Trends</h3>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between text-[11px] font-mono uppercase tracking-widest mb-2 opacity-70">Grade A-C Properties</div>
+<div class="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[64%]"></div>
+</div>
+<div class="mt-2 font-mono text-xl">+12.4% <span class="text-xs opacity-50">YoY</span></div>
+</div>
+<div>
+<div class="flex justify-between text-[11px] font-mono uppercase tracking-widest mb-2 opacity-70">Regulatory Exposure</div>
+<div class="w-full bg-white/10 h-1 rounded-full overflow-hidden">
+<div class="bg-on-tertiary-container h-full w-[28%]"></div>
+</div>
+<div class="mt-2 font-mono text-xl">18.2% <span class="text-xs opacity-50">Risk Tier</span></div>
+</div>
+</div>
+</div>
+<div class="absolute bottom-[-20%] right-[-10%] opacity-10">
+<span class="material-symbols-outlined text-[160px]" data-icon="eco">eco</span>
+</div>
+</div>
+</section>
+<!-- Map Context: Price per Sqm -->
+<section class="md:col-span-7 bg-surface-container rounded-xl overflow-hidden min-h-[400px] flex flex-col">
+<div class="p-8 pb-0">
+<h3 class="font-headline text-2xl font-bold text-primary mb-1">Geographic Density</h3>
+<p class="text-sm font-headline italic text-on-surface-variant">Price per Square Metre (£/sqm) by Postcode Sector</p>
+</div>
+<div class="flex-grow m-8 rounded-lg overflow-hidden relative">
+<img alt="Topographical data visualization map" class="w-full h-full object-cover grayscale opacity-40 mix-blend-multiply" data-alt="Monochromatic topographical map visualization showing real estate density patterns" data-location="London" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXTGKAwbgQNWLnmtUvueLVsHkCuTD6J8rpeSSwuQOJI-oscd2LxF6vVweAvCfIMV7GKBJaOPGN624wmWl1ljxbxwaNNY7QLOSaDW0gKc4LtzxPghWDouUu2u5GDjH5Sd25q6KZ49kgtil7QOhQZ9VaQOB48-KU0nO7cXiKtFPk_NwHBylCXskp2g88Vsqu027D8OTnwvaOlTqTDK6rekHRCbLcLtDNmGGIuzQxgduoXaxlEnDhsnkNjzzaS0u0_r4Fvn2H1yJJexU"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-container via-transparent to-transparent"></div>
+<!-- Abstract Map Markers -->
+<div class="absolute top-1/4 left-1/3 w-16 h-16 bg-secondary/20 rounded-full flex items-center justify-center animate-pulse">
+<div class="w-2 h-2 bg-secondary rounded-full"></div>
+</div>
+<div class="absolute top-1/2 left-1/2 w-24 h-24 bg-on-tertiary-container/10 rounded-full flex items-center justify-center">
+<div class="w-2 h-2 bg-on-tertiary-container rounded-full"></div>
+</div>
+</div>
+</section>
+<!-- Metrics Bento -->
+<section class="md:col-span-5 grid grid-cols-2 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-xl flex flex-col justify-between">
+<span class="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400">Avg. Sqm Price</span>
+<div>
+<div class="font-mono text-3xl text-primary font-bold">£8,420</div>
+<div class="flex items-center gap-1 text-secondary mt-1">
+<span class="material-symbols-outlined text-sm" data-icon="north">north</span>
+<span class="text-[11px] font-mono">2.1%</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl flex flex-col justify-between">
+<span class="text-[10px] font-mono uppercase tracking-[0.2em] text-slate-400">Yield Volatility</span>
+<div>
+<div class="font-mono text-3xl text-primary font-bold">0.84</div>
+<div class="flex items-center gap-1 text-on-tertiary-container mt-1">
+<span class="material-symbols-outlined text-sm" data-icon="warning">warning</span>
+<span class="text-[11px] font-mono">Stable</span>
+</div>
+</div>
+</div>
+<div class="col-span-2 bg-white p-8 rounded-xl border-l-4 border-secondary shadow-sm">
+<h4 class="font-headline font-bold text-lg mb-2">Editorial Insight</h4>
+<p class="text-sm leading-relaxed text-slate-600">The correlation between <span class="italic text-primary font-medium">high thermal efficiency</span> and <span class="italic text-primary font-medium">rental premium</span> has reached a 5-year peak in Northern hubs.</p>
+</div>
+</section>
+</div>
+<!-- Newsreader Quote Section -->
+<section class="mt-24 mb-12 py-16 border-t border-outline-variant/10">
+<div class="max-w-3xl">
+<blockquote class="font-headline italic text-4xl text-primary leading-snug">
+                    "Intelligence is not just the volume of data, but the unhurried observation of the quietest trends before they become market noise."
+                </blockquote>
+<div class="mt-6 flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary-container"></div>
+<div>
+<p class="text-sm font-bold text-primary">Julian Vane</p>
+<p class="text-xs text-slate-500 uppercase tracking-widest">Head of Property Research</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 px-12 bg-[#EBEEF2] dark:bg-slate-950 mt-auto">
+<div class="flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="font-serif italic text-lg text-[#0D2B4E] dark:text-white">Raiz</div>
+<div class="flex gap-8">
+<a class="text-slate-500 font-['DM_Sans'] text-xs tracking-wide hover:text-[#34C97A] transition-colors" href="#">Privacy Policy</a>
+<a class="text-slate-500 font-['DM_Sans'] text-xs tracking-wide hover:text-[#34C97A] transition-colors" href="#">Terms of Service</a>
+<a class="text-[#001631] font-['DM_Sans'] text-xs tracking-wide underline underline-offset-4" href="#">Methodology</a>
+<a class="text-slate-500 font-['DM_Sans'] text-xs tracking-wide hover:text-[#34C97A] transition-colors" href="#">Contact</a>
+</div>
+<div class="text-slate-500 font-['DM_Sans'] text-xs tracking-wide">
+                © 2024 Raiz Property Intelligence. All rights reserved.
+            </div>
+</div>
+</footer>
+</body></html>

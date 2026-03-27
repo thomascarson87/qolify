@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;family=DM+Mono:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "secondary": "#465f85",
+              "surface-tint": "#006d3c",
+              "inverse-on-surface": "#ebf1ff",
+              "secondary-fixed-dim": "#aec8f3",
+              "surface-container-low": "#eff3ff",
+              "on-tertiary-fixed": "#390c00",
+              "tertiary-fixed": "#ffdbd0",
+              "on-secondary-fixed-variant": "#2e486c",
+              "primary-fixed": "#70fda8",
+              "on-tertiary": "#ffffff",
+              "inverse-primary": "#51df8e",
+              "on-error": "#ffffff",
+              "surface-container-high": "#dde9ff",
+              "on-tertiary-fixed-variant": "#832700",
+              "surface-variant": "#d8e3f9",
+              "error-container": "#ffdad6",
+              "on-surface-variant": "#3d4a3f",
+              "on-error-container": "#93000a",
+              "on-secondary-fixed": "#001c3b",
+              "on-surface": "#111c2c",
+              "outline-variant": "#bccabc",
+              "on-secondary": "#ffffff",
+              "surface-container-lowest": "#ffffff",
+              "secondary-fixed": "#d5e3ff",
+              "background": "#f9f9ff",
+              "tertiary-fixed-dim": "#ffb59c",
+              "surface-container-highest": "#d8e3f9",
+              "surface-dim": "#cfdaf0",
+              "secondary-container": "#b9d3ff",
+              "on-primary-fixed": "#00210e",
+              "on-primary-fixed-variant": "#00522c",
+              "on-background": "#111c2c",
+              "primary": "#006d3c",
+              "on-primary": "#ffffff",
+              "on-primary-container": "#004f2a",
+              "primary-fixed-dim": "#51df8e",
+              "surface-container": "#e6eeff",
+              "outline": "#6d7b6e",
+              "tertiary-container": "#ff9571",
+              "inverse-surface": "#263141",
+              "primary-container": "#34c97a",
+              "on-secondary-container": "#415b80",
+              "error": "#ba1a1a",
+              "surface": "#f9f9ff",
+              "tertiary": "#ab3601",
+              "surface-bright": "#f9f9ff",
+              "on-tertiary-container": "#7e2500"
+            },
+            fontFamily: {
+              "headline": ["Newsreader", "serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"],
+              "mono": ["DM Mono", "monospace"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1.5rem", "2xl": "2.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        background-color: #f9f9ff;
+        color: #111c2c;
+      }
+    </style>
+</head>
+<body class="font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="bg-slate-50/70 backdrop-blur-xl docked full-width top-0 sticky z-50 shadow-xl shadow-slate-900/5 transition-all duration-200">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
+<div class="text-2xl font-headline italic text-emerald-900">Estate Humanist</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-slate-500 hover:text-emerald-600 transition-colors font-body text-sm" href="#">Portfolio</a>
+<a class="text-slate-500 hover:text-emerald-600 transition-colors font-body text-sm" href="#">Insights</a>
+<a class="text-emerald-700 font-bold border-b-2 border-emerald-600 pb-1 font-body text-sm" href="#">Signals</a>
+<a class="text-slate-500 hover:text-emerald-600 transition-colors font-body text-sm" href="#">Reports</a>
+</nav>
+<div class="flex items-center gap-6">
+<div class="flex gap-4">
+<button class="text-on-surface-variant hover:bg-emerald-50/50 p-2 rounded-full transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:bg-emerald-50/50 p-2 rounded-full transition-all active:scale-95">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="Professional headshot of a male user" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVZwqb96UFYCxk2SeCDLIWJCdGWjWFDDugJ7mJWdy_7QEc4Kxr6LujGaIuLNw5tKtyfZFCDyC09Bgv0--rorFvqYar6_G_SvlpoT_2WcpdvYHpRJ3gkFTOgu1De8s8lP2emPxE5AdJ0P0Iy55juKby3fpB0Bp75CcGrpc1IC_w9bGK_x36JzfvNLUaOOp6d7i0H2TuQqo7fPVP0il7qWf1QcrGx_3_6MPdM1u2G1A1vAprs7icKzRRr9dx35DZPhD67cpNnLAr37Y"/>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-screen-2xl mx-auto px-8 lg:pl-72 py-12 pb-32">
+<!-- Breadcrumb / Context -->
+<div class="mb-12 flex items-center gap-3 text-on-surface-variant">
+<span class="font-label text-[10px] uppercase tracking-widest">Environmental Intelligence</span>
+<span class="text-outline-variant">/</span>
+<span class="font-label text-[10px] uppercase tracking-widest text-primary">Urban Canopy Analysis</span>
+</div>
+<!-- Hero Content Section (Asymmetric) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-20">
+<div class="lg:col-span-7">
+<h1 class="font-headline text-5xl lg:text-7xl text-on-surface leading-tight mb-8">
+                    Exceptional urban canopy with <span class="italic text-primary">mature tree density</span>
+</h1>
+<p class="text-on-surface-variant text-lg max-w-xl leading-relaxed mb-12">
+                    The local ecosystem provides a robust natural buffer, significantly mitigating environmental stressors. High-resolution satellite imagery confirms a continuous vegetative ceiling that defines the site's aesthetic and ecological value.
+                </p>
+<!-- Comparison & Data -->
+<div class="bg-surface-container-low p-10 rounded-xl relative overflow-hidden">
+<div class="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
+<div>
+<span class="font-label text-[11px] uppercase tracking-widest text-on-surface-variant block mb-4">Comparison vs. Mean</span>
+<div class="font-headline text-4xl text-on-surface">12% more canopy coverage</div>
+<div class="font-headline italic text-on-surface-variant text-xl mt-1">than the neighborhood mean</div>
+</div>
+<div class="text-right">
+<span class="font-label text-[11px] uppercase tracking-widest text-on-surface-variant block mb-4">Coverage Status</span>
+<div class="px-4 py-2 bg-primary-container text-on-primary-container rounded-full text-sm font-bold inline-flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="check_circle">check_circle</span>
+                                High Performance
+                            </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Score Sidebar (The "Bento" Data) -->
+<div class="lg:col-span-5 flex flex-col gap-6">
+<!-- Score Card -->
+<div class="bg-primary text-on-primary p-12 rounded-2xl shadow-xl shadow-primary/10">
+<span class="font-label text-[10px] uppercase tracking-[0.2em] opacity-80 mb-6 block">Greenness Score</span>
+<div class="flex items-baseline gap-2">
+<span class="font-mono text-8xl font-light">84</span>
+<span class="font-mono text-2xl opacity-60">/100</span>
+</div>
+<div class="mt-8 pt-8 border-t border-white/10 flex items-center justify-between">
+<span class="font-body text-sm italic">Top 4% of District</span>
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+</div>
+</div>
+<!-- Climate Card -->
+<div class="bg-surface-container-high p-8 rounded-xl flex flex-col justify-between aspect-square lg:aspect-auto">
+<div>
+<span class="font-label text-[11px] uppercase tracking-widest text-on-surface-variant block mb-6">Micro-climate Impact</span>
+<h3 class="font-headline text-2xl mb-4">Cooling Reservoir</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+                            Mature foliage acts as a natural thermodynamic regulator. Through evapotranspiration and shaded surface protection, this pocket of vegetation creates a localized 'cooling reservoir' during summer peaks.
+                        </p>
+</div>
+<div class="mt-8 flex gap-3">
+<div class="flex-1 bg-surface-container-lowest p-4 rounded-lg">
+<div class="text-primary font-mono text-xl">-3.2°C</div>
+<div class="font-label text-[9px] uppercase mt-1 opacity-70">Delta Temp</div>
+</div>
+<div class="flex-1 bg-surface-container-lowest p-4 rounded-lg">
+<div class="text-primary font-mono text-xl">High</div>
+<div class="font-label text-[9px] uppercase mt-1 opacity-70">O2 Enrichment</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Deep Dive Sections (Tonal Shifts) -->
+<section class="mt-24 grid grid-cols-1 md:grid-cols-2 gap-12">
+<div class="bg-white p-12 rounded-xl">
+<div class="flex items-center gap-4 mb-8">
+<div class="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="device_thermostat">device_thermostat</span>
+</div>
+<h3 class="font-headline text-2xl italic">Heat-Island Reduction</h3>
+</div>
+<p class="text-on-surface-variant leading-relaxed">
+                    By replacing non-porous heat-absorbing surfaces like asphalt with expansive organic canopy, the site drastically lowers its contribution to the Urban Heat Island (UHI) effect. The mature trees intercept solar radiation before it reaches the ground, storing latent heat in their biomass rather than reflecting it back into the atmosphere.
+                </p>
+</div>
+<div class="bg-white p-12 rounded-xl">
+<div class="flex items-center gap-4 mb-8">
+<div class="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="air">air</span>
+</div>
+<h3 class="font-headline text-2xl italic">Air Quality Enrichment</h3>
+</div>
+<p class="text-on-surface-variant leading-relaxed">
+                    A dense canopy serves as a biological particulate filter. Large leaf surface areas capture airborne pollutants and CO2, while simultaneously releasing oxygen and volatile organic compounds that foster a healthier breathing environment. Residents benefit from measurably lower nitrogen dioxide (NO2) concentrations compared to adjacent blocks.
+                </p>
+</div>
+</section>
+<!-- Aerial Visual -->
+<section class="mt-24">
+<div class="rounded-2xl overflow-hidden relative h-[500px] shadow-2xl">
+<img alt="Aerial view of dense green urban forest" class="w-full h-full object-cover" data-alt="Breathtaking aerial view of a lush green forest canopy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCD0fQp1EbzvlF2VSLwPKE7WlOFZJ0LI5Ncb56e4Bu4FZb3c2VR8q8cBAtN7XOT6Qf5pX0ZVNsrZ3Yr5WPSQqEMrHIsgEu7cCNXb1QDE6XXvjCEWQVu2REegq_xPC4XaExezyLTxC21UDN2XpqV_i2TdRKfCu61jqDvi7Q3Yo7zJZTQVw_MWXEJmbB7BmQeFYVp1cwWNN5lKvgG-PnZ3SonbpcLSmKyoIFeTG5dlwMV7cVvzd9n6G7hYR0MJ7gIOcH5KTxUh2CXqW4"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-12">
+<div class="text-white max-w-md">
+<div class="font-label text-[10px] uppercase tracking-widest mb-2 opacity-80">Visual Evidence</div>
+<h4 class="font-headline text-3xl mb-4">Continuous Organic Ceiling</h4>
+<p class="text-sm opacity-90 leading-relaxed font-body">Satellite analysis at 0.5m resolution confirms 72% surface interception by primary canopy species.</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- SideNavBar (Hidden on Mobile) -->
+<aside class="h-screen w-64 fixed left-0 top-0 hidden lg:flex flex-col bg-slate-100 py-8 pr-4 z-40">
+<div class="px-8 mb-12">
+<div class="font-headline text-xl italic text-emerald-900 mb-1">Property Signals</div>
+<div class="font-label uppercase tracking-widest text-[10px] text-slate-500">Proprietary Intelligence</div>
+</div>
+<nav class="flex flex-col gap-2">
+<a class="text-slate-500 py-3 pl-8 hover:translate-x-1 transition-transform font-label text-[10px] uppercase tracking-widest flex items-center gap-4" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="bolt">bolt</span>
+                Grid Stability
+            </a>
+<a class="text-slate-500 py-3 pl-8 hover:translate-x-1 transition-transform font-label text-[10px] uppercase tracking-widest flex items-center gap-4" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="wb_sunny">wb_sunny</span>
+                Luminance Profile
+            </a>
+<a class="text-slate-500 py-3 pl-8 hover:translate-x-1 transition-transform font-label text-[10px] uppercase tracking-widest flex items-center gap-4" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="router">router</span>
+                Fiber Nodes
+            </a>
+<a class="bg-white text-emerald-800 shadow-sm rounded-r-full py-4 pl-8 font-label text-[10px] uppercase tracking-widest flex items-center gap-4" href="#">
+<span class="material-symbols-outlined text-[20px]" data-icon="park">park</span>
+                Urban Canopy
+            </a>
+</nav>
+<div class="mt-auto px-6">
+<button class="w-full bg-primary text-on-primary py-4 rounded-xl font-label text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95">
+                Download Full Report
+            </button>
+</div>
+</aside>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-white/80 backdrop-blur-2xl lg:hidden z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.04)]">
+<div class="flex flex-col items-center justify-center bg-emerald-100/50 text-emerald-900 rounded-2xl px-5 py-2">
+<span class="material-symbols-outlined" data-icon="insights">insights</span>
+<span class="font-label text-[11px] font-medium mt-1">Signals</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 px-5 py-2">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-label text-[11px] font-medium mt-1">Maps</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 px-5 py-2">
+<span class="material-symbols-outlined" data-icon="compare_arrows">compare_arrows</span>
+<span class="font-label text-[11px] font-medium mt-1">Compare</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 px-5 py-2">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+<span class="font-label text-[11px] font-medium mt-1">Vault</span>
+</div>
+</nav>
+</body></html>

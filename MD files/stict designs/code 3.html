@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Raiz | Property Intelligence - Analyse</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "inverse-surface": "#2d3134",
+              "tertiary": "#300900",
+              "surface-bright": "#f7fafe",
+              "outline": "#74777f",
+              "error": "#ba1a1a",
+              "secondary-fixed": "#70fda8",
+              "on-tertiary-fixed": "#390c00",
+              "surface-tint": "#465f85",
+              "primary-container": "#0d2b4e",
+              "on-surface": "#181c1f",
+              "on-primary-fixed": "#001c3b",
+              "on-tertiary-fixed-variant": "#832700",
+              "primary": "#001631",
+              "secondary-container": "#70fda8",
+              "tertiary-fixed-dim": "#ffb59c",
+              "secondary-fixed-dim": "#51df8e",
+              "on-secondary-fixed": "#00210e",
+              "surface-dim": "#d7dade",
+              "surface-variant": "#e0e3e7",
+              "surface-container-highest": "#e0e3e7",
+              "surface": "#f7fafe",
+              "on-primary-fixed-variant": "#2e486c",
+              "on-secondary": "#ffffff",
+              "inverse-primary": "#aec8f3",
+              "surface-container": "#ebeef2",
+              "on-error": "#ffffff",
+              "on-surface-variant": "#43474e",
+              "on-tertiary-container": "#f16735",
+              "surface-container-low": "#f1f4f8",
+              "primary-fixed-dim": "#aec8f3",
+              "inverse-on-surface": "#eef1f5",
+              "on-primary-container": "#7993bc",
+              "primary-fixed": "#d5e3ff",
+              "on-secondary-container": "#007440",
+              "on-tertiary": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-primary": "#ffffff",
+              "outline-variant": "#c4c6cf",
+              "tertiary-fixed": "#ffdbd0",
+              "background": "#f7fafe",
+              "surface-container-high": "#e5e8ec",
+              "on-error-container": "#93000a",
+              "on-secondary-fixed-variant": "#00522c",
+              "surface-container-lowest": "#ffffff",
+              "on-background": "#181c1f",
+              "secondary": "#006d3c",
+              "tertiary-container": "#531500"
+            },
+            fontFamily: {
+              "headline": ["Newsreader", "serif"],
+              "body": ["Manrope", "sans-serif"],
+              "label": ["Manrope", "sans-serif"],
+              "mono": ["DM Mono", "monospace"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Manrope', sans-serif;
+        background-color: #f7fafe;
+      }
+      .serif { font-family: 'Newsreader', serif; }
+      .mono { font-family: 'DM Mono', monospace; }
+      /* Custom Ring for TVI */
+      .tvi-ring {
+        background: conic-gradient(#34C97A 85%, #EBEEF2 0);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- Top Navigation Anchor -->
+<header class="bg-[#0D2B4E] dark:bg-slate-950 docked full-width top-0 z-50">
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-full mx-auto">
+<div class="text-2xl font-serif italic text-white dark:text-slate-100">Raiz</div>
+<nav class="hidden md:flex space-x-8">
+<a class="text-white border-b-2 border-emerald-500 pb-1 font-bold" href="#">Analyse</a>
+<a class="text-slate-300 dark:text-slate-400 font-medium hover:text-emerald-400 transition-colors duration-200" href="#">Compare</a>
+<a class="text-slate-300 dark:text-slate-400 font-medium hover:text-emerald-400 transition-colors duration-200" href="#">Intelligence</a>
+<a class="text-slate-300 dark:text-slate-400 font-medium hover:text-emerald-400 transition-colors duration-200" href="#">Pricing</a>
+</nav>
+<button class="bg-primary-fixed text-on-primary-fixed px-6 py-2 rounded-lg font-bold hover:opacity-90 transition-all scale-[0.98]">
+                Get Started
+            </button>
+</div>
+</header>
+<main class="flex min-h-screen pt-4">
+<!-- Sidebar: 380px -->
+<aside class="w-[380px] flex-shrink-0 px-8 py-6 space-y-10">
+<div>
+<h1 class="serif text-4xl leading-tight mb-6">Analyse a property</h1>
+<!-- Tab Logic -->
+<div class="flex space-x-4 mb-6">
+<button class="text-sm font-bold border-b-2 border-primary pb-1">Single</button>
+<button class="text-sm font-medium text-on-surface-variant hover:text-primary transition-colors">Multiple URL</button>
+</div>
+<!-- Input Container -->
+<div class="space-y-4">
+<div class="relative group">
+<input class="w-full bg-surface-container-low border-none rounded-xl p-5 pr-14 focus:ring-1 focus:ring-primary focus:bg-surface-container-lowest transition-all placeholder:text-outline-variant text-primary font-medium" placeholder="Paste Rightmove or Zoopla URL..." type="text"/>
+<button class="absolute right-3 top-3 p-2 bg-primary text-white rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<p class="italic serif text-sm text-on-surface-variant px-1">Curated property intelligence starts with a simple link.</p>
+</div>
+</div>
+<!-- Recent Analyses -->
+<div class="space-y-6">
+<h3 class="font-bold text-xs uppercase tracking-widest text-outline">Recent analyses</h3>
+<div class="space-y-4">
+<!-- Item 1 -->
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-8 h-8 tvi-ring flex-shrink-0">
+<div class="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[10px] mono font-bold">85</div>
+</div>
+<div class="flex-1 min-w-0">
+<p class="font-bold text-sm truncate">High Street, Bath</p>
+<p class="text-xs text-on-surface-variant mono">BA1 2PT</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="chevron_right">chevron_right</span>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-8 h-8 tvi-ring flex-shrink-0" style="background: conic-gradient(#34C97A 62%, #EBEEF2 0);">
+<div class="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[10px] mono font-bold text-secondary">62</div>
+</div>
+<div class="flex-1 min-w-0">
+<p class="font-bold text-sm truncate">Lansdown Crescent</p>
+<p class="text-xs text-on-surface-variant mono">BA1 5EX</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="chevron_right">chevron_right</span>
+</div>
+<!-- Item 3 -->
+<div class="flex items-center gap-4 group cursor-pointer">
+<div class="w-8 h-8 tvi-ring flex-shrink-0" style="background: conic-gradient(#D4820A 41%, #EBEEF2 0);">
+<div class="w-6 h-6 bg-white rounded-full flex items-center justify-center text-[10px] mono font-bold text-amber-700">41</div>
+</div>
+<div class="flex-1 min-w-0">
+<p class="font-bold text-sm truncate">Richmond Place</p>
+<p class="text-xs text-on-surface-variant mono">BA1 5QU</p>
+</div>
+<span class="material-symbols-outlined text-outline-variant opacity-0 group-hover:opacity-100 transition-opacity" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Right Content Area -->
+<section class="flex-1 bg-surface-container-low rounded-tl-[40px] p-10 overflow-y-auto">
+<!-- Progress Overlay (Subtle) -->
+<div class="mb-12 max-w-4xl">
+<div class="flex justify-between items-end mb-4">
+<div>
+<h2 class="serif text-3xl mb-1">Queue Processing</h2>
+<p class="text-on-surface-variant italic">Unpacking the structural soul of 3 properties...</p>
+</div>
+<div class="text-right">
+<span class="mono text-2xl font-bold">66%</span>
+<p class="text-[10px] uppercase tracking-wider font-bold text-secondary">Processing</p>
+</div>
+</div>
+<div class="h-1.5 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-2/3 transition-all duration-1000"></div>
+</div>
+</div>
+<!-- Queue Items -->
+<div class="grid grid-cols-1 gap-6 max-w-4xl">
+<!-- Row 1: Completed -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl flex items-center gap-8 transition-all hover:translate-x-1">
+<div class="w-24 h-24 rounded-xl overflow-hidden bg-surface-container flex-shrink-0">
+<img alt="Property exterior" class="w-full h-full object-cover" data-alt="Modern cottage with stone facade and garden" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-K1oWF6FprU9OS0NthES70nKuBi3kfZULjjnYs7bkFel6wNHD1Gsyer97MAeiANjZo5rHPVooRUZ_H8BP8XB-_8L2byM77ptc64tW49_wuVoVoNsCxknk6onIW2RRlCDyJpC5p2kkDcYODpv0GlvO4u8H-MGyboKIo_0USKncL2W9KasLYYbBRIJIb8M98z2lKtGkRBWABwLAk1V3kyGY-Lj9bXfXYWhM7PcdtKKSROOJgROwMIqd_I7R31S_GvYu3Wf44CGPRvQ"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-3 mb-1">
+<span class="bg-secondary-container text-on-secondary-container text-[10px] font-bold px-2 py-0.5 rounded uppercase">Success</span>
+<span class="mono text-xs text-outline-variant">ID: RZ-9921</span>
+</div>
+<h4 class="serif text-xl">The Old Rectory, Somerset</h4>
+<p class="text-sm text-on-surface-variant italic">Full structural and yield analysis ready.</p>
+</div>
+<div class="text-right space-y-1">
+<div class="mono text-2xl font-bold text-secondary">£1.45m</div>
+<button class="text-primary font-bold text-sm flex items-center gap-2 hover:underline underline-offset-4">
+                            View Report <span class="material-symbols-outlined text-sm" data-icon="open_in_new">open_in_new</span>
+</button>
+</div>
+</div>
+<!-- Row 2: Active Processing -->
+<div class="bg-surface-container-lowest/50 p-6 rounded-2xl flex items-center gap-8 border-2 border-dashed border-outline-variant/30 relative overflow-hidden">
+<div class="w-24 h-24 rounded-xl overflow-hidden bg-surface-container flex-shrink-0 flex items-center justify-center">
+<span class="material-symbols-outlined animate-spin text-outline-variant text-4xl" data-icon="progress_activity">progress_activity</span>
+</div>
+<div class="flex-1">
+<h4 class="serif text-xl text-on-surface-variant">22 Sydney Place, Bathwick</h4>
+<p class="text-sm text-outline italic">Cross-referencing historic EPC data and land registry...</p>
+<div class="mt-3 flex gap-2">
+<div class="h-1 w-12 bg-secondary rounded-full"></div>
+<div class="h-1 w-12 bg-secondary/30 rounded-full animate-pulse"></div>
+<div class="h-1 w-12 bg-surface-container-high rounded-full"></div>
+</div>
+</div>
+<div class="text-right opacity-40">
+<div class="mono text-2xl font-bold">£850k</div>
+<span class="text-[10px] uppercase font-bold">Pending</span>
+</div>
+</div>
+<!-- Example Report Teaser Section -->
+<div class="mt-16 border-t border-transparent pt-10">
+<div class="flex items-center justify-between mb-8">
+<h3 class="serif text-2xl">The Raiz Perspective <span class="text-on-surface-variant font-light italic text-xl ml-2">— Example Report Highlights</span></h3>
+<button class="text-primary font-medium text-sm border border-primary/10 rounded-full px-4 py-1 hover:bg-primary/5 transition-colors">See full example</button>
+</div>
+<div class="grid grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl space-y-4 hover:shadow-xl transition-all duration-500">
+<div class="w-12 h-12 bg-secondary-container rounded-full flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+</div>
+<h5 class="font-bold text-lg leading-snug">Yield Anomaly Detected</h5>
+<p class="text-sm text-on-surface-variant leading-relaxed">Our intelligence identifies properties performing 15% above street average based on historical occupancy.</p>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl space-y-4 hover:shadow-xl transition-all duration-500">
+<div class="w-12 h-12 bg-tertiary-fixed rounded-full flex items-center justify-center text-on-tertiary-fixed-variant">
+<span class="material-symbols-outlined" data-icon="warning">warning</span>
+</div>
+<h5 class="font-bold text-lg leading-snug">Hidden Risk: Permitted Development</h5>
+<p class="text-sm text-on-surface-variant leading-relaxed">Flagging nearby council applications that may affect natural light or acoustic privacy in the coming 24 months.</p>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl space-y-4 hover:shadow-xl transition-all duration-500">
+<div class="w-12 h-12 bg-primary-fixed rounded-full flex items-center justify-center text-on-primary-fixed-variant">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+</div>
+<h5 class="font-bold text-lg leading-snug">Sentiment Heatmap</h5>
+<p class="text-sm text-on-surface-variant leading-relaxed">Cross-referencing hyper-local social mentions and boutique openings to predict the next 'micro-hotspot'.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Anchor -->
+<footer class="bg-[#CFDAF0] dark:bg-slate-800 w-full py-12 px-8 mt-auto">
+<div class="max-w-screen-2xl mx-auto flex flex-col md:flex-row justify-between items-start gap-8">
+<div class="space-y-4">
+<div class="text-xl font-serif italic text-[#0D2B4E] dark:text-white">Raiz</div>
+<p class="text-[#0D2B4E] font-serif max-w-xs leading-relaxed italic">The informed curator of property intelligence, built for the discerning investor.</p>
+<div class="text-xs text-slate-600 dark:text-slate-400 font-medium">© 2024 Raiz Property Intelligence</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-12">
+<div class="flex flex-col space-y-3">
+<span class="text-[10px] uppercase tracking-widest font-bold text-slate-500">Knowledge</span>
+<a class="text-slate-600 dark:text-slate-400 hover:underline underline-offset-4 decoration-emerald-500" href="#">Methodology</a>
+<a class="text-slate-600 dark:text-slate-400 hover:underline underline-offset-4 decoration-emerald-500" href="#">Data Sources</a>
+</div>
+<div class="flex flex-col space-y-3">
+<span class="text-[10px] uppercase tracking-widest font-bold text-slate-500">Company</span>
+<a class="text-slate-600 dark:text-slate-400 hover:underline underline-offset-4 decoration-emerald-500" href="#">Privacy</a>
+<a class="text-slate-600 dark:text-slate-400 hover:underline underline-offset-4 decoration-emerald-500" href="#">Terms</a>
+</div>
+<div class="flex flex-col space-y-3">
+<span class="text-[10px] uppercase tracking-widest font-bold text-slate-500">Support</span>
+<a class="text-slate-600 dark:text-slate-400 hover:underline underline-offset-4 decoration-emerald-500" href="#">Contact</a>
+</div>
+</div>
+</div>
+</footer>
+<!-- Mobile Bottom Nav -->
+<div class="md:hidden fixed bottom-0 left-0 w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl flex justify-around items-center px-4 pb-6 pt-3 z-50 rounded-t-[24px] shadow-[0_-4px_20px_0_rgba(0,0,0,0.05)] border-t border-slate-100 dark:border-slate-800">
+<div class="flex flex-col items-center justify-center text-[#0D2B4E] dark:text-emerald-400 font-bold">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="text-[11px] font-medium mt-1">Analyse</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined" data-icon="compare_arrows">compare_arrows</span>
+<span class="text-[11px] font-medium mt-1">Compare</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="text-[11px] font-medium mt-1">Reports</span>
+</div>
+<div class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[11px] font-medium mt-1">Profile</span>
+</div>
+</div>
+</body></html>

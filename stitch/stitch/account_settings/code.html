@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Manrope:wght@200..800&amp;family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&amp;family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "on-tertiary-container": "#f16735",
+              "on-surface": "#181c1f",
+              "secondary-container": "#70fda8",
+              "primary-container": "#0d2b4e",
+              "on-tertiary": "#ffffff",
+              "error-container": "#ffdad6",
+              "on-error": "#ffffff",
+              "on-primary": "#ffffff",
+              "on-tertiary-fixed": "#390c00",
+              "primary-fixed": "#d5e3ff",
+              "inverse-on-surface": "#eef1f5",
+              "tertiary-fixed": "#ffdbd0",
+              "primary": "#001631",
+              "tertiary-container": "#531500",
+              "surface-tint": "#465f85",
+              "on-primary-container": "#7993bc",
+              "tertiary": "#300900",
+              "inverse-surface": "#2d3134",
+              "inverse-primary": "#aec8f3",
+              "secondary": "#006d3c",
+              "on-primary-fixed": "#001c3b",
+              "surface": "#f7fafe",
+              "secondary-fixed-dim": "#51df8e",
+              "on-primary-fixed-variant": "#2e486c",
+              "primary-fixed-dim": "#aec8f3",
+              "on-secondary-container": "#007440",
+              "surface-variant": "#e0e3e7",
+              "surface-container-high": "#e5e8ec",
+              "surface-bright": "#f7fafe",
+              "on-surface-variant": "#43474e",
+              "surface-dim": "#d7dade",
+              "on-tertiary-fixed-variant": "#832700",
+              "outline": "#74777f",
+              "background": "#f7fafe",
+              "outline-variant": "#c4c6cf",
+              "on-background": "#181c1f",
+              "on-secondary-fixed-variant": "#00522c",
+              "secondary-fixed": "#70fda8",
+              "on-secondary": "#ffffff",
+              "surface-container-low": "#f1f4f8",
+              "tertiary-fixed-dim": "#ffb59c",
+              "error": "#ba1a1a",
+              "surface-container-highest": "#e0e3e7",
+              "on-error-container": "#93000a",
+              "surface-container-lowest": "#ffffff",
+              "surface-container": "#ebeef2",
+              "on-secondary-fixed": "#00210e"
+            },
+            fontFamily: {
+              "headline": ["Newsreader"],
+              "body": ["Manrope"],
+              "label": ["Manrope"],
+              "mono": ["DM Mono"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      body {
+        font-family: 'Manrope', sans-serif;
+        background-color: #F7FAFE;
+        color: #181C1F;
+      }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- Top Navigation Shell -->
+<nav class="bg-[#F7FAFE]/80 dark:bg-slate-950/80 backdrop-blur-xl fixed top-0 w-full z-50 flex justify-between items-center w-full px-12 py-6">
+<div class="text-3xl font-serif italic text-[#0D2B4E] dark:text-white tracking-tighter">Raiz</div>
+<div class="hidden md:flex items-center gap-12">
+<a class="text-slate-500 dark:text-slate-400 font-sans uppercase tracking-widest text-[11px] hover:text-[#001631] dark:hover:text-white transition-all duration-500" href="#">Analyse</a>
+<a class="text-slate-500 dark:text-slate-400 font-sans uppercase tracking-widest text-[11px] hover:text-[#001631] dark:hover:text-white transition-all duration-500" href="#">Map</a>
+<a class="text-slate-500 dark:text-slate-400 font-sans uppercase tracking-widest text-[11px] hover:text-[#001631] dark:hover:text-white transition-all duration-500" href="#">Intelligence</a>
+<a class="text-slate-500 dark:text-slate-400 font-sans uppercase tracking-widest text-[11px] hover:text-[#001631] dark:hover:text-white transition-all duration-500" href="#">Pricing</a>
+</div>
+<div class="flex items-center gap-6">
+<button class="font-['Newsreader'] italic text-lg tracking-tight text-[#001631] dark:text-slate-100 hover:text-[#001631] dark:hover:text-white transition-all duration-500">Sign In</button>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-lg text-sm font-medium transition-transform active:scale-95">Get Started</button>
+</div>
+</nav>
+<!-- Side Navigation Shell -->
+<aside class="h-screen w-72 fixed left-0 top-0 flex flex-col bg-[#F1F4F8] dark:bg-slate-900 p-6 gap-y-2 pt-32 hidden md:flex">
+<div class="mb-8 px-4">
+<div class="flex items-center gap-3 mb-2">
+<div class="w-10 h-10 rounded-full bg-primary-container overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Sophisticated professional male user profile portrait" src="https://lh3.googleusercontent.com/aida-public/AB6AXuByNG9K34za5xBdAugN7XJ0zqpopUIM2mVHXJ24HbbKejEa7zmVTHeamBeb6FI_1N3EX22El0-_-4hPcbd7zqijYj4OXfy4d8MNaGxvcBtk9hs0NEvnffwutF5FD8rSgSPfJua16mxACYRD-9sknGlIQSj7aMICrIGq13nA3U9UjMqpqAMJCY5S-UxRMcFWCU266IVV8-Y2d14pw_u18nQdiH0IV_4sJFRuu88WeA3jvaC5zmz7Ao0HGO05vBFmvDIZ8HQQsw7sr6M"/>
+</div>
+<div>
+<h3 class="font-serif italic text-xl text-[#0D2B4E] dark:text-white">Intelligence Dashboard</h3>
+<p class="text-[10px] uppercase tracking-widest text-secondary font-bold">Prestige Tier</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="domain">domain</span>
+<span class="font-['Manrope'] font-medium text-sm">Portfolio</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="trending_up">trending_up</span>
+<span class="font-['Manrope'] font-medium text-sm">Trends</span>
+</a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-3 hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-300" href="#">
+<span class="material-symbols-outlined" data-icon="gpp_maybe">gpp_maybe</span>
+<span class="font-['Manrope'] font-medium text-sm">Risk</span>
+</a>
+<a class="flex items-center gap-3 bg-white dark:bg-slate-800 text-[#001631] dark:text-white rounded-lg px-4 py-3 shadow-sm" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-['Manrope'] font-medium text-sm">Settings</span>
+</a>
+</nav>
+<div class="mt-auto pt-6 space-y-1">
+<button class="w-full bg-primary-container text-white py-4 rounded-lg text-sm font-medium mb-4 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="bolt">bolt</span>
+                Upgrade Analysis
+            </button>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-2 text-xs" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="help_outline">help_outline</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 text-slate-500 dark:text-slate-400 px-4 py-2 text-xs" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="logout">logout</span>
+                Sign Out
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-72 pt-32 pb-24 px-8 md:px-16 max-w-7xl">
+<!-- Editorial Header -->
+<header class="mb-16">
+<h1 class="font-headline text-5xl md:text-6xl text-primary leading-tight mb-4">Profile &amp; Settings</h1>
+<p class="font-headline italic text-xl text-on-surface-variant max-w-2xl">Manage your architectural preferences, intelligence feeds, and cross-platform market connections.</p>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+<!-- Personal Information: Large Spanning Card -->
+<section class="md:col-span-8 bg-surface-container-lowest rounded-xl p-10 flex flex-col gap-8">
+<div class="flex justify-between items-end">
+<h2 class="font-headline text-3xl text-primary">Personal Information</h2>
+<span class="font-headline italic text-on-primary-container text-sm">Last updated: 14 May, 2024</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
+<div class="space-y-2">
+<label class="text-[10px] uppercase tracking-widest text-outline">Legal Full Name</label>
+<input class="w-full bg-surface-container-low border-none rounded-lg focus:ring-1 focus:ring-primary font-body text-primary py-3 px-4" type="text" value="Alexander von Raiz"/>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] uppercase tracking-widest text-outline">Email Address</label>
+<input class="w-full bg-surface-container-low border-none rounded-lg focus:ring-1 focus:ring-primary font-body text-primary py-3 px-4" type="email" value="alexander@raiz-intelligence.com"/>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] uppercase tracking-widest text-outline">Primary Location</label>
+<div class="relative">
+<input class="w-full bg-surface-container-low border-none rounded-lg focus:ring-1 focus:ring-primary font-body text-primary py-3 px-4 pr-12" type="text" value="Madrid, Spain"/>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-outline" data-icon="location_on">location_on</span>
+</div>
+</div>
+<div class="space-y-2">
+<label class="text-[10px] uppercase tracking-widest text-outline">Professional Role</label>
+<select class="w-full bg-surface-container-low border-none rounded-lg focus:ring-1 focus:ring-primary font-body text-primary py-3 px-4">
+<option>Private Asset Manager</option>
+<option>Institutional Investor</option>
+<option>Real Estate Consultant</option>
+</select>
+</div>
+</div>
+<div class="mt-4 flex justify-end">
+<button class="bg-primary text-on-primary px-8 py-3 rounded-lg font-medium text-sm transition-all hover:shadow-lg">Save Configuration</button>
+</div>
+</section>
+<!-- Subscription Tier: Prestige Highlight -->
+<section class="md:col-span-4 bg-primary-container text-white rounded-xl p-10 flex flex-col justify-between relative overflow-hidden group">
+<!-- Visual Grain/Texture Overlay -->
+<div class="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-secondary-fixed to-transparent"></div>
+<div class="relative z-10">
+<div class="flex items-center gap-2 mb-8">
+<span class="material-symbols-outlined text-secondary" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+<span class="text-[11px] uppercase tracking-[0.2em] font-bold text-secondary-container">Current Subscription</span>
+</div>
+<h3 class="font-headline text-4xl mb-2">Prestige Intelligence</h3>
+<p class="font-headline italic text-on-primary-container text-lg mb-8 opacity-80">Unrestricted market depth &amp; algorithmic forecasting.</p>
+</div>
+<div class="relative z-10 bg-white/5 backdrop-blur-md rounded-lg p-6 space-y-4">
+<div class="flex justify-between items-center">
+<span class="font-mono text-xs uppercase tracking-tighter opacity-60">Tier ID</span>
+<span class="font-mono text-xs">P-0012948-MAD</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-mono text-xs uppercase tracking-tighter opacity-60">Renewal</span>
+<span class="font-mono text-xs">01 JAN 2025</span>
+</div>
+<div class="pt-4 border-t border-white/10 flex justify-between items-end">
+<div class="font-mono text-2xl">€1,200<span class="text-xs opacity-60">/yr</span></div>
+<button class="text-[10px] uppercase tracking-widest underline underline-offset-4 hover:text-secondary-fixed transition-colors">Manage Plan</button>
+</div>
+</div>
+</section>
+<!-- Connected Accounts: Platform Integration -->
+<section class="md:col-span-6 bg-surface-container rounded-xl p-10">
+<h2 class="font-headline text-3xl text-primary mb-2">Market Integrations</h2>
+<p class="font-body text-sm text-on-surface-variant mb-10">Sync your external listings and search data directly into the Raiz analysis engine.</p>
+<div class="space-y-4">
+<!-- Idealista -->
+<div class="flex items-center justify-between p-6 bg-surface-container-lowest rounded-xl group transition-all hover:shadow-sm">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-[#F1F4F8] rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[#001631]" data-icon="apartment">apartment</span>
+</div>
+<div>
+<h4 class="font-body font-bold text-primary">Idealista</h4>
+<p class="text-[11px] text-on-surface-variant font-mono">Status: <span class="text-secondary font-bold">Synchronized</span></p>
+</div>
+</div>
+<button class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant px-4 py-2 bg-surface-container-high rounded-full group-hover:bg-primary group-hover:text-white transition-all">Configure</button>
+</div>
+<!-- Fotocasa -->
+<div class="flex items-center justify-between p-6 bg-surface-container-lowest rounded-xl group transition-all hover:shadow-sm">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-[#F1F4F8] rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[#001631]" data-icon="home_work">home_work</span>
+</div>
+<div>
+<h4 class="font-body font-bold text-primary">Fotocasa</h4>
+<p class="text-[11px] text-on-surface-variant font-mono">Status: <span class="text-secondary font-bold">Synchronized</span></p>
+</div>
+</div>
+<button class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant px-4 py-2 bg-surface-container-high rounded-full group-hover:bg-primary group-hover:text-white transition-all">Configure</button>
+</div>
+<!-- Add New -->
+<button class="w-full border-2 border-dashed border-outline-variant py-6 rounded-xl text-outline-variant flex items-center justify-center gap-2 hover:bg-white/40 transition-colors">
+<span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+<span class="text-sm font-medium">Connect New Marketplace</span>
+</button>
+</div>
+</section>
+<!-- Notification Preferences: Signal Alerts -->
+<section class="md:col-span-6 bg-surface-container-lowest rounded-xl p-10 flex flex-col h-full">
+<div class="mb-10">
+<h2 class="font-headline text-3xl text-primary mb-2">Signal Alerts</h2>
+<p class="font-body text-sm text-on-surface-variant italic">Control the intensity and frequency of algorithmic market signals.</p>
+</div>
+<div class="flex-1 space-y-8">
+<div class="flex items-center justify-between">
+<div>
+<h4 class="font-body font-bold text-primary">Volatility Spike</h4>
+<p class="text-xs text-on-surface-variant">Alert me when asset prices swing beyond 2.5% in 24h.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<h4 class="font-body font-bold text-primary">New Market Opportunity</h4>
+<p class="text-xs text-on-surface-variant">Instant notification for yield potential above 6.5%.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+<div class="flex items-center justify-between">
+<div>
+<h4 class="font-body font-bold text-primary">Weekly Intelligence Digest</h4>
+<p class="text-xs text-on-surface-variant">Curated summary of macro trends sent every Sunday.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+</div>
+<div class="mt-auto pt-10">
+<div class="bg-surface-container-low p-4 rounded-lg flex items-start gap-3">
+<span class="material-symbols-outlined text-amber-600" data-icon="warning">warning</span>
+<p class="text-[11px] leading-relaxed text-on-surface-variant">
+<strong>Note:</strong> Some signals are processed exclusively via your prestige tier and cannot be disabled without affecting analysis accuracy.
+                        </p>
+</div>
+</div>
+</section>
+</div>
+<!-- Danger Zone -->
+<section class="mt-16 pt-16 border-t border-surface-container-highest">
+<h2 class="font-headline text-3xl text-tertiary mb-6">Archive Account</h2>
+<div class="bg-white p-8 rounded-xl flex flex-col md:flex-row justify-between items-center gap-6">
+<div>
+<h4 class="font-body font-bold text-primary">Data Export &amp; Deletion</h4>
+<p class="text-sm text-on-surface-variant">Permanently remove your account and all historical analysis data. This action is irreversible.</p>
+</div>
+<button class="border border-tertiary text-tertiary px-8 py-3 rounded-lg font-medium text-sm hover:bg-tertiary hover:text-white transition-all">Request Deletion</button>
+</div>
+</section>
+</main>
+<!-- Footer Shell -->
+<footer class="w-full py-12 px-12 mt-auto bg-[#EBEEF2] dark:bg-slate-950 flex flex-col md:flex-row justify-between items-center gap-6">
+<div>
+<div class="font-serif italic text-lg text-[#0D2B4E] dark:text-white mb-2">Raiz</div>
+<p class="font-['DM_Sans'] text-xs tracking-wide text-slate-500 dark:text-slate-400">© 2024 Raiz Property Intelligence. All rights reserved.</p>
+</div>
+<div class="flex gap-8">
+<a class="font-['DM_Sans'] text-xs tracking-wide text-slate-500 dark:text-slate-400 hover:text-[#34C97A] transition-colors duration-300" href="#">Privacy Policy</a>
+<a class="font-['DM_Sans'] text-xs tracking-wide text-slate-500 dark:text-slate-400 hover:text-[#34C97A] transition-colors duration-300" href="#">Terms of Service</a>
+<a class="font-['DM_Sans'] text-xs tracking-wide text-slate-500 dark:text-slate-400 hover:text-[#34C97A] transition-colors duration-300" href="#">Methodology</a>
+<a class="font-['DM_Sans'] text-xs tracking-wide text-slate-500 dark:text-slate-400 hover:text-[#34C97A] transition-colors duration-300" href="#">Contact</a>
+</div>
+</footer>
+</body></html>
