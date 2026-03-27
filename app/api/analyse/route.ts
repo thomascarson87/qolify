@@ -53,6 +53,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'url is required' }, { status: 400 })
   }
 
+  const _t0 = Date.now()
+  console.log('[analyse] start')
+
   // --- 1. Cache check ---
   const [cached] = await sql<{ id: string; composite_indicators: unknown; tvi_score: number | null; expires_at: string }[]>`
     SELECT id, composite_indicators, tvi_score, expires_at
@@ -61,6 +64,7 @@ export async function POST(req: NextRequest) {
       AND expires_at > NOW()
     LIMIT 1
   `
+  console.log('[analyse] cache check done', Date.now() - _t0, 'ms')
 
   if (cached) {
     return NextResponse.json({
@@ -123,8 +127,10 @@ export async function POST(req: NextRequest) {
 
   // --- 3. Run indicator engine ---
   let indicators
+  console.log('[analyse] starting indicators', Date.now() - _t0, 'ms')
   try {
     indicators = await runAllIndicators(sql, propertyInput, buyer_age)
+    console.log('[analyse] indicators done', Date.now() - _t0, 'ms')
   } catch (err) {
     console.error('[analyse] indicator engine error:', err)
     return NextResponse.json(
