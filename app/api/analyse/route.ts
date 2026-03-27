@@ -54,7 +54,8 @@ export async function POST(req: NextRequest) {
   }
 
   const _t0 = Date.now()
-  console.log('[analyse] start')
+  const _dbUrl = process.env.DATABASE_URL_POOLER || process.env.DATABASE_URL || 'NONE'
+  console.log('[analyse] start — db:', _dbUrl.slice(0, 45), '| pooler:', _dbUrl.includes('pooler'))
 
   // --- 1. Cache check ---
   const [cached] = await sql<{ id: string; composite_indicators: unknown; tvi_score: number | null; expires_at: string }[]>`
