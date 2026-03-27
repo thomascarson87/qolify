@@ -26,7 +26,13 @@ function getClientIp(request: NextRequest): string {
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Session refresh (always runs — needed for Supabase auth on all routes)
+  // API routes don't use session cookies — skip the Supabase refresh round-trip.
+  // The route handler does its own auth check if the endpoint requires a user.
+  if (pathname.startsWith('/api/')) {
+    return NextResponse.next()
+  }
+
+  // Session refresh (page routes — needed for Supabase auth on all non-API routes)
   const { supabaseResponse, user } = await updateSession(request)
 
   // Rate limiting — API routes only, skip cron
