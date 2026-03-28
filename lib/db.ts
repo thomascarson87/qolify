@@ -5,12 +5,12 @@
  * This client is server-only. Never import from client components.
  *
  * Connection priority:
- *   1. DATABASE_URL (direct connection, port 5432)
- *   2. DATABASE_URL_POOLER (session pooler — fallback for restricted networks)
+ *   1. DATABASE_URL (direct connection, port 5432) — preferred in production (Vercel)
+ *   2. DATABASE_URL_POOLER (transaction pooler, port 6543) — used locally where direct DNS doesn't resolve
  */
 import postgres from 'postgres'
 
-const url = process.env.DATABASE_URL_POOLER || process.env.DATABASE_URL
+const url = process.env.DATABASE_URL || process.env.DATABASE_URL_POOLER
 
 if (!url) {
   throw new Error('DATABASE_URL or DATABASE_URL_POOLER must be set')
