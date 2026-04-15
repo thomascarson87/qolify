@@ -229,6 +229,220 @@ The  reference table is expanded to include energy tariff constants (gas and PVP
 
 ---
 
+## D-022 — Progressive streaming as the analysis loading pattern
+**Status:** Active
+**Date:** March 2026
+**Decision:** Property analysis results are returned to the user progressively as each indicator resolves — not as a single all-or-nothing response. The analyse page and browser extension panel both implement a two-phase render:
+
+**Phase 1 — Instant skeleton (0ms):** On URL submission, the report layout renders immediately as skeleton screens. Skeleton shapes match actual card dimensions to prevent layout shift when data arrives. The TVI ring renders as a grey arc with a pulsing shimmer.
+
+**Phase 2 — Progressive data arrival:** Indicators resolve and populate their cards as data becomes available. Two natural speed tiers exist based on data source:
+
+| Speed | Indicators | Reason |
+|---|---|---|
+| Fast (~500ms) | Health Security, Education Opportunity, Structural Liability, Digital Viability, Expat Liveability | Pure PostGIS lookups on indexed local tables |
+| Slower (~2–5s) | True Affordability | 5 sequential DB queries + energy cost calculation + Catastro enrichment |
+
+Fast indicators populate first. True Affordability populates last. The TVI ring arc reveals at full score only once all contributing indicators have resolved. If True Affordability is still pending, the TVI ring holds at the partial score with a subtle amber pulse on the arc and label: "Calculating affordability..."
+
+**Phase 0 fallback (MVP):** While streaming infrastructure is not yet built, the analyse page shows an honest wait state: a labelled step-by-step progress indicator ("Fetching listing... ✓ / Checking flood risk... ✓ / Calculating true monthly cost...") with an estimated wait of 1–2 seconds (validated baseline from CHI-327 testing). This is acceptable at MVP and is replaced by true streaming in Phase 1.
+
+**Indicator failure handling (applies in all phases):** No single indicator failure blocks the overall response. Each indicator resolves independently inside `Promise.all`. If a data source is unavailable (external API timeout, PostGIS query error, missing Catastro record), that indicator's card renders as "Data unavailable" with a brief explanation — all other indicators continue to load normally. The TVI ring is calculated from whichever indicators did resolve; the score is flagged as partial if any contributing indicator failed. Silent swallowing of errors is not acceptable — every failure must surface visibly to the user and be logged server-side.
+
+**User-selected indicators:** Users do not select which indicators to run before submitting. Indicator selection is implicitly handled by tier (Free: 5 Tier 1 indicators, Pro+: all 15). Running fewer indicators on demand is not a user-facing control — it adds friction before the user has seen any value. The tier gate achieves the same DB cost outcome without UX complexity.
+
+**Rationale:** A multi-second all-or-nothing wait reads as broken on a modern web product. Progressive disclosure of results makes the wait feel productive — users see health, schools, and structural risk in under a second, and the product feels alive. The natural two-speed split in the indicator engine (PostGIS lookups vs. multi-query affordability calculation) maps directly onto a clean progressive reveal without artificial complexity. Skeleton screens prevent layout shift and set accurate expectations for content shape before data arrives. Isolating indicator failures prevents one unreliable data source (e.g. a flaky external API) from degrading the entire analysis — partial results are almost always more useful than a total failure.
+
+---
+
+## D-023 — Map UX: profile-driven amenity layers + click-to-explore, not choropleth
+**Status:** Active
+**Date:** April 2026
+**Decision:** The map interface does not display a full-coverage choropleth overlay. Instead:
+
+1. **Profile-driven point layers** — switching user profile (Families / Nomads / Retirees / Investors) auto-activates contextually relevant amenity pin clusters (schools, health centres, transport stops, infrastructure projects). Each layer is a distinct colour. Manual chip toggles allow per-layer override.
+
+2. **Click-to-explore** — clicking inside a zone boundary highlights only that single zone (coloured fill + white stroke border) and opens the right-side zone detail panel. Clicking outside all zones does nothing.
+
+3. **No always-visible choropleth** — the zone_tvi score colouring is applied only to the single selected zone, not as a permanent full-map overlay.
+
+**Rationale:** The original choropleth was visually broken because Nominatim returns bounding-box rectangles, not real postcode polygons. All 17 Málaga zones rendered as same-sized overlapping green squares covering the same part of the city — users could not understand what the shapes represented, and the overlay obscured the basemap. Even with real polygon boundaries, a permanent full-coverage colour overlay provides low signal: Málaga zone scores cluster tightly (48–59 range) and are hard to differentiate by colour alone. The profile-driven layer model is contextually richer — a family user sees schools and health centres immediately without any configuration, which directly maps to their decision-making process. Reference: malaga.is/pulse — clean dark basemap, contextual point markers, no full-coverage overlays.
+
+**When to revisit:** If/when real CartoCiudad postcode polygon boundaries are ingested and zone score variance widens (more data sources loaded), a toggleable choropleth layer could be re-added as an opt-in overlay. It should never be the default always-visible map state.
+
+---
+
+## D-024 — SNCZI flood zone data source: ArcGIS REST (replaces dead WFS)
+**Status:** Active
+**Date:** April 2026
+**Decision:** SNCZI flood zone data is now fetched from the MITECO ArcGIS REST MapServer (`sig.miteco.gob.es/arcgis/rest/services/25830/WMS_AguaZI/MapServer`) rather than the original GeoServer WFS endpoint (`snczi.miteco.gob.es/geoserver/civ/wfs`). Layer IDs: T10=38 (alta probabilidad), T100=40 (media), T500=41 (baja). Server only accepts `f=json` (Esri format) — `f=geojson` returns HTTP 400. An Esri JSON → GeoJSON converter (`esri_rings_to_geojson`) handles the `rings[]` geometry format. Page size capped at 50 records — server returns HTTP 500 at ≥100 with geometry+bbox combined.
+**Rationale:** The original GeoServer WFS endpoint stopped resolving in 2026. The ArcGIS REST service at sig.miteco.gob.es is the active official MITECO distribution for flood zone data. Discovered by enumerating the ArcGIS REST service folder listing to find `WMS_AguaZI` (ZI = Zonas Inundables).
+**Affected files:** `scripts/ingest/ingest_flood_zones.py` (fully rewritten). CHI-285 progress comment has full details.
+
+---
+
+## D-025 — PVGIS solar zone scores: LATERAL nearest-neighbour, not ST_Within
+**Status:** Active
+**Date:** April 2026
+**Decision:** `zone_scores` computes `avg_ghi` (annual solar irradiance per postcode) using a LATERAL nearest-neighbour join to `solar_radiation`, not a ST_Within inner join.
+**Rationale:** The PVGIS grid spacing is ~3–5 km, while Málaga urban postal zones are ~1 km². ST_Within requires a solar grid point to fall *inside* the zone polygon — with most urban zones containing zero grid points, `avg_ghi` was NULL for the majority of zones. LATERAL nearest-neighbour (ORDER BY `geom::geometry <-> centroid LIMIT 1`) always returns the closest grid point and is the correct approach for a reference climate grid. This is migration 011. See CHI-362 for the planned per-building Catastro orientation upgrade.
+**Affected files:** `supabase/migrations/011_zone_scores_solar_nearest_neighbour.sql`
+
+---
+
+## D-033 — Score rings never the sole output for any indicator
+**Status:** Active
+**Date:** April 2026
+**Decision:** Score ring visualisations (0–100) must never be the only output for an indicator field. Every ring must be accompanied by either a consequence statement in plain English, the underlying raw figure (€ amount, count, distance), or both.
+**Rationale:** A score ring without context is an abstraction without meaning. "Affordability: 61" communicates nothing actionable. "€1,847/month estimated total cost" communicates something the buyer can act on. Rings are only appropriate for cross-property comparison or composite TVI — not as a primary output for individual data fields.
+
+---
+
+## D-034 — Euro amounts take precedence over scores wherever financial data exists
+**Status:** Active
+**Date:** April 2026
+**Decision:** Wherever financial data is available (mortgage estimate, IBI, running costs, Catastro reference value), the primary displayed element is a euro figure. A score derived from that financial data may appear as supplementary context but never as the primary element.
+**Rationale:** A buyer makes a financial decision. The score is an abstraction. "Affordability score: 74" does not help someone decide if they can afford a property. "Estimated monthly cost: €1,847" does.
+
+---
+
+## D-035 — Flood zone membership at pin level is always binary, always first
+**Status:** Active
+**Date:** April 2026
+**Decision:** At the property pin level, flood zone membership is always presented as a binary Consequence Statement (in zone / not in zone, with return period). It is never scored, never dimmed, never conditionally shown. It is always the first data section after the location header in the pin report.
+**Rationale:** Flood risk is a safety-critical fact. A scored or de-emphasised flood warning fails the user. The two-level truth principle applies: zone-level flood scores are acceptable in the zone panel accordion (discovery context); property-level flood membership is always a binary statement (decision context).
+
+---
+
+## D-036 — Proximity shown as counts + walking distances, never a score
+**Status:** Active
+**Date:** April 2026
+**Decision:** All proximity data (schools within 800m, nearest supermarket, nearest health centre, etc.) is displayed as counts and distances/walking times. It is never condensed into a single "proximity score."
+**Rationale:** "3 schools within 800m, nearest 280m (≈3 min walk)" is a fact a buyer can evaluate. "Proximity score: 74" is an abstraction that hides the information and invites distrust.
+
+---
+
+## D-037 — Choropleth is not the default map state; replaced with opt-in overlay toolbar
+**Status:** Active
+**Date:** April 2026
+**Supersedes:** Original MAP_MVP_SPEC.md §5 bottom toolbar concept (7-dimension choropleth switcher)
+**Decision:** The map default state is a clean dark basemap with point layer clusters only — no choropleth fill. The postcode zone choropleth (previously default-on) becomes an opt-in overlay activated by the user. The bottom toolbar is redesigned as a contextual overlay switcher with radio behaviour (one overlay at a time, or none).
+
+Phase 1 overlays (data available now):
+- **Flood Zones** — SNCZI T10/T100/T500 polygon fills (terracotta → amber by return period)
+- **Tourist Density** — VUT licence point density as a MapLibre heatmap layer
+- **Quality of Life** — the existing `zone_scores` weighted TVI choropleth, now opt-in
+
+Pin drop (CHI-346) additionally renders radiating proximity rings at 400m / 800m / 1,200m centred on the pin coordinate, generated client-side via `turf.circle()` and rendered as dashed emerald `line` layers.
+
+Phase 2 overlays (future — require additional data ingestion): school catchment polygons, blue zone parking, NTI investment signal.
+
+**Linear issue:** CHI-362 (replaces CHI-345).
+
+**Rationale:** The postcode choropleth is a bureaucratic boundary. It does not correspond to how buyers think about place, it provides no property-level precision, and it visually dominates the map without adding decision-relevant information. Once pin drop is built, the postcode zone outline is entirely redundant. Overlays should be tools a user reaches for to answer specific questions — not ambient decoration that requires the user to mentally ignore it.
+
+---
+
+## D-038 — QoL choropleth removed from overlay toolbar
+**Status:** Active
+**Date:** April 2026
+**Decision:** The "Quality of Life" button has been removed from the map overlay toolbar. The zone TVI choropleth is not re-enabled until CartoCiudad real postcode polygon boundaries are ingested to replace the current Nominatim bounding-box zones.
+**Rationale:** The existing zone boundaries are Nominatim axis-aligned bounding rectangles that overlap each other, cover identical geographic areas, and do not correspond to meaningful neighbourhoods. Rendering them as a full-coverage choropleth is visually broken and actively misleading. The zone click-to-explore interaction (single selected zone + detail panel) is sufficient until real polygon data is available. The "Tourist Density" overlay is disabled (not removed) pending VUT licence geocoding — 650k records exist but all have null geometry.
+
+---
+
+## D-039 — Pin drop elevated as primary map interaction; address search as primary entry point
+**Status:** Active
+**Date:** April 2026
+**Decision:** The coordinate pin drop is the primary interaction on the map, not zone exploration. Address/street search is added as the primary discovery entry point. The map view and the Analyse view are treated as convergent entry points to the same property intelligence output — one starts from a coordinate, one starts from a listing URL, but both lead to the same data model. The CTA in the pin report links directly to the Analyse page with pre-filled coordinates.
+**Rationale:** The platform's most defensible value is precision at the property coordinate level — flood membership, school proximity, solar irradiance, connectivity, financial estimate. This data is returned by a single PostGIS query against a real lat/lng coordinate. Zone-level aggregation is a secondary, exploratory concern. A user searching "Calle Almona 2" needs an address search, not a right-click affordance. By elevating pin drop and adding address search, the map view becomes a useful entry point for all buyer types — including those who found a listing on Idealista and want to quickly understand the location before pasting the URL.
+
+---
+
+## D-040 — Four-state rendering standard for all indicator cards
+**Status:** Active
+**Date:** April 2026
+**Decision:** Every indicator card in the DNA Report must render in exactly four states: LOADED, LOADING, UNAVAILABLE, and LOCKED. No card may show a blank, a zero where zero is meaningless, or silently omit data. The four states are implemented inside `IndicatorCard.tsx` via optional props (`data?`, `loading?`, `locked?`). The dispatch logic in `ResultView.tsx` is the single place that decides which state each card receives, based on job phase, user tier, and data presence. A `score === null` within an otherwise-present data object is treated as equivalent to absent data and routes to UNAVAILABLE, not LOADED.
+**Rationale:** During CHI-383 audit, the original component had no LOADING, UNAVAILABLE, or LOCKED states. A null score silently zeroed the score bar and showed nothing — users could not distinguish a computation failure from a genuine zero. Tier-2 indicators with data were shown in full to all users regardless of tier. The four-state standard closes these gaps and is now an absolute rule (`claude.md` Rule 5 and 6). `live: false` indicators (pipeline not yet built) are explicitly excluded from this standard — they render as `SkeletonCard` "coming soon" because UNAVAILABLE would incorrectly imply a retrieval failure rather than a deliberate phase gate.
+**Affects:** `components/ui/IndicatorCard.tsx` · `app/analyse/[jobId]/ResultView.tsx` · `components/map/FloodSafetySection.tsx`
+
+---
+
+## D-041 — Extraction layer: Parse.bot replaced with Apify
+**Status:** Active
+**Date:** April 2026
+**Decision:** Replace Parse.bot with the Apify actor `dz_omar/idealista-scraper-api` for all Idealista listing extraction. The actor is called via Apify's REST run-sync endpoint directly from the Edge Function using `APIFY_API_TOKEN`.
+**Rationale:** Parse.bot's v1/fetch endpoint no longer exists. The new Parse.bot dispatch API enforces domain allowlisting that blocks Supabase Edge Function origins. No workaround was viable. `dz_omar/idealista-scraper-api` is pay-per-event (~$0.006/property), requires no rental subscription, and Apify's $5/month free credit covers ~800 lookups — sufficient for MVP. The actor accepts full Idealista URLs directly (no property code extraction needed at the API level, though the URL is passed as-is). Field mapping was verified against a live response for property 109560592.
+**Field mapping confirmed:**
+- `ubication.latitude / longitude` → `lat / lng` (7 d.p.)
+- `moreCharacteristics.constructedArea` → `area_sqm`
+- `moreCharacteristics.roomNumber / bathNumber` → `bedrooms / bathrooms`
+- `moreCharacteristics.energyCertificationType` (uppercased) → `epc_rating`
+- `moreCharacteristics.floor` (parsed from string code) → `floor`
+- `moreCharacteristics.status` → `condition`
+- `contactInfo.userType` → `seller_type`
+- `ubication.title` → `address`
+- `ubication.administrativeAreaLevel2` → `municipio`
+- `detailedType.typology` → `property_type`
+**Not returned by Apify (handled by downstream steps):**
+- `ref_catastral` — not published on Idealista listings; Catastro OVC step degrades gracefully
+- `build_year` — same; indicators fall back to neutral assumptions
+- `codigo_postal` — derived via PostGIS spatial join against `postal_zones` in the reverse geocode step
+- `comunidad_autonoma` — derived via `municipios` reverse geocode (Apify's `administrativeAreaLevel1` is province name, not comunidad)
+**Also in this change:** `condition` column added to `analysis_cache`; `address`, `bathrooms`, `property_type`, `condition` now written to `analysis_cache` on every analysis run. `extraction_version` bumped to `2.0`.
+**Affects:** `supabase/functions/analyse-job/index.ts` · `app/api/analyse/route.ts` · `analysis_cache` schema
+
+---
+
+## D-042 — PinReportPanel simplified to triage card; MiniMapCard added to ResultView
+**Status:** Active
+**Date:** April 2026
+**Decision:** `PinReportPanel` reduced to a thin triage card. `ResultView` gains a new Life Proximity section (Section 4) with a static mini-map.
+
+**PinReportPanel triage card — what it now shows:**
+1. Coordinates + reverse geocoded address (+ optional Idealista URL enrichment, URL input only)
+2. AI area summary — markdown stripped at source (`generateAreaSummary.ts`) and at render (`stripMarkdown()` in the panel)
+3. `FloodSafetySection` — always first risk signal, never removed
+4. `ProximitySummary` — 4 categories only (school, health, supermarket, park), compact mode
+5. Community character — VUT count within 200m only
+6. Full Report CTA — navy pill button, Playfair italic, calls `POST /api/analyse` with `{ url: null, lat, lng, name }`
+
+**Removed from PinReportPanel (belong in ResultView only):**
+- `ZoneSnapshotSection` (score bars: Schools/Flood/Daily Life/Noise/Community/Price)
+- `ReportsNavSection` (deep-dive tile links)
+- `SavePinForm` — noted for future addition to ResultView sticky header
+- Solar exposure inline section
+- URL-gated "Run full DNA analysis" CTA (replaced by coordinates-based Full Report CTA)
+- `AddressEnrichment` (street/floor/door/Catastro fields) — reduced to URL input only
+
+**MiniMapCard (`components/report/MiniMapCard.tsx`) — new component:**
+- Fixed 220px height, non-interactive (`interactive: false` on MapLibre constructor — single flag covers all pan/zoom/click)
+- `visibility: hidden` not `display: none` during load — preserves container dimensions for MapLibre init
+- Pulsing emerald pin reusing `pinPulse` animation from `globals.css`
+- 400m radius circle: emerald 8% fill, 2px dashed stroke
+- Emoji HTML markers (not MapLibre symbol layers) — avoids font loading issues
+- Cancelled flag guards amenity marker useEffect against stale state on rapid coordinate changes
+- Chip row below map renders regardless of map state — amenity data is not dependent on map success
+- `amenities !== null` guard before "no amenities" message — avoids false empty state during load
+- DM Mono for distance values in chip row
+
+**ResultView Section 4 — Life Proximity + Mini-Map:**
+- Inserted after Section 3 (Intelligence Indicators) and before Section 5 (Asset Performance Pillars)
+- Two-column grid (`repeat(auto-fit, minmax(280px, 1fr))`): LEFT = `MiniMapCard`, RIGHT = `ProximitySummaryFromCoords`
+- `ProximitySummaryFromCoords` fetches `/api/map/amenities` and derives `FacilityCounts` from raw feature arrays
+- If `result.property.lat/lng` is null: fallback card with "Add an Idealista URL to unlock location intelligence →"
+
+**ProximitySummary in two contexts:**
+- In `PinReportPanel`: `compact={true}`, 4 categories, `onExpandRadius` syncs the map ring outward
+- In `ResultView`: `compact={false}`, full categories, `onExpandRadius` is a no-op — there is no map canvas in the report context. The "Show all →" expand toggle works normally in both contexts because it is internal component state, not prop-driven.
+
+**Full Report CTA — pending route patch:**
+The CTA calls `POST /api/analyse` with `{ url: null, lat, lng, name }`. The route currently rejects `url: null` (line 89 requires a non-null string). The parallel session must patch `app/api/analyse/route.ts` to accept coordinates-only jobs before the CTA creates a job successfully.
+
+**Affects:** `components/map/PinReportPanel.tsx` · `components/report/MiniMapCard.tsx` (new) · `app/analyse/[jobId]/ResultView.tsx` · `app/actions/generateAreaSummary.ts` · `app/globals.css`
+
+---
+
 ## Future Decisions (pending)
 
 These decisions need to be made before the relevant phase begins:

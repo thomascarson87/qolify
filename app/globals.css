@@ -1,26 +1,237 @@
 @import "tailwindcss";
 
+/* ─── Qolify Design System ─────────────────────────────────────────────────── */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Foundation — Navy */
+  --navy-deep:   #0D2B4E;
+  --navy-mid:    #1A3D6B;
+  --navy-light:  #2A5490;
+
+  /* Signal — Emerald (positive / opportunity ONLY) */
+  --emerald-deep:   #1B5E3A;
+  --emerald-bright: #34C97A;
+
+  /* Risk — Terracotta (risk / negative ONLY) */
+  --risk:       #C94B1A;
+  --risk-light: #F5A07A;
+
+  /* Caution — Amber (attention without emergency ONLY) */
+  --amber:       #D4820A;
+  --amber-light: #FBBF24;
+
+  /* Neutral — Slate */
+  --text:        #1A2535;
+  --text-mid:    #4A5D74;
+  --text-light:  #8A9BB0;
+  --surface:     #FFFFFF;
+  --background:  #F4F7FB;
+  --border:      #DDE4EF;
+
+  /* Gold — Intelligence tier badge only */
+  --gold: #C9A84C;
+
+  /* Form inputs — distinct from surface tiers so inputs look right in both modes */
+  --input-bg:     #FFFFFF;
+  --input-border: #DDE4EF;
+
+  /* Divider lines (section separators, step connectors) */
+  --divider: rgba(13,43,78,0.07);
+
+  /* Map page chrome — light-mode defaults (dark overridden below) */
+  --map-chrome-bg:     #FFFFFF;
+  --map-chrome-border: #DDE4EF;
+  --map-panel-bg:      rgba(255, 255, 255, 0.97);
+  --map-text:          #1A2535;
+  --map-text-muted:    #4A5D74;
+  --map-text-dim:      #8A9BB0;
+
+  /* Surface tiers */
+  --surface-0: #F4F7FB;
+  --surface-1: #F1F4F8;
+  --surface-2: #FFFFFF;
+
+  /* Shadows — always navy-tinted */
+  --shadow-sm: 0 1px 4px rgba(13,43,78,0.08);
+  --shadow-md: 0 4px 16px rgba(13,43,78,0.12);
+  --shadow-lg: 0 12px 40px rgba(13,43,78,0.16);
+  --shadow-xl: 0 24px 80px rgba(13,43,78,0.20);
 }
+
+/* ─── Tailwind v4 theme registration ──────────────────────────────────────── */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Map CSS vars into Tailwind utility classes */
+  --color-background:    var(--background);
+  --color-surface:       var(--surface);
+  --color-surface-0:     var(--surface-0);
+  --color-surface-1:     var(--surface-1);
+  --color-surface-2:     var(--surface-2);
+  --color-border:        var(--border);
+
+  --color-navy-deep:     var(--navy-deep);
+  --color-navy-mid:      var(--navy-mid);
+  --color-navy-light:    var(--navy-light);
+
+  --color-emerald-deep:  var(--emerald-deep);
+  --color-emerald:       var(--emerald-bright);
+
+  --color-risk:          var(--risk);
+  --color-risk-light:    var(--risk-light);
+
+  --color-amber:         var(--amber);
+  --color-amber-light:   var(--amber-light);
+
+  --color-text:          var(--text);
+  --color-text-mid:      var(--text-mid);
+  --color-text-light:    var(--text-light);
+
+  --color-gold:          var(--gold);
+
+  /* Typography */
+  --font-playfair: var(--font-playfair);
+  --font-sans:     var(--font-dm-sans);
+  --font-mono:     var(--font-dm-mono);
+
+  /* Shadows */
+  --shadow-sm:  var(--shadow-sm);
+  --shadow-md:  var(--shadow-md);
+  --shadow-lg:  var(--shadow-lg);
+  --shadow-xl:  var(--shadow-xl);
+
+  /* Border radii */
+  --radius-badge:  6px;
+  --radius-card:   12px;
+  --radius-panel:  18px;
+  --radius-modal:  24px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Report page dark theme override ─────────────────────────────────────── */
+/* Toggled by ThemeToggle component via data-report-theme="dark" on <html>.    */
+/* Only affects pages that use var(--background) / var(--text) etc.            */
+
+:root[data-report-theme="dark"] {
+  --text:         #FFFFFF;
+  --text-mid:     #C5D5E8;
+  --text-light:   #8A9BB0;
+  --background:   #0A1F3A;
+  --surface:      #0D2B4E;
+  --surface-0:    #0A1F3A;
+  --surface-1:    #0D2B4E;
+  --surface-2:    rgba(255,255,255,0.05);
+  --navy-deep:    #FFFFFF;
+  --border:       rgba(255,255,255,0.08);
+  --input-bg:     #0F2035;
+  --input-border: #2A4570;
+  --divider:      #1E3050;
+
+  /* Map page chrome — dark overrides */
+  --map-chrome-bg:     #0D1B2A;
+  --map-chrome-border: #1E3050;
+  --map-panel-bg:      rgba(13, 27, 42, 0.80);
+  --map-text:          #FFFFFF;
+  --map-text-muted:    #C5D5E8;
+  --map-text-dim:      #8A9BB0;
 }
+
+/* Nav dividers and inline dividers use rgba(0,0,0,0.07) hardcoded —          */
+/* swap to white equivalent in dark mode via a targeted selector.              */
+:root[data-report-theme="dark"] nav {
+  border-bottom-color: rgba(255,255,255,0.08) !important;
+}
+
+/* ─── Base styles ──────────────────────────────────────────────────────────── */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--background);
+  color: var(--text);
+  font-family: var(--font-dm-sans), system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
 }
+
+/* ─── Shimmer skeleton animation ──────────────────────────────────────────── */
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(221, 228, 239, 0.5) 25%,
+    rgba(221, 228, 239, 0.9) 50%,
+    rgba(221, 228, 239, 0.5) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ─── TVI ring SVG arc animation ──────────────────────────────────────────── */
+
+@keyframes tvi-fill {
+  from { stroke-dashoffset: var(--tvi-full); }
+  to   { stroke-dashoffset: var(--tvi-target); }
+}
+
+.tvi-arc {
+  animation: tvi-fill 600ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ─── Pillar bar fill animation ───────────────────────────────────────────── */
+
+@keyframes bar-fill {
+  from { width: 0%; }
+  to   { width: var(--bar-target); }
+}
+
+.pillar-bar-fill {
+  animation: bar-fill 500ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ─── Spinner (Full Report CTA loading state) ─────────────────────────────── */
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ─── Pin drop pulse animation ────────────────────────────────────────────── */
+
+@keyframes pinPulse {
+  0%   { box-shadow: 0 0 0 0   rgba(52, 201, 122, 0.6); }
+  70%  { box-shadow: 0 0 0 10px rgba(52, 201, 122, 0);   }
+  100% { box-shadow: 0 0 0 0   rgba(52, 201, 122, 0);    }
+}
+
+/* ─── Ring-scoped amenity icon markers (CHI-370) ────────────────────────── */
+/* HTML markers placed at real facility coordinates within 400m of a pin.    */
+
+.map-pin-icon {
+  width:           28px;
+  height:          28px;
+  min-width:       28px;
+  min-height:      28px;
+  border-radius:   50%;
+  border:          2px solid rgba(255, 255, 255, 0.25);
+  /* Use grid centering — more reliable than flex inside MapLibre's marker wrapper */
+  display:         grid;
+  place-items:     center;
+  overflow:        hidden;
+  font-size:       14px;
+  line-height:     1;
+  cursor:          default;
+  user-select:     none;
+  pointer-events:  none;        /* don't block map pan/click events */
+  /* Drop shadow so icons read against both light and dark basemap */
+  box-shadow:      0 2px 6px rgba(0, 0, 0, 0.55);
+}
+
+.map-pin-schools     { background: #34C97A; }
+.map-pin-health      { background: #C94B1A; }
+.map-pin-pharmacy    { background: #E87040; }
+.map-pin-transport   { background: #4A7DB8; }
+.map-pin-supermarket { background: #1A8C6B; }
+.map-pin-park        { background: #2D7A2D; }
+.map-pin-cafe        { background: #D4820A; }
