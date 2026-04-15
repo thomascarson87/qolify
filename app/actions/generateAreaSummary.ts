@@ -70,8 +70,14 @@ Write 3-4 sentences. Start with what kind of area this is. Mention the most impo
     });
 
     const text = message.content[0].type === 'text' ? message.content[0].text : null;
-    // Strip any markdown headings the model occasionally inserts despite instructions
-    return text ? text.replace(/^#+\s*/gm, '').trim() : null;
+    if (!text) return null;
+    return text
+      // Strip markdown headings (# / ## / ###…)
+      .replace(/^#+\s*/gm, '')
+      // Strip plain-text "[City] Property Summary" prefix the model sometimes
+      // outputs without markdown syntax, e.g. "Málaga Property Summary This is…"
+      .replace(/^[\p{L}\s]+ Property Summary\s*/iu, '')
+      .trim();
   } catch {
     return null;
   }
