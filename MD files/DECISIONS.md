@@ -443,6 +443,21 @@ The CTA calls `POST /api/analyse` with `{ url: null, lat, lng, name }`. The rout
 
 ---
 
+## D-043 — Shared TopNav added to layout.tsx
+**Status:** Active
+**Date:** April 2026
+**Decision:** `components/ui/TopNav.tsx` added to `app/layout.tsx` — renders on all routes. Active link detection via `usePathname()`. `/analyse` active for any path starting with `/analyse`; `/map` active for any path starting with `/map`. ThemeToggle moved into TopNav (desktop + mobile sheet) and removed from per-page standalone positions. Mobile: hamburger → bottom sheet.
+
+**Homepage routing confirmed:** Homepage content lives at `/`. `/analyse` (without a jobId) redirects to `/` via Next.js server-side `redirect()`. The URL paste form on the homepage now POSTs directly to `/api/analyse` instead of redirecting to `/analyse?url=`.
+
+**ICP profile selector added to homepage:** Four pill buttons (Family · Nomad · Retiree · Investor), stored in `localStorage` key `qolify_icp_profile`, passed as `profile` field in the POST body to `/api/analyse`. Default null on first visit.
+
+**"Analyse another property" button:** Links to `/` (was `/analyse`). DNA Report `TopBar` sticky offset updated to `top: 64` to clear TopNav. Map canvas height updated to `calc(100vh - 64px)`. Old map inner nav strip removed — TopNav replaces it.
+
+**Affects:** `app/layout.tsx` · `app/page.tsx` · `app/analyse/page.tsx` · `app/analyse/[jobId]/ResultView.tsx` · `app/map/MapClient.tsx` · `app/map/MapWrapper.tsx` · `components/ui/TopNav.tsx` · `components/map/ZoneDetailPanel.tsx` · `components/report/ThemeToggle.tsx`
+
+---
+
 ## Future Decisions (pending)
 
 These decisions need to be made before the relevant phase begins:

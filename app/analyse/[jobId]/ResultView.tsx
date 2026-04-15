@@ -20,7 +20,6 @@ import { IndicatorCard, type IndicatorData } from '@/components/ui/IndicatorCard
 import { PillarScoreBar } from '@/components/ui/PillarScoreBar'
 import { SkeletonCard } from '@/components/ui/SkeletonCard'
 import { pollJob, type AnalysisResult, type PollState } from '@/lib/analysePoller'
-import { ThemeToggle } from '@/components/report/ThemeToggle'
 import { INDICATOR_REGISTRY, PILLAR_GROUPS } from '@/lib/indicators/registry'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
@@ -74,7 +73,7 @@ function TopBar({
 }) {
   const backHref = backToMap && backLat && backLng
     ? `/map?lat=${backLat}&lng=${backLng}&pin=true`
-    : '/analyse'
+    : '/'
   const backLabel = backToMap && backLat && backLng
     ? '← Back to map'
     : '← Analyse another property'
@@ -89,15 +88,14 @@ function TopBar({
         borderBottom: '1px solid var(--border)',
         background: 'var(--surface-2)',
         position: 'sticky',
-        top: 0,
-        zIndex: 50,
+        top: 64,
+        zIndex: 40,
       }}
     >
       <span style={{ fontFamily: 'var(--font-playfair)', fontSize: 20, fontWeight: 700, color: 'var(--navy-deep)', letterSpacing: '-0.02em' }}>
         Qolify
       </span>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <ThemeToggle />
         <a
           href={backHref}
           style={{
@@ -644,7 +642,7 @@ export function ResultView({
           try {
             const r = next.result
             if (r.property?.municipio && r.property?.price_asking) {
-              const item = { id: r.id, url: r.source_url, municipio: r.property.municipio, price: r.property.price_asking, tvi: r.tvi_score, analysedAt: new Date().toISOString() }
+              const item = { id: r.id, url: r.source_url, address: r.property?.address ?? null, municipio: r.property.municipio, price: r.property.price_asking, tvi: r.tvi_score, analysedAt: new Date().toISOString() }
               const stored = JSON.parse(localStorage.getItem('qolify_recent') ?? '[]') as unknown[]
               const updated = [item, ...(stored as typeof item[]).filter((x) => x.id !== r.id)].slice(0, 3)
               localStorage.setItem('qolify_recent', JSON.stringify(updated))
