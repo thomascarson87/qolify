@@ -25,6 +25,8 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { MiniMapCard } from '@/components/report/MiniMapCard'
 import { ProximitySummary, type FacilityCounts } from '@/components/map/ProximitySummary'
+import { SolarPotentialCard } from '@/components/report/SolarPotentialCard'
+import type { SolarPotentialResult } from '@/lib/indicators/solar-potential'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -305,9 +307,23 @@ function FullReport({ result }: { result: AnalysisResult }) {
     return bars
   }
 
-  const addressLine = result.property
-    ? `${result.property.municipio ?? ''}, ${result.property.provincia ?? ''}`
+  const p = result.property
+
+  // Street address is the primary identifier; fall back to "Property Analysis"
+  const streetAddress = p?.address ?? null
+
+  // Location line: "Municipio, Provincia" — shown as subheading when we have a street address,
+  // or as the main h1 fallback when we don't
+  const locationLine = p
+    ? [p.municipio, p.provincia].filter(Boolean).join(', ')
     : result.source_url.replace(/https?:\/\/(www\.)?/, '').split('/')[0]
+
+  // Descriptor pill text: e.g. "3 bed · Apartment · Floor 4"
+  const descriptorParts: string[] = []
+  if (p?.bedrooms)      descriptorParts.push(`${p.bedrooms} bed`)
+  if (p?.property_type) descriptorParts.push(p.property_type)
+  if (p?.floor != null) descriptorParts.push(`Floor ${p.floor}`)
+  const descriptorPill = descriptorParts.join(' · ')
 
   return (
     <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', height: 'calc(100vh - 57px)' }}>
@@ -323,16 +339,21 @@ function FullReport({ result }: { result: AnalysisResult }) {
         <div style={{ padding: compressed ? '12px 24px' : '20px 24px', display: 'flex', alignItems: compressed ? 'center' : 'flex-start', justifyContent: 'space-between', gap: 16, transition: 'padding 200ms' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
             {!compressed && (
-              <h1 style={{ fontFamily: 'var(--font-playfair)', fontSize: 'clamp(20px, 3vw, 28px)', fontWeight: 600, color: 'var(--text)', lineHeight: 1.2, marginBottom: 4 }}>
-                Property Analysis
+              <h1 style={{ fontFamily: 'var(--font-playfair)', fontSize: 'clamp(18px, 2.8vw, 26px)', fontWeight: 600, color: 'var(--text)', lineHeight: 1.2, marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {streetAddress ?? 'Property Analysis'}
               </h1>
             )}
-            <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 13, color: 'var(--text-light)', marginBottom: compressed ? 0 : 6 }}>
-              {addressLine}
+            <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 13, color: 'var(--text-light)', marginBottom: compressed ? 0 : 4 }}>
+              {locationLine}
             </p>
-            {!compressed && result.property?.price_asking && (
+            {!compressed && descriptorPill && (
+              <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 12, color: 'var(--text-light)', marginBottom: 6, opacity: 0.75 }}>
+                {descriptorPill}
+              </p>
+            )}
+            {!compressed && p?.price_asking && (
               <p style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 22, fontWeight: 500, color: 'var(--text)' }}>
-                {formatCurrency(result.property.price_asking)}
+                {formatCurrency(p.price_asking)}
               </p>
             )}
           </div>
@@ -495,6 +516,30 @@ function FullReport({ result }: { result: AnalysisResult }) {
             </div>
           )}
         </section>
+
+        {/* Solar Potential — CHI-380 */}
+        {/* Only rendered when the edge function has populated solar_potential_result */}
+        {result.solar_potential_result && (() => {
+          const solarData = result.solar_potential_result as unknown as SolarPotentialResult
+          const isLocked  = tierRank(userTier) < 2
+          return (
+            <section style={{ marginBottom: 48 }}>
+              <h2 style={{ fontFamily: 'var(--font-playfair)', fontSize: 'clamp(20px, 3vw, 26px)', fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>
+                Solar Potential
+              </h2>
+              <p style={{ fontFamily: 'var(--font-playfair)', fontStyle: 'italic', fontSize: 16, color: 'var(--text-mid)', marginBottom: 24 }}>
+                What a solar installation could save — and earn — at this property.
+              </p>
+              <div style={{ background: 'var(--surface-2)', borderRadius: 18, padding: 24, boxShadow: 'var(--shadow-sm)', maxWidth: 560 }}>
+                <SolarPotentialCard
+                  result={solarData}
+                  locked={isLocked}
+                  city={result.property.municipio ?? 'Spain'}
+                />
+              </div>
+            </section>
+          )
+        })()}
 
         {/* Pillar Scores */}
         <section style={{ marginBottom: 48 }}>
