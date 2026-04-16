@@ -247,9 +247,38 @@ export const INDICATOR_REGISTRY: IndicatorMeta[] = [
     icon:     '☀️',
     tier:     2,
     category: 'qol',
-    live:     false,
-    summarise()  { return 'Climate and solar orientation data coming in a future release.' },
-    dataRows()   { return [] },
+    live:     true,
+    summarise(d) {
+      const ghi    = d.ghi_annual_kwh_m2     as number | null
+      const sun    = d.sunshine_hours_annual as number | null
+      const hdd    = d.hdd_annual            as number | null
+      const cdd    = d.cdd_annual            as number | null
+      const aspect = d.building_aspect       as string | null
+      const damp   = d.damp_risk_index       as number | null
+      if (ghi == null && sun == null) return 'Climate data being computed for this location.'
+      const parts: string[] = []
+      if (ghi != null)  parts.push(`${ghi.toLocaleString('es-ES')} kWh/m²/yr solar irradiance`)
+      else if (sun != null) parts.push(`${sun.toLocaleString('es-ES')} sunshine hrs/yr`)
+      if (hdd != null)  parts.push(`Heating: ${hdd} HDD`)
+      if (cdd != null)  parts.push(`Cooling: ${cdd} CDD`)
+      if (aspect)       parts.push(`${aspect}-facing`)
+      if (damp != null) parts.push(`Damp risk: ${damp}/100`)
+      return parts.join('. ') + '.'
+    },
+    dataRows(d) {
+      const ss = d.sub_scores as Record<string, number> | null
+      return [
+        { label: 'Solar irradiance (GHI)', value: d.ghi_annual_kwh_m2 != null ? `${d.ghi_annual_kwh_m2} kWh/m²/yr` : '—' },
+        { label: 'AEMET sunshine hours',   value: d.sunshine_hours_annual != null ? `${Number(d.sunshine_hours_annual).toLocaleString('es-ES')} hrs/yr` : '—' },
+        { label: 'Heating (HDD)',          value: d.hdd_annual   != null ? `${d.hdd_annual} HDD` : '—'   },
+        { label: 'Cooling (CDD)',          value: d.cdd_annual   != null ? `${d.cdd_annual} CDD` : '—'   },
+        { label: 'Building orientation',   value: d.building_aspect ? String(d.building_aspect) : '—'    },
+        { label: 'Damp risk index',        value: d.damp_risk_index != null ? `${d.damp_risk_index}/100` : '—' },
+        { label: 'Days above 35°C',        value: d.days_above_35c_annual != null ? String(d.days_above_35c_annual) : '—' },
+        { label: 'Solar resource score',   value: ss ? `${ss.solar_resource}/100` : '—' },
+        { label: 'HDD score',              value: ss ? `${ss.hdd}/100`            : '—' },
+      ]
+    },
   },
 
   {

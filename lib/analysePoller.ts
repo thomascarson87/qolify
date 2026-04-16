@@ -38,6 +38,8 @@ export interface AnalysisResult {
   composite_indicators: Record<string, unknown>
   alerts: Array<{ type: 'red' | 'amber' | 'green'; title: string; description: string }>
   property: AnalysisProperty
+  /** Solar panel potential (CHI-380). Populated by edge function once implemented. */
+  solar_potential_result?: Record<string, unknown> | null
 }
 
 export type PollState =

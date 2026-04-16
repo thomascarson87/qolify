@@ -25,6 +25,8 @@ import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { MiniMapCard } from '@/components/report/MiniMapCard'
 import { ProximitySummary, type FacilityCounts } from '@/components/map/ProximitySummary'
+import { SolarPotentialCard } from '@/components/report/SolarPotentialCard'
+import type { SolarPotentialResult } from '@/lib/indicators/solar-potential'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -514,6 +516,30 @@ function FullReport({ result }: { result: AnalysisResult }) {
             </div>
           )}
         </section>
+
+        {/* Solar Potential — CHI-380 */}
+        {/* Only rendered when the edge function has populated solar_potential_result */}
+        {result.solar_potential_result && (() => {
+          const solarData = result.solar_potential_result as unknown as SolarPotentialResult
+          const isLocked  = tierRank(userTier) < 2
+          return (
+            <section style={{ marginBottom: 48 }}>
+              <h2 style={{ fontFamily: 'var(--font-playfair)', fontSize: 'clamp(20px, 3vw, 26px)', fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>
+                Solar Potential
+              </h2>
+              <p style={{ fontFamily: 'var(--font-playfair)', fontStyle: 'italic', fontSize: 16, color: 'var(--text-mid)', marginBottom: 24 }}>
+                What a solar installation could save — and earn — at this property.
+              </p>
+              <div style={{ background: 'var(--surface-2)', borderRadius: 18, padding: 24, boxShadow: 'var(--shadow-sm)', maxWidth: 560 }}>
+                <SolarPotentialCard
+                  result={solarData}
+                  locked={isLocked}
+                  city={result.property.municipio ?? 'Spain'}
+                />
+              </div>
+            </section>
+          )
+        })()}
 
         {/* Pillar Scores */}
         <section style={{ marginBottom: 48 }}>

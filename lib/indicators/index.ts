@@ -22,6 +22,7 @@ import { calcCommunityStability }   from './community-stability'
 import { calcDailyLifeScore }       from './daily-life-score'
 import { calcSensoryEnvironment }   from './sensory-environment'
 import { calcCostOfLifeIndex }      from './cost-of-life-index'
+import { calcClimateSolar }         from './climate-solar'
 
 /** Stub result for indicators without data yet. */
 function insufficientData() {
@@ -47,6 +48,7 @@ export async function runAllIndicators(
     educationOpportunity,
     expatLiveability,
     communityStability,
+    climateSolar,
     dailyLifeScore,
     sensoryEnvironment,
     costOfLifeIndex,
@@ -58,6 +60,7 @@ export async function runAllIndicators(
     calcEducationOpportunity(sql, property),
     calcExpatLiveability(sql, property),
     calcCommunityStability(sql, property),
+    calcClimateSolar(sql, property),
     calcDailyLifeScore(sql, property),
     calcSensoryEnvironment(sql, property),
     calcCostOfLifeIndex(sql, property),
@@ -74,16 +77,7 @@ export async function runAllIndicators(
     // Tier 2
     neighbourhood_transition: { ...insufficientData(), details: { nti_signal: null } },
     community_stability:      communityStability,
-    climate_solar:            {
-      ...insufficientData(),
-      details: {
-        sunshine_hours_annual: null,
-        hdd_annual: null,
-        cdd_annual: null,
-        building_aspect: null,
-        damp_risk_index: null,
-      },
-    },
+    climate_solar:            climateSolar,
     infrastructure_arbitrage: insufficientData(),
     motivated_seller:         insufficientData(),
     rental_trap:              insufficientData(),
