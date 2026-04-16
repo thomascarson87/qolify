@@ -6,6 +6,9 @@
  *
  * Tier 3 indicators (price velocity, gentrification, seasonal) require historical data
  * and are not computed here — they're populated by the zone-metrics cron.
+ *
+ * QoL Enrichment Layer (CHI-377): Added community_stability (real), daily_life_score,
+ * sensory_environment, and cost_of_life_index.
  */
 import type { Sql } from 'postgres'
 import type { PropertyInput, AllIndicators } from './types'
@@ -15,6 +18,10 @@ import { calcDigitalViability }     from './digital-viability'
 import { calcHealthSecurity }       from './health-security'
 import { calcEducationOpportunity } from './education-opportunity'
 import { calcExpatLiveability }     from './expat-liveability'
+import { calcCommunityStability }   from './community-stability'
+import { calcDailyLifeScore }       from './daily-life-score'
+import { calcSensoryEnvironment }   from './sensory-environment'
+import { calcCostOfLifeIndex }      from './cost-of-life-index'
 
 /** Stub result for indicators without data yet. */
 function insufficientData() {
@@ -39,6 +46,10 @@ export async function runAllIndicators(
     healthSecurity,
     educationOpportunity,
     expatLiveability,
+    communityStability,
+    dailyLifeScore,
+    sensoryEnvironment,
+    costOfLifeIndex,
   ] = await Promise.all([
     calcTrueAffordability(sql, property, buyerAge),
     calcStructuralLiability(sql, property),
@@ -46,6 +57,10 @@ export async function runAllIndicators(
     calcHealthSecurity(sql, property),
     calcEducationOpportunity(sql, property),
     calcExpatLiveability(sql, property),
+    calcCommunityStability(sql, property),
+    calcDailyLifeScore(sql, property),
+    calcSensoryEnvironment(sql, property),
+    calcCostOfLifeIndex(sql, property),
   ])
 
   return {
@@ -56,9 +71,9 @@ export async function runAllIndicators(
     health_security:       healthSecurity,
     education_opportunity: educationOpportunity,
 
-    // Tier 2 — stubs until zone data accumulates
+    // Tier 2
     neighbourhood_transition: { ...insufficientData(), details: { nti_signal: null } },
-    community_stability:      insufficientData(),
+    community_stability:      communityStability,
     climate_solar:            {
       ...insufficientData(),
       details: {
@@ -73,6 +88,11 @@ export async function runAllIndicators(
     motivated_seller:         insufficientData(),
     rental_trap:              insufficientData(),
     expat_liveability:        expatLiveability,
+
+    // QoL Enrichment Layer (CHI-377)
+    daily_life_score:    dailyLifeScore,
+    sensory_environment: sensoryEnvironment,
+    cost_of_life_index:  costOfLifeIndex,
   }
 }
 

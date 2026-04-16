@@ -236,65 +236,10 @@ def upsert_batch(conn, records: list[dict], batch_size: int = 500):
 # Andalucía ingestor (OpenRTA JSON API)
 # ---------------------------------------------------------------------------
 
-def ingest_andalucia(conn, dry_run: bool, do_geocode: bool, skip_geocoded: bool) -> int:
-    """
-    Ingest Andalucía VUT via the OpenRTA API (JSON format).
-    Filters to VUT-type establishments (tipo_establecimiento).
-    """
-    print("\n→ Andalucía VUT (OpenRTA API)")
-
-    # OpenRTA supports pagination — fetch all pages
-    all_items = []
-    page = 1
-    page_size = 1000
-
-    with tqdm(desc="  Fetching pages", unit="page") as pbar:
-        while True:
-            r = requests.get(
-                ANDALUCIA_OPENRTA_URL,
-                params={"page": page, "size": page_size, "format": "json"},
-                timeout=60,
-            )
-            r.raise_for_status()
-            data = r.json()
-
-            # OpenRTA response: {"data": [...], "total": N} or just a list
-            if isinstance(data, list):
-                batch = data
-            else:
-                batch = data.get("data") or data.get("items") or data.get("results") or []
-
-            if not batch:
-                break
-            all_items.extend(batch)
-            pbar.update(1)
-
-            # If fewer results than page_size, we've reached the last page
-            if len(batch) < page_size:
-                break
-            page += 1
-
-    print(f"  Fetched {len(all_items)} total OpenRTA records")
-
-    # Filter to VUT type only
-    vut_items = []
-    for item in all_items:
-        tipo = (
-            item.get("tipo_establecimiento") or
-            item.get("tipo") or
-            item.get("type") or ""
-        ).upper().strip()
-        if not tipo or any(vut_type in tipo for vut_type in ANDALUCIA_VUT_TYPES):
-            vut_items.append(item)
-
-    print(f"  {len(vut_items)} VUT records after type filter")
-
-    already_geocoded = set()
-    if skip_geocoded and conn:
-        already_geocoded = get_geocoded_refs(conn, "andalucia")
-
+def _items_to_records(items: list, already_geocoded: set, do_geocode: bool) -> list:
+    """Convert raw OpenRTA API items to vut_licences record dicts."""
     records = []
-    for item in tqdm(vut_items, desc="  Andalucía VUT", unit="rec"):
+    for item in items:
         licence_ref = (
             item.get("numero_inscripcion") or
             item.get("numero_registro") or
@@ -324,16 +269,78 @@ def ingest_andalucia(conn, dry_run: bool, do_geocode: bool, skip_geocoded: bool)
             "status":      normalise_vut_status(status_raw),
             "source":      "openrta_andalucia",
         })
+    return records
 
-    if dry_run:
-        geocoded = sum(1 for r in records if r["lat"])
-        print(f"  [DRY] Would upsert {len(records)} records ({geocoded} with coords)")
-    else:
-        upsert_batch(conn, records)
-        geocoded = sum(1 for r in records if r["lat"])
-        print(f"  ✓ {len(records)} Andalucía VUT records upserted ({geocoded} with coords)")
 
-    return len(records)
+def ingest_andalucia(conn, dry_run: bool, do_geocode: bool, skip_geocoded: bool) -> int:
+    """
+    Ingest Andalucía VUT via the OpenRTA API (JSON format).
+    Writes to DB per page so a killed process doesn't lose completed pages.
+    """
+    print("\n→ Andalucía VUT (OpenRTA API)")
+
+    already_geocoded: set = set()
+    if skip_geocoded and conn:
+        already_geocoded = get_geocoded_refs(conn, "andalucia")
+
+    page = 1
+    page_size = 1000
+    total_fetched = 0
+    total_vut = 0
+    total_written = 0
+
+    while True:
+        print(f"  Page {page}...", end=" ", flush=True)
+        r = requests.get(
+            ANDALUCIA_OPENRTA_URL,
+            params={"page": page, "size": page_size, "format": "json"},
+            timeout=120,
+        )
+        r.raise_for_status()
+        data = r.json()
+
+        # OpenRTA response: {"data": [...], "total": N} or just a list
+        if isinstance(data, list):
+            batch = data
+        else:
+            batch = data.get("data") or data.get("items") or data.get("results") or []
+
+        if not batch:
+            print("empty — done.")
+            break
+
+        total_fetched += len(batch)
+
+        # Filter to VUT type only
+        vut_items = [
+            item for item in batch
+            if not (tipo := (
+                item.get("tipo_establecimiento") or
+                item.get("tipo") or
+                item.get("type") or ""
+            ).upper().strip()) or any(vt in tipo for vt in ANDALUCIA_VUT_TYPES)
+        ]
+        total_vut += len(vut_items)
+
+        records = _items_to_records(vut_items, already_geocoded, do_geocode)
+
+        if dry_run:
+            geocoded = sum(1 for rec in records if rec["lat"])
+            print(f"{len(batch)} records, {len(vut_items)} VUT ({geocoded} with coords) [dry-run]")
+        else:
+            upsert_batch(conn, records)
+            geocoded = sum(1 for rec in records if rec["lat"])
+            total_written += len(records)
+            print(f"{len(batch)} records → {len(vut_items)} VUT upserted ({geocoded} with coords)")
+
+        # Last page: fewer results than page_size
+        if len(batch) < page_size:
+            break
+        page += 1
+
+    print(f"\n  ✓ Andalucía: {total_fetched} total fetched, {total_vut} VUT"
+          + (f", {total_written} written" if not dry_run else " [dry-run]"))
+    return total_vut
 
 
 # ---------------------------------------------------------------------------

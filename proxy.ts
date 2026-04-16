@@ -2,73 +2,31 @@
  * proxy.ts — Next.js 16 request interceptor (replaces middleware.ts)
  * Runs on the Node.js runtime before every request.
  *
- * 1. Refreshes Supabase session cookie (keeps server-side auth valid)
- * 2. Rate limits /api/* routes: 100 req/min anon, 1000 req/min authenticated
+ * Refreshes the Supabase session cookie on every page request so that
+ * server-side auth (supabase.auth.getUser()) stays valid across navigations.
+ *
+ * API routes are passed through without session refresh — they handle their
+ * own auth checks at the route handler level.
+ *
+ * NOTE: Rate limiting is intentionally NOT implemented here. Importing
+ * @upstash/redis/@upstash/ratelimit in the proxy causes an ESM/CJS interop
+ * failure in Turbopack's lazy proxy compilation. Add rate limiting inside
+ * individual API route handlers using lib/ratelimit.ts instead.
  */
 import { NextResponse, type NextRequest } from 'next/server'
-import { updateSession }  from '@/lib/supabase/middleware'
-import { checkRateLimit } from '@/lib/ratelimit'
-
-// Only rate-limit API routes (not pages, static assets, etc.)
-const RATE_LIMITED_PREFIX = '/api/'
-
-// Cron routes are called by Vercel with CRON_SECRET — skip user rate limit
-const CRON_PREFIX = '/api/cron/'
-
-function getClientIp(request: NextRequest): string {
-  return (
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    request.headers.get('x-real-ip') ??
-    'unknown'
-  )
-}
+import { updateSession } from '@/lib/supabase/middleware'
 
 export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // API routes don't use session cookies — skip the Supabase refresh round-trip.
-  // The route handler does its own auth check if the endpoint requires a user.
+  // Each API route handler performs its own auth check if needed.
   if (pathname.startsWith('/api/')) {
     return NextResponse.next()
   }
 
-  // Session refresh (page routes — needed for Supabase auth on all non-API routes)
-  const { supabaseResponse, user } = await updateSession(request)
-
-  // Rate limiting — API routes only, skip cron
-  if (pathname.startsWith(RATE_LIMITED_PREFIX) && !pathname.startsWith(CRON_PREFIX)) {
-    const identifier    = user?.id ?? getClientIp(request)
-    const authenticated = user != null
-
-    const rl = await checkRateLimit(identifier, authenticated)
-
-    if (!rl.success) {
-      return new NextResponse(
-        JSON.stringify({
-          error:       'Too many requests',
-          retry_after: rl.reset - Math.floor(Date.now() / 1000),
-        }),
-        {
-          status:  429,
-          headers: {
-            'Content-Type':  'application/json',
-            'X-RateLimit-Limit':     String(rl.limit),
-            'X-RateLimit-Remaining': '0',
-            'X-RateLimit-Reset':     String(rl.reset),
-            'Retry-After':           String(rl.reset - Math.floor(Date.now() / 1000)),
-          },
-        },
-      )
-    }
-
-    // Pass rate limit headers through on successful requests
-    if (rl.limit > 0) {
-      supabaseResponse.headers.set('X-RateLimit-Limit',     String(rl.limit))
-      supabaseResponse.headers.set('X-RateLimit-Remaining', String(rl.remaining))
-      supabaseResponse.headers.set('X-RateLimit-Reset',     String(rl.reset))
-    }
-  }
-
+  // Session refresh — keeps the Supabase auth cookie valid for page routes.
+  const { supabaseResponse } = await updateSession(request)
   return supabaseResponse
 }
 

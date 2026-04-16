@@ -401,7 +401,7 @@ Tab switch below: `[Single URL]` / `[Multiple URLs]`
 
 Multiple mode: Textarea expanding to accept multiple URLs (one per line). Instructions: "Paste up to 10 Idealista, Fotocasa, or Pisos.com links."
 
-Submit button: Full-width, navy background, Emerald text — "Analyse →". On click: transforms to loading state with subtle pulse animation.
+Submit button: Full-width, navy background, Emerald text — "Analyse →". On click: transforms to a labelled step-progress state ("Fetching listing... / Checking risks... / Calculating costs...") in Phase 0. In Phase 1+, the button transforms to "Analysing..." and the report area begins populating immediately via streaming — no full-page wait.
 
 **Recent analyses:** Compact list of last 5. Each row: address (truncated), price, TVI ring XS, time ago.
 
@@ -755,7 +755,7 @@ Orientation unknown: *"Building orientation not available for this property. We'
 
 **Key moments to design carefully:**
 
-1. **Analysis trigger:** Button transforms to "Fetching..." with progress indicator. Report sections appear sequentially as data arrives — progressive reveal that communicates real work being done.
+1. **Analysis trigger:** Button transforms to loading state. Report layout renders immediately as skeleton screens (grey arc for TVI ring, shimmer cards for each indicator). Fast indicators (Health, Education, Structural, Digital, Expat) populate within ~500ms. True Affordability arrives last at 2–5s — the TVI ring holds with an amber pulse until it resolves, then the arc animates to final score over 600ms. Phase 0 fallback: labelled step-progress state with honest 1–2s wait estimate instead of streaming. **Indicator failure rule:** if any single indicator cannot retrieve data, its card renders as "Data unavailable" — it does not block other cards or the TVI ring. The TVI ring renders as a partial score with a visible flag if any contributing indicator failed.
 
 2. **TVI ring reveal:** Arc fills from zero in 600ms. The single most satisfying moment in the product — design it carefully.
 

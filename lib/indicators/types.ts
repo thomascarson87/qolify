@@ -55,4 +55,9 @@ export interface AllIndicators {
   motivated_seller:         IndicatorResult
   rental_trap:              IndicatorResult
   expat_liveability:        IndicatorResult
+
+  // QoL Enrichment Layer — new indicators (CHI-377)
+  daily_life_score:         IndicatorResult  // Indicator 16
+  sensory_environment:      IndicatorResult  // Indicator 17
+  cost_of_life_index:       IndicatorResult  // Indicator 18
 }

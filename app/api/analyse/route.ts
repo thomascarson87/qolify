@@ -126,11 +126,17 @@ export async function POST(req: NextRequest) {
     municipio: string | null
     build_year: number | null
     epc_rating: string | null
+    address: string | null
+    bedrooms: number | null
+    bathrooms: number | null
+    property_type: string | null
+    floor: number | null
   }[]>`
     SELECT
       id, composite_indicators, alerts, tvi_score, expires_at,
       lat, lng, price_asking, price_per_sqm, area_sqm,
-      provincia, municipio, build_year, epc_rating
+      provincia, municipio, build_year, epc_rating,
+      address, bedrooms, bathrooms, property_type, floor
     FROM analysis_cache
     WHERE source_url = ${sourceUrl}
       AND expires_at > NOW()
@@ -147,15 +153,20 @@ export async function POST(req: NextRequest) {
       composite_indicators: cached.composite_indicators,
       alerts:               cached.alerts ?? [],
       property: {
-        lat:                cached.lat,
-        lng:                cached.lng,
-        price_asking:       cached.price_asking,
-        price_per_sqm:      cached.price_per_sqm,
-        area_sqm:           cached.area_sqm,
-        provincia:          cached.provincia,
-        municipio:          cached.municipio,
-        build_year:         cached.build_year,
-        epc_rating:         cached.epc_rating,
+        lat:           cached.lat,
+        lng:           cached.lng,
+        price_asking:  cached.price_asking,
+        price_per_sqm: cached.price_per_sqm,
+        area_sqm:      cached.area_sqm,
+        provincia:     cached.provincia,
+        municipio:     cached.municipio,
+        build_year:    cached.build_year,
+        epc_rating:    cached.epc_rating,
+        address:       cached.address,
+        bedrooms:      cached.bedrooms,
+        bathrooms:     cached.bathrooms,
+        property_type: cached.property_type,
+        floor:         cached.floor,
       },
     })
   }

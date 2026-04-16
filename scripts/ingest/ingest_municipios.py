@@ -37,6 +37,64 @@ OVERPASS_URL = OVERPASS_MIRRORS[0]  # default; fetch_municipios rotates on empty
 # Spain bounding box (includes Canarias/Baleares/Ceuta/Melilla)
 SPAIN_BBOX = "27.6,-18.2,43.8,4.4"
 
+# Static mapping: 2-digit INE province code → (comunidad autónoma, provincia name)
+# The first 2 digits of every 5-digit municipio code ARE the province code — this never changes.
+# Source: INE classification of provinces and comunidades autónomas (52 total: 50 provinces + Ceuta + Melilla)
+PROVINCE_CA_MAP: dict[str, tuple[str, str]] = {
+    "01": ("País Vasco",                       "Álava"),
+    "02": ("Castilla-La Mancha",               "Albacete"),
+    "03": ("Comunidad Valenciana",             "Alicante"),
+    "04": ("Andalucía",                        "Almería"),
+    "05": ("Castilla y León",                  "Ávila"),
+    "06": ("Extremadura",                      "Badajoz"),
+    "07": ("Islas Baleares",                   "Baleares"),
+    "08": ("Cataluña",                         "Barcelona"),
+    "09": ("Castilla y León",                  "Burgos"),
+    "10": ("Extremadura",                      "Cáceres"),
+    "11": ("Andalucía",                        "Cádiz"),
+    "12": ("Comunidad Valenciana",             "Castellón"),
+    "13": ("Castilla-La Mancha",               "Ciudad Real"),
+    "14": ("Andalucía",                        "Córdoba"),
+    "15": ("Galicia",                          "A Coruña"),
+    "16": ("Castilla-La Mancha",               "Cuenca"),
+    "17": ("Cataluña",                         "Girona"),
+    "18": ("Andalucía",                        "Granada"),
+    "19": ("Castilla-La Mancha",               "Guadalajara"),
+    "20": ("País Vasco",                       "Gipuzkoa"),
+    "21": ("Andalucía",                        "Huelva"),
+    "22": ("Aragón",                           "Huesca"),
+    "23": ("Andalucía",                        "Jaén"),
+    "24": ("Castilla y León",                  "León"),
+    "25": ("Cataluña",                         "Lleida"),
+    "26": ("La Rioja",                         "La Rioja"),
+    "27": ("Galicia",                          "Lugo"),
+    "28": ("Comunidad de Madrid",              "Madrid"),
+    "29": ("Andalucía",                        "Málaga"),
+    "30": ("Región de Murcia",                 "Murcia"),
+    "31": ("Comunidad Foral de Navarra",       "Navarra"),
+    "32": ("Galicia",                          "Ourense"),
+    "33": ("Principado de Asturias",           "Asturias"),
+    "34": ("Castilla y León",                  "Palencia"),
+    "35": ("Canarias",                         "Las Palmas"),
+    "36": ("Galicia",                          "Pontevedra"),
+    "37": ("Castilla y León",                  "Salamanca"),
+    "38": ("Canarias",                         "Santa Cruz de Tenerife"),
+    "39": ("Cantabria",                        "Cantabria"),
+    "40": ("Castilla y León",                  "Segovia"),
+    "41": ("Andalucía",                        "Sevilla"),
+    "42": ("Castilla y León",                  "Soria"),
+    "43": ("Cataluña",                         "Tarragona"),
+    "44": ("Aragón",                           "Teruel"),
+    "45": ("Castilla-La Mancha",               "Toledo"),
+    "46": ("Comunidad Valenciana",             "Valencia"),
+    "47": ("Castilla y León",                  "Valladolid"),
+    "48": ("País Vasco",                       "Bizkaia"),
+    "49": ("Castilla y León",                  "Zamora"),
+    "50": ("Aragón",                           "Zaragoza"),
+    "51": ("Ciudad Autónoma de Ceuta",         "Ceuta"),
+    "52": ("Ciudad Autónoma de Melilla",       "Melilla"),
+}
+
 # Province bounding boxes for filtered runs (saves time during testing)
 PROVINCE_BBOXES = {
     "29": ("36.35,-5.20,36.95,-3.90", "Málaga"),
@@ -127,11 +185,17 @@ def parse_municipio(el: dict) -> dict | None:
     if lat is None or lng is None:
         return None
 
+    # Derive comunidad and provincia from the INE code prefix (always reliable).
+    # The first 2 digits of the 5-digit INE municipio code ARE the province code.
+    # OSM tags (is_in:province, is_in:region) are inconsistent in Spanish data — don't use them.
+    prov_code = ine_code[:2]
+    comunidad, provincia = PROVINCE_CA_MAP.get(prov_code, (None, None))
+
     return {
         "municipio_code": ine_code,
         "municipio_name": name.strip(),
-        "provincia":      tags.get("is_in:province") or tags.get("addr:province"),
-        "comunidad":      tags.get("is_in:region") or tags.get("is_in:community"),
+        "provincia":      provincia,
+        "comunidad":      comunidad,
         "lat":            lat,
         "lng":            lng,
         "osm_id":         str(el.get("id", "")),
@@ -152,8 +216,8 @@ VALUES (
 )
 ON CONFLICT (municipio_code) DO UPDATE SET
     municipio_name = EXCLUDED.municipio_name,
-    provincia      = COALESCE(EXCLUDED.provincia, municipios.provincia),
-    comunidad      = COALESCE(EXCLUDED.comunidad, municipios.comunidad),
+    provincia      = EXCLUDED.provincia,
+    comunidad      = EXCLUDED.comunidad,
     lat            = EXCLUDED.lat,
     lng            = EXCLUDED.lng,
     geom           = EXCLUDED.geom,
@@ -166,12 +230,21 @@ def verify(conn):
     with conn.cursor() as cur:
         cur.execute("SELECT COUNT(*) FROM municipios")
         count = cur.fetchone()[0]
-        cur.execute("SELECT municipio_code, municipio_name, provincia FROM municipios ORDER BY municipio_name LIMIT 5")
+        cur.execute("""
+            SELECT municipio_code, municipio_name, comunidad, provincia
+            FROM municipios
+            WHERE provincia = 'Málaga'
+            ORDER BY municipio_name
+            LIMIT 5
+        """)
         samples = cur.fetchall()
-    print(f"\nmunicipio_code rows: {count}")
-    print("Sample rows:")
+        cur.execute("SELECT COUNT(*) FROM municipios WHERE comunidad IS NULL")
+        null_ca = cur.fetchone()[0]
+    print(f"\nTotal municipios: {count}")
+    print(f"Rows with NULL comunidad: {null_ca}  (should be 0 after re-ingest)")
+    print("Sample rows (Málaga):")
     for row in samples:
-        print(f"  {row[0]}  {row[1]}  ({row[2]})")
+        print(f"  {row[0]}  {row[1]}  |  {row[2]}  |  {row[3]}")
 
 
 def main():

@@ -36,15 +36,15 @@
 
 ### Week 1: Infrastructure
 
-- [ ] Supabase project created (production + staging)
-- [ ] Full database schema migrated — all tables including `analysis_cache`, `property_price_history`, `zone_metrics_history`, `amenity_history`, `climate_data`, `solar_radiation`, `building_orientation`, `eco_constants`, and all QoL reference tables
-- [ ] PostGIS extension enabled; all spatial indexes confirmed
-- [ ] Row Level Security policies written and tested
+- [x] Supabase project created (production)
+- [x] Full database schema migrated — all tables including `analysis_cache`, `property_price_history`, `zone_metrics_history`, `amenity_history`, `climate_data`, `solar_radiation`, `building_orientation`, `eco_constants`, and all QoL reference tables
+- [x] PostGIS extension enabled; all spatial indexes confirmed
+- [x] Row Level Security policies written and tested
 - [ ] Supabase Auth configured (email/password + Google OAuth)
-- [ ] GitHub repository created (`main` → production, `develop` → staging)
-- [ ] Next.js 14 project scaffolded with Tailwind CSS
-- [ ] Vercel project connected to GitHub (auto-deploy on `main`)
-- [ ] Environment variables configured in Vercel
+- [x] GitHub repository created (`main` → production)
+- [x] Next.js 16.2.1 project scaffolded with Tailwind CSS v4
+- [x] Vercel project connected to GitHub (auto-deploy on `main`); live at `qolify.vercel.app` (region: lhr1)
+- [x] Environment variables configured in Vercel
 - [ ] Sentry error tracking integrated
 - [ ] Stripe account configured; webhook endpoint live; `user_profiles.tier` updates on subscription events
 - [ ] Upstash Redis configured for rate limiting
@@ -53,30 +53,63 @@
 
 All data loaded nationally. These tables do not change based on how a listing enters the system — they are the intelligence foundation that makes both models work.
 
-- [ ] **SNCZI Flood Zones**: WFS download → PostGIS import → `flood_zones` (all Spain)
-- [ ] **MITMA GTFS**: feed download → parse stops/routes → `transport_stops`
-- [ ] **CNMC Fibre Coverage**: GIS shapefile → PostGIS → `fibre_coverage`
-- [ ] **Minedu School Directory**: BuscaColegio scrape → `schools` (all Spain, ~28,000 centres)
-- [ ] **Sanidad RESC**: health centre scrape/API → `health_centres`
+- [~] **SNCZI Flood Zones**: ArcGIS REST ingest → `flood_zones` — Málaga province loaded and live (T10/T100/T500). **Note: original GeoServer WFS endpoint dead as of 2026; script rewritten to use MITECO ArcGIS REST (sig.miteco.gob.es). National run pending.**
+- [x] **MITMA GTFS**: feed download → parse stops/routes → `transport_stops` (11,150 stops loaded)
+- [ ] **CNMC Fibre Coverage**: GIS shapefile → PostGIS → `fibre_coverage` (partial — 1 row; national load pending)
+- [x] **Minedu School Directory**: BuscaColegio scrape → `schools` (48,988 centres nationally loaded via OSM Overpass)
+- [x] **Sanidad RESC**: health centre scrape/API → `health_centres` (136 centres loaded)
 - [ ] **MIR Crime Stats**: first CSV bulk download → `crime_stats`
-- [ ] **OSM Amenities**: Overpass QL national query → `amenities` + `amenity_history` (initial seed)
+- [x] **OSM Amenities**: Overpass QL national query → `amenities` + `amenity_history` (197,253 amenities; 179,222 history rows)
 - [ ] **EEA Noise Maps**: shapefile → PostGIS → `noise_zones`
-- [ ] **VUT Licences**: Andalucía, Madrid, Catalunya, Valencia registries → `vut_licences` (first four regions)
+- [~] **VUT Licences**: Andalucía → `vut_licences` — 192,284+ records ingested from OpenRTA API. **Known gap: OpenRTA does not return coordinates — all records have `geom = NULL`. Nominatim geocoding pass required before spatial queries work. Madrid/Catalunya/Valencia pending.**
 - [ ] **Municipal ITE Status**: Madrid + Barcelona ayuntamiento portals → `ite_status` (priority cities first)
-- [ ] Scheduled refresh jobs configured for all datasets (per cadence in architecture Section 5.4)
-- [ ] **AEMET Climate Normals**: Open Data API → `climate_data` per municipio (annual sunshine hours + monthly distribution, HDD, CDD, extreme heat day count + trend direction, rainfall, humidity — all Spain, ~8,000 municipios, annual refresh cadence)
-- [ ] **`eco_constants` table seeded**: energy tariff constants (gas + PVPC electricity price per kWh), EPC U-value coefficients, solar gain factors by orientation — replaces hardcoded values in indicator engine (per D-021)
-  - *Note: PVGIS solar irradiance is queried per-analysis via REST API. `solar_radiation` table is a coordinate-level cache (0.01° resolution) populated on demand — no bulk load required*
+- [x] **zone_scores pg_cron refresh**: `refresh-zone-scores` job registered at 03:00 UTC (after zone_metrics cron at 02:00 UTC). Migrations 009 (pg_cron extension) + 010 (cron.schedule) applied and confirmed via `SELECT * FROM cron.job`.
+- [ ] Scheduled refresh jobs configured for remaining datasets (per cadence in architecture Section 5.4)
+- [~] **AEMET Climate Normals**: Open Data API → `climate_data` (loaded; **known gap: ~90% of AEMET stations lack sunshine sensors — `sunshine_hours_annual` is NULL for most municipios. Nearest-station gap-fill SQL pending.**)
+- [x] **`eco_constants` table seeded**: energy tariff constants (gas + PVPC electricity price per kWh), EPC U-value coefficients, solar gain factors by orientation — replaces hardcoded values in indicator engine (per D-021)
+  - *Note: `solar_radiation` table fully loaded via `ingest_pvgis_solar.py` (0.01° grid, 7,961 rows). `zone_scores` uses LATERAL nearest-neighbour join (migration 011) — ST_Within was broken because PVGIS grid spacing (~3–5 km) exceeds most urban zone sizes (~1 km²).*
   - *Note: `building_orientation` is derived from Catastro footprint geometry at analysis time — no bulk load required, falls back to "unknown" gracefully*
-- [ ] **Zone metrics cron**: nightly aggregation job created (starts running immediately even with no properties yet — it will aggregate from `analysis_cache` once analyses begin)
-- [ ] Manual validation: run PostGIS proximity query for 3 known Málaga addresses — confirm schools, flood risk, and transport data returns correctly
+- [x] **Zone metrics cron**: nightly aggregation job live at `/api/cron/zone-metrics` (02:00 UTC via Vercel cron, lhr1)
+- [x] Manual validation: CHI-327 passed (2026-03-28) — `/api/analyse` returns 200 in ~1.1s for Málaga test property; health=60, education=70, expat=98, tvi=72
 
 ### Phase 0 Success Criteria
-- PostGIS proximity query for any coordinate in Spain returns at least: nearest school, nearest health centre, flood risk level, fibre coverage type, nearest transport stop
-- Flood risk correctly identifies a known Valencia flood zone property
-- School data returns correct results for a known Madrid address
-- All scheduled refresh jobs running without errors in staging
-- Zone metrics cron runs nightly without failure (zero data yet — that is expected and correct)
+- [x] PostGIS proximity query returns nearest school, nearest health centre, nearest transport stop — confirmed via CHI-327 (Málaga)
+- [~] Flood risk correctly identifies a flood zone property — **Málaga live and tested** (29004: T10 coverage 3.39%). Valencia full test blocked pending national run.
+- [ ] Fibre coverage type returned for any Spanish coordinate — **partial**: 1 row loaded; national load pending
+- [ ] School data returns correct results for a known Madrid address — validated for Málaga (32 schools in 1km); Madrid validation pending
+- [x] zone_scores nightly pg_cron refresh running at 03:00 UTC — confirmed. Remaining dataset refresh jobs pending.
+- [ ] All other scheduled refresh jobs running without errors — pending
+- [x] Zone metrics cron runs nightly without failure — live at 02:00 UTC (zero data as expected; will seed from `analysis_cache` as analyses accumulate)
+
+---
+
+## Map MVP (M2b) — Zone Intelligence Explorer
+**Completed: April 2026**
+**Scope: Málaga 17 postcodes (29001–29017). Standalone `/map` page, not gated behind Phase 1.**
+
+This work was built in parallel with Phase 0 to provide an early visual proof-of-concept and accumulate zone data. It does not replace the Phase 4 Discovery Portal — that builds a full scraped listing inventory. The Map MVP only visualises QoL zone scores, not property listings.
+
+### What was built
+
+- [x] `postal_zones` table — 17 Málaga postcode boundaries ingested via `ingest_postal_zones.py` (Nominatim bboxes; CartoCiudad real polygons are follow-up Task 2)
+- [x] `zone_scores` materialised view — composite TVI + 7 pillar scores per postcode (CHI-339)
+- [x] zones.geojson pre-baked tile — 17 features uploaded to Supabase Storage CDN (`map-tiles/malaga/zones.geojson`)
+- [x] `GET /api/map/zone/[codigo_postal]` — zone detail API with schools_list, health_list, amenity_context, climate, price_context (CHI-341, CHI-348)
+- [x] `GET /api/map/layer` — amenity point layers for schools, health, transport, infrastructure
+- [x] `/map` page — MapLibre GL JS choropleth explorer
+- [x] **UX redesign (CHI-349):** Choropleth removed; replaced with profile-driven amenity layers + click-to-explore single-zone highlight
+  - Profile tabs auto-activate contextual layers: Families→Schools+Health, Nomads→Transport, Retirees→Health, Investors→Infrastructure
+  - Clicking a zone highlights its boundary and opens the detail panel; clicking outside does nothing
+  - Manual layer chip toggles override profile defaults
+- [x] **Zone detail panel (CHI-344):** Full rich portrait — proximity stat grid, named schools list, named health centres list, local life amenity counts, AEMET 30yr climate data, pillar score bars, signal badges, CTA to `/analyse`
+- [x] MapTiler key added to Vercel Preview environment
+- [x] pg_cron zone_scores refresh at 03:00 UTC (migrations 009 + 010)
+
+### Known limitations / follow-up
+
+- Postcode boundaries are Nominatim rectangles, not real polygons. CartoCiudad shapefile import is pending (Task 2 from Map MVP plan).
+- 17 Málaga zones only. Expansion to other cities follows after real boundary data is confirmed working.
+- Zone scores will be sparse until property analyses accumulate (VUT, flood zones, infrastructure projects tables still mostly empty).
 
 ---
 
@@ -85,6 +118,8 @@ All data loaded nationally. These tables do not change based on how a listing en
 **Goal: A real user in Spain can paste an Idealista URL and receive a meaningful Hidden DNA report within 10 seconds. Free tier live. Browser extension in Chrome Web Store.**
 
 ### Week 4: On-Demand Analysis Engine
+
+> **Note (2026-03-28):** `/api/analyse` endpoint is already built and live (Phase 0 headstart). Parse.bot integration and Catastro enrichment remain to complete. The indicator engine (5 of 15 indicators live) passed CHI-327 validation at ~1.1s response time.
 
 - [ ] **Parse.bot schemas defined** for Idealista and Fotocasa listing pages
   - Extracts: price, area_sqm, bedrooms, bathrooms, floor, address, postcode, coordinates, ref_catastral, epc_rating, seller_type
@@ -107,7 +142,7 @@ All data loaded nationally. These tables do not change based on how a listing en
 
 ### Week 5: Analyse Page UI
 
-- [ ] **Analyse page** (`/analyse`): URL input field, "Analyse" button, loading state with skeleton
+- [ ] **Analyse page** (`/analyse`): URL input field, "Analyse" button, loading state with labelled step-by-step progress indicator as D-022 Phase 0 fallback ("Fetching listing... ✓ / Checking flood risk... ✓ / Calculating true monthly cost...") — replaced by full skeleton streaming in Week 11
 - [ ] **Hidden DNA Report UI** — full property report with:
   - Property header: address, price, source portal badge, TVI badge
   - Negotiation gauge: asking vs Catastro visual indicator (Green/Amber/Red)
@@ -248,7 +283,7 @@ By this point, the `zone_metrics_history` cron has been running for ~5 weeks and
 - [ ] Indicator confidence levels displayed clearly: "High confidence" / "Based on limited data" / "Insufficient data — will improve over time"
 - [ ] Plain-English explanations for every indicator
 - [ ] Mobile-responsive analyse page, full report, and comparison view (iOS Safari + Android Chrome)
-- [ ] Loading states improved: partial report renders as each section completes (streaming feel)
+- [ ] Loading states: full progressive streaming implementation per D-022 (skeleton screens → fast indicators ~500ms → True Affordability last ~2–5s → TVI ring reveals at final score)
 - [ ] "What does this mean?" expandable context cards for jargon (ITE, Catastro, ICO, VPO, ITP)
 - [ ] Recent analyses page: full history with saved/unsaved toggle
 

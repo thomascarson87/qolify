@@ -115,6 +115,7 @@ CREATE TABLE analysis_cache (
   composite_indicators  JSONB,
   alerts                JSONB,
   tvi_score             DECIMAL(5,2),
+  solar_potential_result JSONB,            -- added: migration 014
 
   extracted_at          TIMESTAMPTZ DEFAULT NOW(),
   expires_at            TIMESTAMPTZ DEFAULT NOW() + INTERVAL '48 hours',
@@ -338,6 +339,24 @@ CREATE TABLE schools (
 CREATE INDEX schools_geom_idx ON schools USING GIST (geom);
 ```
 
+**QoL Enrichment columns** (added by `013_qol_enrichment_layer.sql` / CHI-371):
+```sql
+ALTER TABLE schools
+  ADD COLUMN IF NOT EXISTS source_id              TEXT,           -- gobierno centre code (BuscaColegio 'Código de Centro'); used by enrich_schools.py to match diagnostic CSVs
+  ADD COLUMN IF NOT EXISTS bilingual_languages    TEXT[],         -- ISO 639-1 codes e.g. ['es', 'en']
+  ADD COLUMN IF NOT EXISTS diagnostic_score       DECIMAL(5,2),   -- 0–100 from LOMCE / regional evaluation; NULL when unavailable — never fabricated
+  ADD COLUMN IF NOT EXISTS diagnostic_year        SMALLINT,
+  ADD COLUMN IF NOT EXISTS diagnostic_source      TEXT,           -- 'lomce' | 'evaluacion_diagnostico_and' | 'evaluacion_diagnostico_mad'
+  ADD COLUMN IF NOT EXISTS teacher_ratio          DECIMAL(4,2),   -- pupils per teacher (per-school where available; province avg as fallback)
+  ADD COLUMN IF NOT EXISTS etapas_range           TEXT,           -- 'infantil-bachillerato' | 'primaria' | etc.
+  ADD COLUMN IF NOT EXISTS year_founded           SMALLINT,
+  ADD COLUMN IF NOT EXISTS has_canteen            BOOLEAN DEFAULT FALSE,
+  ADD COLUMN IF NOT EXISTS has_sports_facilities  BOOLEAN DEFAULT FALSE;
+
+CREATE INDEX schools_diagnostic_score_idx ON schools (diagnostic_score) WHERE diagnostic_score IS NOT NULL;
+CREATE INDEX schools_bilingual_idx ON schools (municipio) WHERE bilingual_languages IS NOT NULL;
+```
+
 ### `school_catchments`
 ```sql
 CREATE TABLE school_catchments (
@@ -389,19 +408,40 @@ CREATE INDEX transport_stops_geom_idx ON transport_stops USING GIST (geom);
 ### `amenities`
 ```sql
 CREATE TABLE amenities (
-  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  nombre     TEXT,
-  category   TEXT,
-  lat        DECIMAL(10,7),
-  lng        DECIMAL(10,7),
-  geom       GEOGRAPHY(POINT, 4326),
-  municipio  TEXT,
-  source     TEXT DEFAULT 'osm',
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre           TEXT,
+  category         TEXT,                          -- raw OSM category key
+  display_category TEXT NOT NULL DEFAULT 'other', -- mapped display group (CHI-350)
+  lat              DECIMAL(10,7),
+  lng              DECIMAL(10,7),
+  geom             GEOGRAPHY(POINT, 4326),
+  municipio        TEXT,
+  source           TEXT DEFAULT 'osm',
+  updated_at       TIMESTAMPTZ DEFAULT NOW()
 );
-CREATE INDEX amenities_geom_idx ON amenities USING GIST (geom);
-CREATE INDEX amenities_category_idx ON amenities (category);
+CREATE INDEX amenities_geom_idx             ON amenities USING GIST (geom);
+CREATE INDEX amenities_category_idx         ON amenities (category);
+CREATE INDEX amenities_display_category_idx ON amenities (display_category);
 ```
+
+`display_category` values: `supermarket`, `pharmacy`, `bakery`, `bank`, `cafe`, `restaurant`, `bar`, `gym`, `park`, `coworking`, `parking`, `playground`, `sports`, `market`, `other`.
+Mapping defined in `lib/amenity-categories.ts`. Added by migration `009_amenity_display_category.sql`.
+
+**QoL Enrichment columns** (added by `013_qol_enrichment_layer.sql` / CHI-371):
+```sql
+ALTER TABLE amenities
+  ADD COLUMN IF NOT EXISTS area_sqm  INTEGER,   -- polygon area in m² for parks, sports areas, plazas (computed before point conversion)
+  ADD COLUMN IF NOT EXISTS fee       TEXT,       -- 'free' | 'paid' | 'unknown' — used for parking categories
+  ADD COLUMN IF NOT EXISTS osm_id    TEXT UNIQUE, -- OSM element ID; enables idempotent UPSERT re-runs
+  ADD COLUMN IF NOT EXISTS operator  TEXT;       -- OSM operator tag; used for supermarket tier classification (CHI-376)
+```
+
+**New `category` values** ingested by the QoL enrichment layer:
+- `parking_free` — OSM `amenity=parking` + `fee=no` → `display_category='parking'`
+- `parking_paid` — OSM `amenity=parking` + `fee=yes` → `display_category='parking'`
+- `playground` — OSM `leisure=playground` → `display_category='playground'`
+- `sports_area` — OSM `leisure=pitch` / `leisure=sports_centre` → `display_category='sports'`
+- `market` — OSM `amenity=marketplace` → `display_category='market'`
 
 ### `crime_stats`
 ```sql
@@ -570,7 +610,7 @@ CREATE INDEX climate_data_municipio_idx ON climate_data (municipio_code);
 ```
 
 ### `solar_radiation`
-Coordinate-level solar irradiance from PVGIS JRC. Queried on-demand per property analysis and cached here. Monthly Global Horizontal Irradiance (GHI) in kWh/m².
+Coordinate-level solar irradiance from PVGIS JRC. Full national grid loaded via `ingest_pvgis_solar.py` at 0.01° resolution (~7,961 rows for Spain). Also used as an on-demand cache for per-analysis lookups. Zone-level `avg_ghi` in `zone_scores` uses a **LATERAL nearest-neighbour join** to this table (migration 011) — the PVGIS grid spacing (~3–5 km) is larger than most urban postal zones (~1 km²), so ST_Within would return zero rows for the majority of zones. See CHI-362 for the planned per-building Catastro orientation × PVGIS factor upgrade. Monthly Global Horizontal Irradiance (GHI) in kWh/m².
 
 ```sql
 CREATE TABLE solar_radiation (
@@ -618,10 +658,209 @@ CREATE TABLE building_orientation (
   aspect_degrees  SMALLINT,           -- 0=N, 90=E, 180=S, 270=W
   source          TEXT CHECK (source IN ('catastro_explicit', 'footprint_derived', 'manual')),
   confidence      TEXT CHECK (confidence IN ('high', 'medium', 'low')),
+  footprint_area_m2 DECIMAL(10,2),   -- building footprint from Catastro — added: migration 014
+  num_floors        SMALLINT,        -- total storeys from Catastro — added: migration 014
   updated_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX building_orientation_ref_idx ON building_orientation (ref_catastral);
+```
+
+---
+
+## QoL Enrichment Tables
+Added by `013_qol_enrichment_layer.sql` (CHI-371). These tables are populated by the ingest scripts in CHI-372 through CHI-376.
+
+### `noise_zones`
+EEA Strategic Noise Map polygons (road, rail, airport, industry) and ENAIRE airport contours. Lden bands are the standard EU noise reporting metric. Where multiple polygons overlap at a property point (e.g. road + airport), the highest `lden_min` is used.
+
+```sql
+CREATE TABLE noise_zones (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  geom          GEOGRAPHY(MULTIPOLYGON, 4326) NOT NULL,
+  source_type   TEXT NOT NULL CHECK (source_type IN ('road', 'rail', 'airport', 'industry')),
+  lden_band     TEXT NOT NULL CHECK (lden_band IN ('55-60', '60-65', '65-70', '70-75', '75+')),
+  lden_min      SMALLINT NOT NULL,    -- dB lower bound
+  lden_max      SMALLINT,             -- dB upper bound; NULL = open-ended (75+)
+  source        TEXT DEFAULT 'eea',   -- 'eea' | 'enaire' | 'mitma'
+  agglomeration TEXT,
+  updated_at    TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX noise_zones_geom_idx ON noise_zones USING GIST (geom);
+```
+
+### `beaches`
+OSM beach centroids with ADEAC Blue Flag certification status. Loaded by `ingest_beaches.py` (CHI-374). Refreshed annually.
+
+```sql
+CREATE TABLE beaches (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre         TEXT,
+  lat            DECIMAL(10,7),
+  lng            DECIMAL(10,7),
+  geom           GEOGRAPHY(POINT, 4326),
+  beach_type     TEXT CHECK (beach_type IN ('urban', 'natural', 'cala', 'lake', 'river')),
+  length_m       INTEGER,
+  is_blue_flag   BOOLEAN DEFAULT FALSE,
+  blue_flag_year SMALLINT,
+  municipio      TEXT,
+  provincia      TEXT,
+  osm_id         TEXT UNIQUE,
+  source         TEXT DEFAULT 'osm',
+  updated_at     TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX beaches_geom_idx ON beaches USING GIST (geom);
+```
+
+### `pedestrian_cycling_zones`
+OSM pedestrian streets, plazas, and cycling infrastructure (lanes, tracks, shared paths). Loaded by `ingest_active_mobility.py` (CHI-374). Used for mobility sub-score in the Daily Life Score (Indicator 16).
+
+```sql
+CREATE TABLE pedestrian_cycling_zones (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  geom        GEOGRAPHY(MULTILINESTRING, 4326) NOT NULL,
+  zone_type   TEXT NOT NULL CHECK (zone_type IN (
+                'pedestrian_street', 'pedestrian_zone',
+                'cycle_lane', 'cycle_track', 'cycle_path', 'shared_path'
+              )),
+  surface     TEXT,
+  municipio   TEXT,
+  osm_id      TEXT UNIQUE,
+  source      TEXT DEFAULT 'osm',
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX pedcycle_geom_idx ON pedestrian_cycling_zones USING GIST (geom);
+```
+
+### `health_waiting_times`
+MSCBS quarterly surgical waiting list data + Andalucía and Madrid regional GP appointment wait time supplements. Loaded by `ingest_health_waiting.py` (CHI-375). The MSCBS Excel URL changes every quarter — confirm and document in `DATA_SOURCES.md` before each run.
+
+```sql
+CREATE TABLE health_waiting_times (
+  id                   UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  health_area_code     TEXT NOT NULL,
+  health_area_name     TEXT,
+  comunidad_autonoma   TEXT NOT NULL,
+  avg_days_gp          DECIMAL(4,1),     -- NULL for regions without published GP data
+  avg_days_specialist  DECIMAL(4,1),
+  avg_days_surgery     DECIMAL(5,1),
+  surgery_waiting_list INTEGER,
+  recorded_quarter     DATE NOT NULL,    -- first day of quarter, e.g. 2026-01-01 = Q1 2026
+  source               TEXT DEFAULT 'mscbs',
+  source_url           TEXT,
+  updated_at           TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT health_waiting_times_area_quarter_unique
+    UNIQUE (health_area_code, recorded_quarter)
+);
+```
+
+**Indicator fallback:** When `health_waiting_times` has no row for a health area, `calc_health_security()` uses `wait_score = 60` (neutral) — never a NULL error.
+
+### `cost_of_living`
+Numbeo city-level price data (coffee, beer, meals, grocery index) refreshed quarterly. OSM supermarket operator tier breakdown (`supermarket_premium_pct`, `supermarket_discount_pct`) computed per postcode by `ingest_cost_of_living.py` (CHI-376). **Granularity is city-level, not postcode** — disclosed in UI.
+
+```sql
+CREATE TABLE cost_of_living (
+  id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  municipio                TEXT,
+  ciudad                   TEXT NOT NULL,
+  provincia                TEXT,
+  coffee_eur               DECIMAL(4,2),
+  beer_eur                 DECIMAL(4,2),
+  meal_cheap_eur           DECIMAL(5,2),
+  meal_midrange_eur        DECIMAL(6,2),
+  grocery_index            DECIMAL(5,2),          -- Numbeo index (100 = global avg)
+  supermarket_premium_pct  DECIMAL(4,1),
+  supermarket_discount_pct DECIMAL(4,1),
+  source                   TEXT DEFAULT 'numbeo',
+  recorded_quarter         DATE NOT NULL,
+  updated_at               TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT col_city_quarter_unique UNIQUE (ciudad, recorded_quarter)
+);
+```
+
+---
+
+## Map & Zone Tables
+
+### `postal_zones`
+Postcode boundary polygons. MVP coverage: Málaga 29001–29017 (loaded via `ingest_postal_zones.py`). Currently Nominatim bounding rectangles — CartoCiudad real polygons are a follow-up task. `centroid` is pre-computed at load time for proximity query performance.
+
+```sql
+CREATE TABLE IF NOT EXISTS postal_zones (
+  codigo_postal TEXT PRIMARY KEY,
+  municipio     TEXT,
+  geom          GEOMETRY(MultiPolygon, 4326),
+  centroid      GEOMETRY(Point, 4326)   -- pre-computed for proximity queries
+);
+
+CREATE INDEX IF NOT EXISTS postal_zones_geom_idx     ON postal_zones USING GIST (geom);
+CREATE INDEX IF NOT EXISTS postal_zones_centroid_idx ON postal_zones USING GIST (centroid);
+```
+
+### `zone_scores`
+Materialized view. One row per postcode. Computed from all QoL reference tables via LEFT JOINs — missing data produces null pillar scores without errors. Refreshed nightly at 03:00 UTC by pg_cron.
+
+**Canonical definition:** `supabase/migrations/011_zone_scores_solar_nearest_neighbour.sql` (latest). Created by migration 008; amended by migrations 010 (walkability) and 011 (solar nearest-neighbour fix).
+
+Columns produced:
+- Raw aggregates: `school_count`, `nearest_school_m`, `schools_400m`, `public_count`, `nearest_gp_m`, `nearest_emergency_m`, `pharmacies_500m`, `vut_active`, `vut_density_pct`, `has_t10_flood`, `has_t100_flood`, `t10_coverage_pct`, `avg_ghi`, `nearest_metro_m`, `stops_400m`, `project_count`, `has_metro_project`, `nearest_supermarket_m`, `nearest_cafe_m`, `nearest_park_m`, `daily_necessities_400m`
+- Normalised pillar scores (0–100): `school_score_norm`, `health_score_norm`, `community_score_norm`, `flood_risk_score`, `solar_score_norm`, `connectivity_score_norm`, `infrastructure_score_norm`
+- Composite: `zone_tvi` (weighted average of pillar scores)
+- `signals` TEXT[] — array of keyword badges (e.g. `flood_t10`, `high_solar`, `metro_incoming`)
+
+```sql
+-- Indexes recreated after each DROP MATERIALIZED VIEW
+CREATE UNIQUE INDEX ON zone_scores (codigo_postal);
+CREATE INDEX ON zone_scores USING GIST (geom);
+```
+
+### `zone_enrichment_scores`
+Materialised view. One row per postcode. Pre-computes QoL enrichment metrics and a `daily_life_score` composite for use by the Map Explorer choropleth and the DNA report zone panel. Added by `013_qol_enrichment_layer.sql` (CHI-371). Refreshed nightly at 02:00 UTC by pg_cron (before `zone_scores` at 03:00 UTC).
+
+**Note on `daily_life_score`:** The view computes this column directly so `CHI-379` can reference it as a single field from the zone GeoJSON API. The formula mirrors `calc_daily_life_score()` (CHI-377): walk component (40%), mobility component (30%), green space (20%), beach proximity (10%).
+
+Columns produced:
+- Noise: `avg_noise_lden`, `max_noise_lden`
+- Green space: `park_count_500m`, `park_area_sqm_500m`, `playground_count_500m`
+- Mobility: `pedestrian_features_500m`, `cycle_features_500m`
+- Parking / markets: `free_parking_count_1km`, `market_count_1km`
+- Beach: `nearest_beach_m`
+- Schools: `school_avg_diagnostic`, `bilingual_schools_1km`
+- Daily needs: `daily_needs_count_400m` (pharmacy + supermarket + cafe + GP within 400m)
+- Composite: `daily_life_score` (0–100)
+
+```sql
+-- Unique index required for REFRESH MATERIALIZED VIEW CONCURRENTLY
+CREATE UNIQUE INDEX zone_enrichment_scores_cp_idx ON zone_enrichment_scores (codigo_postal);
+```
+
+**Canonical definition:** `supabase/migrations/013_qol_enrichment_layer.sql`.
+
+### `analysis_jobs`
+Async job queue for the on-demand analysis pipeline (CHI-334). Jobs are created by `POST /api/analyse` and processed by the Supabase Edge Function `analyse-job`. Client polls `GET /api/analyse/status` for progress. RLS: no public access — polling is server-side via service role key.
+
+```sql
+CREATE TABLE IF NOT EXISTS analysis_jobs (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  source_url      TEXT NOT NULL,
+  property_input  JSONB,                    -- lat, lng, price_asking, area_sqm, municipio etc. (manual form data)
+  status          TEXT NOT NULL DEFAULT 'pending',  -- 'pending' | 'processing' | 'complete' | 'error'
+  tier            TEXT NOT NULL DEFAULT 'free',
+  cache_id        UUID REFERENCES analysis_cache(id),
+  error_message   TEXT,
+  step            SMALLINT DEFAULT 0,       -- 0=queued 1=fetching 2=catastro 3=indicators 4=writing 5=complete
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  started_at      TIMESTAMPTZ,
+  completed_at    TIMESTAMPTZ,
+  retry_count     SMALLINT DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS analysis_jobs_status_idx ON analysis_jobs (status, created_at DESC);
+CREATE INDEX IF NOT EXISTS analysis_jobs_url_idx    ON analysis_jobs (source_url);
+
+ALTER TABLE analysis_jobs ENABLE ROW LEVEL SECURITY;
+-- No public/anon policy — service role bypasses RLS automatically.
 ```
 
 ---
@@ -714,6 +953,10 @@ CREATE TABLE eco_constants (
   solar_gain_ne_nw          DECIMAL(4,3) DEFAULT 0.020,
   solar_gain_n              DECIMAL(4,3) DEFAULT 0.000,
 
+  -- Solar panel financial parameters — added: migration 014
+  solar_export_rate_eur       DECIMAL(6,5) DEFAULT 0.07000,  -- feed-in tariff €/kWh
+  solar_install_cost_per_kwp  DECIMAL(8,2) DEFAULT 1200.00,  -- installed cost €/kWp
+
   valid_from                DATE NOT NULL,
   valid_until               DATE,
   notes                     TEXT,
@@ -775,6 +1018,27 @@ CREATE TABLE saved_properties (
   saved_at    TIMESTAMPTZ DEFAULT NOW(),
   UNIQUE (user_id, property_id)
 );
+```
+
+### `saved_pins`
+Coordinate pin drops saved by authenticated users. Users can name a pin, attach a geocoded address, and link Idealista/Fotocasa listing URLs to a location. See migration 012.
+```sql
+CREATE TABLE saved_pins (
+  id           UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      UUID        NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
+  lat          DECIMAL(10,7) NOT NULL,
+  lng          DECIMAL(10,7) NOT NULL,
+  geom         GEOGRAPHY(POINT, 4326) NOT NULL,
+  name         TEXT        NOT NULL DEFAULT 'Unnamed pin',
+  address      TEXT,
+  notes        TEXT,
+  listing_urls TEXT[]      NOT NULL DEFAULT '{}',
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX saved_pins_user_idx ON saved_pins (user_id, created_at DESC);
+CREATE INDEX saved_pins_geom_idx ON saved_pins USING GIST (geom);
+-- RLS: users can only access their own pins
 ```
 
 ### `user_filter_presets`

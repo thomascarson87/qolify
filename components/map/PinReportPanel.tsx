@@ -267,7 +267,7 @@ function CommunityCharacterTriage({ vutCount }: { vutCount: number }) {
 // ---------------------------------------------------------------------------
 // URL Enrichment — slim optional form (URL only, per §4.4)
 // Stores the Idealista URL in localStorage keyed to the pin coordinates.
-// The re-run-with-URL flow (§4.4 "updates the existing job") is a future session.
+// idealistaUrl is lifted to PinReportPanel so handleFullReport can read it.
 // ---------------------------------------------------------------------------
 
 function storageKey(lat: number, lng: number) {
@@ -277,32 +277,23 @@ function storageKey(lat: number, lng: number) {
 function UrlEnrichment({
   lat,
   lng,
+  idealistaUrl,
+  onUrlSave,
 }: {
-  lat: number;
-  lng: number;
+  lat:           number;
+  lng:           number;
+  idealistaUrl:  string;
+  onUrlSave:     (url: string) => void;
 }) {
-  const [expanded,     setExpanded]     = useState(false);
-  const [saved,        setSaved]        = useState(false);
-
-  // Initialise from localStorage using a lazy initializer — avoids a
-  // synchronous setState inside useEffect. The parent passes a `key` prop
-  // keyed to coordinates, so this component remounts whenever the pin moves
-  // and the initializer re-runs automatically.
-  const [idealistaUrl, setIdealistaUrl] = useState<string>(() => {
-    try {
-      const raw = localStorage.getItem(storageKey(lat, lng));
-      if (raw) {
-        const data = JSON.parse(raw) as { idealistaUrl?: string };
-        return data.idealistaUrl ?? '';
-      }
-    } catch { /* localStorage may not be available */ }
-    return '';
-  });
+  const [expanded,   setExpanded]   = useState(false);
+  const [saved,      setSaved]      = useState(false);
+  const [inputValue, setInputValue] = useState(idealistaUrl);
 
   function handleSave() {
     try {
-      localStorage.setItem(storageKey(lat, lng), JSON.stringify({ idealistaUrl }));
+      localStorage.setItem(storageKey(lat, lng), JSON.stringify({ idealistaUrl: inputValue }));
     } catch { /* ok */ }
+    onUrlSave(inputValue);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
     setExpanded(false);
@@ -310,7 +301,7 @@ function UrlEnrichment({
 
   return (
     <div>
-      {/* Saved URL display */}
+      {/* Saved URL display — only when a URL is stored */}
       {idealistaUrl && !expanded && (
         <a
           href={idealistaUrl}
@@ -331,25 +322,27 @@ function UrlEnrichment({
         </a>
       )}
 
-      {/* Expand/collapse toggle */}
-      <button
-        onClick={() => setExpanded(e => !e)}
-        style={{
-          width:      '100%',
-          fontFamily: 'var(--font-dm-sans)',
-          fontSize:   11,
-          fontWeight: 500,
-          color:      expanded ? '#8A9BB0' : '#34C97A',
-          background: 'transparent',
-          border:     'none',
-          cursor:     'pointer',
-          textAlign:  'left',
-          padding:    '4px 0',
-          transition: 'color 0.15s',
-        }}
-      >
-        {expanded ? '− Close' : '+ Add Idealista URL for financial analysis'}
-      </button>
+      {/* Toggle — hidden when a URL is already saved; expand only when there's nothing yet */}
+      {!idealistaUrl && (
+        <button
+          onClick={() => setExpanded(e => !e)}
+          style={{
+            width:      '100%',
+            fontFamily: 'var(--font-dm-sans)',
+            fontSize:   11,
+            fontWeight: 500,
+            color:      expanded ? '#8A9BB0' : '#34C97A',
+            background: 'transparent',
+            border:     'none',
+            cursor:     'pointer',
+            textAlign:  'left',
+            padding:    '4px 0',
+            transition: 'color 0.15s',
+          }}
+        >
+          {expanded ? '− Close' : '+ Add Idealista URL for deeper analysis'}
+        </button>
+      )}
 
       {/* Expandable URL input */}
       <div style={{
@@ -370,8 +363,8 @@ function UrlEnrichment({
         }}>
           <input
             type="url"
-            value={idealistaUrl}
-            onChange={e => setIdealistaUrl(e.target.value)}
+            value={inputValue}
+            onChange={e => setInputValue(e.target.value)}
             placeholder="https://www.idealista.com/inmueble/…"
             style={{
               background:  '#0D1B2A',
@@ -442,6 +435,24 @@ export function PinReportPanel({
   // Full Report CTA loading state
   const [fullReportLoading, setFullReportLoading] = useState(false);
 
+  // Idealista URL — lifted from UrlEnrichment so handleFullReport can use it.
+  // Synced from localStorage whenever the pin coordinates change.
+  const [idealistaUrl, setIdealistaUrl] = useState('');
+
+  useEffect(() => {
+    if (!report) { setIdealistaUrl(''); return; }
+    try {
+      const raw = localStorage.getItem(storageKey(report.lat, report.lng));
+      if (raw) {
+        const data = JSON.parse(raw) as { idealistaUrl?: string };
+        setIdealistaUrl(data.idealistaUrl ?? '');
+        return;
+      }
+    } catch { /* localStorage may not be available */ }
+    setIdealistaUrl('');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [report?.lat, report?.lng]);
+
   // ---- Zone fetch + AI summary -----------------------------------------------
   // Runs when a new report lands. Fetches zone data first (for AI context),
   // then generates the summary. Both steps fail silently.
@@ -498,14 +509,12 @@ export function PinReportPanel({
       .then(text => setAreaSummary(text))
       .catch(() => { /* fail silently — triage card always renders */ })
       .finally(() => setSummaryLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [report]);
 
   // ---- Full Report CTA handler ------------------------------------------------
-  // POST /api/analyse with coordinates. The route must accept { url: null, lat, lng }.
-  // TODO: app/api/analyse/route.ts currently requires a non-null url string.
-  //       The parallel session (or a follow-up) must patch it to accept url: null
-  //       with lat/lng as the primary address signal.
+  // POST /api/analyse. When the user has saved an Idealista URL for this pin,
+  // include it so the Edge Function can scrape the full listing. Otherwise send
+  // url: null and fall back to coordinates-only (pin: URI) analysis.
   const handleFullReport = useCallback(async () => {
     if (!report) return;
     setFullReportLoading(true);
@@ -514,7 +523,7 @@ export function PinReportPanel({
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          url:  null,
+          url:  idealistaUrl || null,
           lat:  report.lat,
           lng:  report.lng,
           name: resolvedAddress ?? `${report.lat.toFixed(4)}, ${report.lng.toFixed(4)}`,
@@ -529,7 +538,7 @@ export function PinReportPanel({
       console.error('[full report CTA]', err);
       setFullReportLoading(false); // reset so user can retry
     }
-  }, [report, resolvedAddress, router]);
+  }, [report, idealistaUrl, resolvedAddress, router]);
 
   // ---- Panel geometry --------------------------------------------------------
   const panelStyle: React.CSSProperties = isFullscreen
@@ -654,11 +663,13 @@ export function PinReportPanel({
                   {resolvedAddress}
                 </p>
               )}
-              {/* key forces remount on pin change so localStorage re-initialises */}
+              {/* key forces remount on pin change so inputValue re-initialises */}
               <UrlEnrichment
                 key={`${report.lat.toFixed(5)}_${report.lng.toFixed(5)}`}
                 lat={report.lat}
                 lng={report.lng}
+                idealistaUrl={idealistaUrl}
+                onUrlSave={setIdealistaUrl}
               />
             </div>
 

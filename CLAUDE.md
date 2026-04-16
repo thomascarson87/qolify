@@ -1,77 +1,51 @@
-# CLAUDE.md
+# CLAUDE.md — Qolify
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Read this file first, then read **only** the reference files listed under your current task. Do not load any other MD files.
 
 ---
 
 ## What is Qolify?
 
-A property intelligence platform for the Spanish residential market. It aggregates government, environmental, social, and market data to give house hunters a complete picture of a property's true quality of life and value — data no mainstream portal (Idealista, Fotocasa) currently provides.
+Spanish property intelligence platform. Users paste an Idealista URL → system extracts property data via Parse.bot → runs 15 composite indicators → renders the DNA Report.
 
-**Tagline:** Invest in your Life, not just a Postcode.
+**Core principle:** The DNA Report is the product. The map is one section within it, not the frame around everything.
 
 ---
 
 ## The Builder
 
-Thomas is the product owner, not a software engineer. He relies on Claude Code for all technical implementation and uses Claude (chat) to design and plan first.
+Thomas is the product owner, not a software engineer. He relies on Claude Code for all implementation.
 
-- Thomas reviews plans before code is written
-- Prefer clear, commented code over terse code
-- Always explain what a file or function does before writing it
-- Never delete or overwrite existing working code without explicit instruction
-- When in doubt, ask — do not assume
-
----
-
-## Reference Documents
-
-All project decisions are captured in `MD files/`. Read the relevant ones before starting any task:
-
-| File | What it covers |
-|---|---|
-| `PRODUCT.md` | What Qolify is, who it's for, the problem it solves |
-| `DECISIONS.md` | All key product and technical decisions with rationale |
-| `ARCHITECTURE.md` | Full system architecture, tech stack, database schema, pipelines |
-| `ROADMAP.md` | Phased build plan with success criteria per phase |
-| `DATA_SOURCES.md` | Every data source, API, URL, collection method |
-| `INDICATORS.md` | All 15 composite indicators — inputs, formulas, outputs |
-| `TIERS.md` | Product tiers, feature gating, pricing |
-| `SCHEMA.md` | Complete database schema — canonical source of truth |
-| `ANNEX_WEATHER_SOLAR.md` | Full spec for climate, solar and orientation data ingestion |
+- Review the plan with Thomas before writing code
+- Write clear, commented code — explain what each file/function does
+- Never delete or overwrite working code without explicit instruction
+- When in doubt, ask
 
 ---
 
-## Project Resources
+## Project Location & Resources
 
 | Resource | Value |
 |---|---|
-| GitHub repo | https://github.com/thomascarson87/qolify |
-| Supabase project URL | https://btnnaoitbrgyjjzpwoze.supabase.co |
-| Supabase project ref | `btnnaoitbrgyjjzpwoze` |
-| Supabase anon key | `sb_publishable_-j0F6WziKKDN3cEzJoJyqA_P0k3cYmq` |
-| Linear workspace | https://linear.app/chimeopen — team `CHI` (Chimeopen) |
+| Project root | `/Users/thomascarson/Desktop/Qolify` |
+| GitHub | https://github.com/thomascarson87/qolify |
+| Supabase URL | https://btnnaoitbrgyjjzpwoze.supabase.co |
+| Supabase ref | `btnnaoitbrgyjjzpwoze` |
+| Linear | https://linear.app/chimeopen — team `CHI` |
 
-**Env var names for `.env.local` and Vercel:**
+**Env vars (in `.env.local` only — never commit):**
 ```
-NEXT_PUBLIC_SUPABASE_URL=https://btnnaoitbrgyjjzpwoze.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_-j0F6WziKKDN3cEzJoJyqA_P0k3cYmq
-DATABASE_URL=postgresql://postgres:[PASSWORD]@db.btnnaoitbrgyjjzpwoze.supabase.co:5432/postgres
-DATABASE_URL_POOLER=postgresql://postgres.btnnaoitbrgyjjzpwoze:[PASSWORD]@aws-1-eu-west-1.pooler.supabase.com:6543/postgres
-SUPABASE_SERVICE_ROLE_KEY=
-AEMET_API_KEY=
-UPSTASH_REDIS_REST_URL=
-UPSTASH_REDIS_REST_TOKEN=
-CRON_SECRET=
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+DATABASE_URL
+DATABASE_URL_POOLER
+SUPABASE_SERVICE_ROLE_KEY
+AEMET_API_KEY
+UPSTASH_REDIS_REST_URL
+UPSTASH_REDIS_REST_TOKEN
+CRON_SECRET
+ANTHROPIC_API_KEY
 ```
-
-> The DB password is a secret — store it only in `.env.local` (never commit) and in Vercel environment variables. The anon key is public and safe for client-side use.
-
----
-
-## Current Phase
-
-**Phase 0 — Foundation & QoL Data.** See `ROADMAP.md` for the full checklist. Active issue tracking is in Linear (project: Chimeopen, team: CHI).
 
 ---
 
@@ -79,131 +53,184 @@ CRON_SECRET=
 
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js 16.2.1 (App Router, Turbopack) + Tailwind CSS v4 |
+| Frontend | Next.js (App Router) + Tailwind CSS v4 |
 | Map | MapLibre GL JS |
 | Database | Supabase (PostgreSQL + PostGIS) |
 | Auth | Supabase Auth |
 | API | Next.js API Routes on Vercel |
-| On-demand extraction | Parse.bot |
-| Bulk scraping (Phase 4+) | Cloudflare Browser Rendering `/crawl` |
-| Pipeline orchestration | Cloudflare Workers (cron) |
+| Extraction | Parse.bot |
 | Rate limiting | Upstash Redis |
 | Payments | Stripe |
-| Monitoring | Vercel Analytics + Sentry |
 | Deployment | Vercel |
 
 ---
 
-## Development Commands
+## Codebase Map
 
-**Next.js app** (project root):
-```bash
-npm run dev      # dev server — user must run this in their own terminal (Turbopack OOMs in background)
-npm run build    # production build
-npm run lint     # ESLint
 ```
+app/
+  page.tsx                          ← Homepage (URL paste entry point)
+  layout.tsx                        ← Root layout
+  analyse/
+    page.tsx                        ← Analyse page shell
+    AnalyseClient.tsx               ← Client-side analyse form
+    [jobId]/
+      page.tsx                      ← Job result page
+      ResultView.tsx                ← DNA Report renderer
+  map/
+    page.tsx                        ← Map explorer page
+    MapClient.tsx                   ← MapLibre canvas
+    MapWrapper.tsx                  ← Map shell with panels
+    AddressSearch.tsx               ← Address search input
+    OverlayToolbar.tsx              ← Bottom overlay toggle bar
+    report/                         ← Deep-dive report sub-pages
+      zone/[postcode]/page.tsx
+      education/[postcode]/page.tsx
+      community/[postcode]/page.tsx
+      solar/[ref_catastral]/page.tsx
 
-**Python ingest scripts** (`scripts/ingest/`):
-```bash
-cd scripts/ingest
+  api/
+    analyse/route.ts                ← POST: trigger analysis job
+    analyse/status/route.ts         ← GET: poll job status
+    catastro/route.ts               ← GET: Catastro OVC lookup
+    cron/zone-metrics/route.ts      ← Nightly zone aggregation
+    map/
+      amenities/route.ts            ← GET: amenities in radius
+      layer/route.ts                ← GET: map point layers
+      pin/route.ts                  ← POST: pin-drop analysis
+      pin/save/route.ts             ← POST: save pin
+      overlay/flood/route.ts        ← GET: flood zone polygons
+      overlay/solar/route.ts        ← GET: solar overlay
+      zone/[codigo_postal]/route.ts ← GET: zone detail
 
-python ingest_municipios.py           # municipal boundaries + reference data
-python ingest_aemet_climate.py        # AEMET 30-year climate normals
-python ingest_pvgis_solar.py          # PVGIS solar irradiance grid
-python ingest_gtfs.py                 # MITMA/ALSA bus stops
-python ingest_flood_zones.py          # SNCZI flood zone polygons (WFS/MVT)
-python ingest_schools.py              # OSM schools (Málaga bbox)
-python ingest_health_centres.py       # OSM health centres (Málaga bbox)
-python ingest_air_quality.py          # air quality stations
+components/
+  map/
+    PinReportPanel.tsx              ← Right-side pin intel panel
+    ZoneDetailPanel.tsx             ← Zone click detail panel
+    FinancialBreakdown.tsx          ← Financial section
+    FloodSafetySection.tsx          ← Flood risk display
+    ProximitySummary.tsx            ← Amenity proximity list
+    CommunityCharacterSection.tsx   ← Community/VUT section
+    StatusBadgeGrid.tsx             ← Alert badge grid
+    SunshineBarChart.tsx            ← Solar bar chart
+    TrendSparkline.tsx              ← Trend line chart
+  report/
+    SolarPotentialCard.tsx          ← Solar indicator card
+  ui/
+    AlertPill.tsx                   ← Alert badge component
+    IndicatorCard.tsx               ← Indicator card (4 states)
+    PillarScoreBar.tsx              ← Score bar component
+    SkeletonCard.tsx                ← Loading skeleton
+    TVIRing.tsx                     ← TVI score ring
 
-# Single station dry-run (AEMET):
-python ingest_aemet_climate.py --station 6155A --dry-run
+lib/
+  indicators/                       ← Composite indicator calculators
+    index.ts                        ← Exports all indicators
+    registry.ts                     ← Indicator registry
+    types.ts                        ← Shared TypeScript types
+    true-affordability.ts
+    structural-liability.ts
+    solar-potential.ts
+    health-security.ts
+    education-opportunity.ts
+    community-stability.ts
+    expat-liveability.ts
+    cost-of-life-index.ts
+    daily-life-score.ts
+    sensory-environment.ts
+  supabase/
+    client.ts / server.ts / middleware.ts
+  db.ts                             ← DB query helpers
+  analysePoller.ts                  ← Job status polling
+  consequence-statements.ts         ← Plain-English implications
+  amenity-categories.ts             ← Amenity display config
+  theme.ts                          ← Theme tokens
 
-# Bounding box filter (GTFS, Málaga only):
-python ingest_gtfs.py --bbox 36.4,-5.1,36.8,-4.3
-```
+actions/
+  generateAreaSummary.ts            ← AI area summary (Claude API)
+  generateEducationNarrative.ts     ← AI education narrative
+  generateZoneNarrative.ts          ← AI zone narrative
 
-**Validation gate** (run after ingest, before marking Phase 0 done):
-```bash
-bash scripts/validate_phase0.sh        # tests 3 Málaga properties against /api/analyse
-```
-
-**Database migrations:**
-```bash
-# Via Supabase MCP (preferred): use mcp__claude_ai_Supabase__apply_migration
-# Via CLI: supabase db push --db-url $DATABASE_URL
+supabase/
+  functions/analyse-job/index.ts    ← Edge Function: analysis pipeline
 ```
 
 ---
 
-## Architecture
+## Key Routes
 
-### Two-model design
+| URL | What it does |
+|---|---|
+| `/` | Homepage — URL paste input |
+| `/analyse` | Analysis page with input form |
+| `/analyse/[jobId]` | DNA Report for a completed job |
+| `/map` | Map explorer |
+| `/map/report/zone/[postcode]` | Zone deep-dive |
+| `/map/report/education/[postcode]` | Education deep-dive |
+| `/map/report/solar/[ref_catastral]` | Solar deep-dive |
+| `/map/report/community/[postcode]` | Community deep-dive |
 
-**Model A — Bulk (Phase 4+):** Cloudflare Workers scrape listings → Parse.bot extracts structured data → stored in `properties` table → nightly cron aggregates zone metrics into `zone_metrics_history`.
+---
 
-**Model B — On-demand (live now):** User submits a property URL → `/api/analyse` route fetches listing via Parse.bot → joins QoL reference data from PostGIS → returns composite score → cached in `analysis_cache` (48h TTL).
+## Design Tokens (never deviate from these)
 
-### Reference data layers
-
-All reference data is pre-ingested by Python scripts in `scripts/ingest/` and served at query time.
-
-| Table | Source | Script |
-|---|---|---|
-| `municipios` | INE shapefile | `ingest_municipios.py` |
-| `climate_data` | AEMET OpenData API | `ingest_aemet_climate.py` |
-| `solar_radiation` | PVGIS JRC REST API (`MRcalculation`) | `ingest_pvgis_solar.py` |
-| `transport_stops` | MITMA GTFS (ALSA S3 mirror) | `ingest_gtfs.py` |
-| `flood_zones` | SNCZI / MITECO MVT tiles | `ingest_flood_zones.py` |
-| `schools` | OpenStreetMap Overpass | `ingest_schools.py` |
-| `health_centres` | OpenStreetMap Overpass | `ingest_health_centres.py` |
-
-### Database connections
-
-- **Python scripts:** use `_db.py` → `get_conn()` — prefers `DATABASE_URL_POOLER` (port 6543, transaction pooler) with TCP keepalives. The pooler has an app-level idle timeout (~10–15 min); any script running longer needs `except psycopg2.OperationalError: conn = get_conn()` reconnect logic around every DB call in its main loop.
-- **Next.js app:** uses the `postgres` package (v3) with `DATABASE_URL` (direct port 5432).
-
-### Key files
-
-```
-app/api/analyse/route.ts              ← on-demand property analysis (POST)
-app/api/cron/zone-metrics/route.ts    ← nightly zone aggregation (Vercel cron, 02:00 UTC)
-scripts/ingest/_db.py                 ← shared psycopg2 connection helper
-supabase/migrations/                  ← all schema migrations (must match SCHEMA.md)
-```
+| Token | Value |
+|---|---|
+| Primary font (headings) | Playfair Display |
+| UI font (body/labels) | DM Sans |
+| Data font (numbers) | DM Mono |
+| Navy | `#0D2B4E` |
+| Emerald | `#34C97A` |
+| Amber | `#D4820A` |
+| Risk/Terracotta | `#C94B1A` |
+| Surface | `#F7FAFE` |
 
 ---
 
 ## Absolute Rules
 
-1. **Never hardcode secrets.** All API keys, connection strings, and tokens go in `.env.local` (local) or Vercel environment variables (production).
-2. **Never modify the database schema without updating `SCHEMA.md`.** The schema file is the canonical source of truth. Supabase migrations must match it exactly.
-3. **Never skip tier gating.** Every API route that serves Explorer or Intelligence data must check the user's `tier` claim from the Supabase JWT. See `TIERS.md`.
-4. **Always log to `property_price_history`.** Every analysis — on-demand or scraped — must write a price observation. This time-series data is irreplaceable.
-5. **Always write `zone_metrics_history`.** The nightly cron that aggregates zone data must never be allowed to silently fail. Sentry cron monitoring is mandatory.
-6. **PostGIS for all spatial queries.** Never calculate distances in application code. Use `ST_DWithin`, `ST_Distance`, `ST_Intersects` in SQL.
+1. **Never hardcode secrets.** Keys in `.env.local` or Vercel env vars only.
+2. **Never modify the DB schema without updating `MD files/SCHEMA.md`.** Migrations must match exactly.
+3. **Always check tier gating.** Every route serving Pro/Explorer/Intelligence data must verify the Supabase JWT `tier` claim.
+4. **PostGIS for all spatial queries.** Never calculate distances in application code.
+5. **Every indicator card must handle 4 states:** `loaded | loading | unavailable | locked`. See `MD files/INDICATOR_CARD_SPEC.md`.
+6. **Never ship broken UI.** If data is unavailable, show the UNAVAILABLE state. Never show null values, empty cards, or zero where zero is meaningless.
 
 ---
 
-## Issue Tracking Rule
+## Task-Scoped Reference Files
 
-**Any serious or repeating failure must be filed as a Linear issue before or immediately after being fixed.**
+Read **only** the files relevant to your current task:
 
-This applies to:
-- Ingest script crashes or data quality bugs (wrong values written, silent skips, connection drops)
-- External API breakages (endpoint moved, parameter changes, authentication failures)
-- Schema or migration mismatches discovered at runtime
-- Any issue that required more than one debug cycle to diagnose
-- Any issue that could recur (connection timeouts, rate limits, API deprecations)
+| Task | Read these files |
+|---|---|
+| Indicator card work | `MD files/INDICATOR_CARD_SPEC.md` |
+| Any DB query or schema change | `MD files/SCHEMA.md` |
+| Report page layout | `MD files/REPORT_PAGE_SPEC.md` |
+| Map work | `MD files/MAP_MVP_SPEC_PATCH_v2_1.md` |
+| Tier/feature gating | `MD files/TIERS.md` |
+| Composite indicator logic | `MD files/INDICATORS.md` |
+| Data sources / ingest scripts | `MD files/DATA_SOURCES.md` |
+| Climate/solar calculations | `MD files/ANNEX_WEATHER_SOLAR.md` |
+| Past decisions and rationale | `MD files/DECISIONS.md` |
+| Phase scope and acceptance criteria | `MD files/ROADMAP.md` |
 
-**Why:** Bugs that are just fixed locally leave no trail. If the same failure recurs, there's no history to diagnose from. Linear issues give every non-trivial failure a ticket, a root cause write-up, and acceptance criteria — the same traceability as any build task.
+---
 
-**How to file:**
-- Team: `CHI` (Chimeopen), project: `Chimeopen`
-- Priority: High (2) for data correctness bugs, Normal (3) for latency/performance
-- Title: descriptive enough to find by searching — include the script name and failure mode
-- Description must include: **symptom**, **root cause**, **fix required**, **acceptance criteria**
-- Link related tickets with `relatedTo` or `blockedBy` where relevant
-- Use the `mcp__claude_ai_Linear__save_issue` MCP tool — do not rely on code comments or memory
+## Development Commands
 
-**When in doubt, file it.** A ticket that turns out to be trivial costs nothing. An undocumented failure that recurs costs a full debug session.
+```bash
+npm run dev      # dev server (Turbopack — run in your own terminal)
+npm run build    # production build
+npm run lint     # ESLint
+```
+
+---
+
+## Issue Tracking
+
+File a Linear issue for any serious or repeating failure — before or immediately after fixing it.
+
+- Team: `CHI`, project: `Chimeopen`
+- Priority: High (2) for data correctness bugs, Normal (3) for performance
+- Description: symptom · root cause · fix required · acceptance criteria

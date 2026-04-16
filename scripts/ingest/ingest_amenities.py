@@ -43,6 +43,44 @@ QUERY_GROUPS = {
     "cinema":       '[amenity=cinema]',
 }
 
+# Maps the category keys above → display_category stored in DB.
+# Mirrors the mapping in lib/amenity-categories.ts (CHI-350).
+# Multiple OSM categories can share the same display_category
+# (e.g. 'park' and 'garden' both → 'park').
+# Any category not listed here defaults to 'other' and is excluded
+# from the proximity summary display.
+DISPLAY_CATEGORY_MAP: dict[str, str] = {
+    # Daily necessities
+    "supermarket":   "supermarket",
+    "convenience":   "supermarket",
+    "grocery":       "supermarket",
+    "bakery":        "bakery",
+    "pastry":        "bakery",
+    "bank":          "bank",
+    "atm":           "bank",
+    "pharmacy":      "pharmacy",
+    # Lifestyle
+    "cafe":          "cafe",
+    "coffee_shop":   "cafe",
+    "restaurant":    "restaurant",
+    "fast_food":     "restaurant",
+    "bar":           "bar",
+    "pub":           "bar",
+    "gym":           "gym",
+    "sports_centre": "gym",
+    "swimming":      "gym",
+    "park":          "park",
+    "garden":        "park",
+    "coworking":     "coworking",
+    # Other — stored but not shown in proximity summary
+    "clinic":        "other",
+    "kindergarten":  "other",
+    "library":       "other",
+    "beach":         "other",
+    "theatre":       "other",
+    "cinema":        "other",
+}
+
 PROVINCE_BBOXES = {
     "malaga":    "36.35,-5.20,36.95,-3.90",
     "madrid":    "40.10,-4.00,40.70,-3.40",
@@ -111,12 +149,13 @@ def elements_to_records(elements: list, category: str) -> tuple[list, list]:
         municipio = tags.get("addr:city") or tags.get("addr:municipality")
 
         amenity_records.append({
-            "nombre":    name,
-            "category":  category,
-            "lat":       lat,
-            "lng":       lng,
-            "municipio": municipio,
-            "source":    "osm",
+            "nombre":           name,
+            "category":         category,
+            "display_category": DISPLAY_CATEGORY_MAP.get(category, "other"),
+            "lat":              lat,
+            "lng":              lng,
+            "municipio":        municipio,
+            "source":           "osm",
         })
         history_records.append({
             "osm_id":    osm_id,
@@ -130,10 +169,11 @@ def elements_to_records(elements: list, category: str) -> tuple[list, list]:
 
 
 UPSERT_SQL = """
-INSERT INTO amenities (nombre, category, lat, lng, geom, municipio, source, updated_at)
+INSERT INTO amenities (nombre, category, display_category, lat, lng, geom, municipio, source, updated_at)
 VALUES (
     %(nombre)s,
     %(category)s,
+    %(display_category)s,
     %(lat)s,
     %(lng)s,
     ST_SetSRID(ST_MakePoint(%(lng)s, %(lat)s), 4326)::GEOGRAPHY,
