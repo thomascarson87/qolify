@@ -393,6 +393,7 @@ function FullReport({ result }: { result: AnalysisResult }) {
                   ['Mortgage (30yr, 80%)',     ci.true_affordability.details.monthly_mortgage_eur],
                   ['IBI property tax',          ci.true_affordability.details.monthly_ibi_eur],
                   ['Energy (climate-adjusted)', ci.true_affordability.details.monthly_energy_eur],
+                  ['Comunidad (building fees)', ci.true_affordability.details.monthly_comunidad_eur],
                 ] as [string, unknown][]).map(([label, val]) => (
                   <div key={label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                     <span style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 12, color: 'var(--text-mid)' }}>{label}</span>
@@ -408,6 +409,35 @@ function FullReport({ result }: { result: AnalysisResult }) {
                       ? `${formatCurrency(Number(ci.true_affordability.details.monthly_total_eur))}/mo` : '—'}
                   </span>
                 </div>
+
+                {/* Income context (CHI-401) — local affordability ratios from INE ADRH. */}
+                {ci.true_affordability.details.local_income_annual_eur != null && (
+                  <div style={{ borderTop: '1px dashed var(--border)', marginTop: 14, paddingTop: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <span style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 12, color: 'var(--text-mid)' }}>Local median income</span>
+                      <span style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 13, color: 'var(--text)' }}>
+                        {formatCurrency(Number(ci.true_affordability.details.local_income_annual_eur))}/yr
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <span style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 12, color: 'var(--text-mid)' }}>Price ÷ annual income</span>
+                      <span style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 13, color: 'var(--text)' }}>
+                        {Number(ci.true_affordability.details.price_to_income_ratio).toFixed(1)}× yrs
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 12, color: 'var(--text-mid)' }}>Monthly cost ÷ income</span>
+                      <span style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 13, color: 'var(--text)' }}>
+                        {Math.round(Number(ci.true_affordability.details.cost_to_income_ratio) * 100)}%
+                      </span>
+                    </div>
+                    <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 10, color: 'var(--text-light)', marginTop: 10, lineHeight: 1.4 }}>
+                      Source: INE Atlas de Renta
+                      {ci.true_affordability.details.local_income_year != null ? ` ${ci.true_affordability.details.local_income_year}` : ''}
+                      {ci.true_affordability.details.income_source === 'national_fallback' ? ' (national estimate — no municipio-level data)' : ''}.
+                    </p>
+                  </div>
+                )}
               </div>
             ) : <SkeletonCard label="True Monthly Cost" />}
 
