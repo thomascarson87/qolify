@@ -36,8 +36,25 @@ DB investigation showed 3 of the 4 reported bugs were already fixed in recent co
 
 ## Phase 2 — Income data (True Affordability)
 
-- CHI-400 — Ingest municipio_income from INE Atlas de Renta · ⏸
-- CHI-401 — Fix True Affordability card · ⏸ (blocked by CHI-400)
+### CHI-400 — Ingest municipio_income from INE Atlas de Renta · ✅
+
+Wrote `scripts/ingest/ingest_municipio_income.py`. Streams the full INE ADRH CSV (table 30824 — "Renta neta media por persona"), filters to municipio-level rows, parses European number format, and upserts the latest year per municipio.
+
+**Result:** 8,126 municipios loaded, latest year 2023, income range €6,958–€30,524 (national avg €14,494). Effectively full coverage vs the ~8,340 municipios in the `municipios` reference table.
+
+### CHI-401 — Fix True Affordability card · ✅
+
+Three changes shipped together:
+
+1. **P0 DECIMAL-string bug fix.** `postgres.js` returns DECIMAL columns as strings. `row.ecb_base_rate_pct + row.typical_bank_spread_pct` was doing `"3.400" + "1.200" = "3.4001.200"`, then `/100 = NaN`, so `aff_score` was null on every analysis. Wrapped every DECIMAL read with `Number()` in both `lib/indicators/true-affordability.ts` and the edge function's inlined `calcTrueAffordability`.
+
+2. **Real income wiring.** Added an `income` CTE joining `municipio_income` by 5-digit INE code (primary) or municipio name (fallback). Replaced the hardcoded `/2000` proxy denominator with the actual local monthly income. Exposes `local_income_annual_eur`, `local_income_year`, `income_source`, `price_to_income_ratio`, and `cost_to_income_ratio` in `details`. Confidence now reflects local-data availability (`high` = local income + climate, `medium` = local income only, `low` = fallback).
+
+3. **UI card update.** `ResultView.tsx` Financial Intelligence card now lists comunidad fees alongside mortgage/IBI/energy and renders a second block with local median income, price-to-income multiple, and cost-to-income %, footnoted with the INE source year. Falls back gracefully to the national estimate flag when no municipio row exists.
+
+**Pipeline wiring:** also updated `supabase/functions/analyse-job/index.ts` reverse-geocode step to populate `prop.municipio_code` from `municipios.municipio_code` so the CTE can match by INE code even when name strings differ (e.g. València vs Valencia).
+
+**Edge function redeployed** to `btnnaoitbrgyjjzpwoze` after changes.
 
 ## Phase 3 — Rental data
 
