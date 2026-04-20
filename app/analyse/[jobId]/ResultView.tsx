@@ -593,9 +593,15 @@ interface AmenitiesRaw {
 
 function ProximitySummaryFromCoords({ lat, lng }: { lat: number; lng: number }) {
   const [facilities, setFacilities] = useState<FacilityCounts | null>(null);
+  // radiusM is owned here so the expand/collapse buttons actually re-fetch at the new radius.
+  // ProximitySummary receives it as a prop and re-renders its label and rows accordingly.
+  const [radiusM, setRadiusM] = useState<400 | 800>(400);
 
   useEffect(() => {
-    fetch(`/api/map/amenities?lat=${lat}&lng=${lng}&radius=400`)
+    // Clear previous data so the loading shimmer shows while the new radius fetches
+    setFacilities(null);
+
+    fetch(`/api/map/amenities?lat=${lat}&lng=${lng}&radius=${radiusM}`)
       .then(r => r.ok ? r.json() as Promise<AmenitiesRaw> : null)
       .then((data: AmenitiesRaw | null) => {
         if (!data) return;
@@ -631,7 +637,7 @@ function ProximitySummaryFromCoords({ lat, lng }: { lat: number; lng: number }) 
         });
       })
       .catch(() => { /* fail silently — section shows unavailable appearance */ });
-  }, [lat, lng]);
+  }, [lat, lng, radiusM]);  // re-fetches when radius changes
 
   if (!facilities) {
     // Loading shimmer — matches ProximitySummary row height
@@ -650,9 +656,10 @@ function ProximitySummaryFromCoords({ lat, lng }: { lat: number; lng: number }) 
   return (
     <ProximitySummary
       facilities={facilities}
-      radiusM={400}
-      onExpandRadius={() => {}}  // no-op: no map canvas in report context
-      compact={false}            // full categories — not the 4-category triage subset
+      radiusM={radiusM}
+      onExpandRadius={() => setRadiusM(800)}    // triggers re-fetch + relabel to 10 min
+      onCollapseRadius={() => setRadiusM(400)}  // triggers re-fetch + relabel to 5 min
+      compact={false}
     />
   );
 }

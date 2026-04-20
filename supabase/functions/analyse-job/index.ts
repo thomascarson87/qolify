@@ -183,12 +183,17 @@ async function fetchListing(sourceUrl: string): Promise<Partial<PropertyInput> |
       bathrooms:    typeof more?.bathNumber === 'number' ? more.bathNumber as number : undefined,
       // EPC: try energyCertification.energyConsumption.type (current schema) first,
       // fall back to moreCharacteristics.energyCertificationType (older schema).
-      // Apify returns lowercase — DB is CHAR(1), indicators call .toUpperCase()
-      epc_rating:   typeof energyCons?.type === 'string'
-                      ? (energyCons.type as string).toUpperCase()
-                      : typeof more?.energyCertificationType === 'string'
-                      ? (more.energyCertificationType as string).toUpperCase()
-                      : undefined,
+      // Apify returns lowercase single letters ('a'–'g') OR multi-char strings like
+      // 'in_progress', 'no_certif', 'exempt'. DB column is CHAR(1) so only store
+      // single-character values — anything else is coerced to undefined.
+      epc_rating: (() => {
+        const raw = typeof energyCons?.type === 'string'
+          ? (energyCons.type as string).toUpperCase()
+          : typeof more?.energyCertificationType === 'string'
+          ? (more.energyCertificationType as string).toUpperCase()
+          : undefined
+        return raw && raw.length === 1 && /^[A-G]$/.test(raw) ? raw : undefined
+      })(),
       // floor: prefer top-level d.floor; fall back to moreCharacteristics.floor
       floor:        parseFloor(
                       typeof d.floor === 'string' ? d.floor as string
@@ -1281,9 +1286,13 @@ Deno.serve(async (req: Request) => {
     // If essential fields are missing after merging Parse.bot + manual input, report exactly
     // which fields are needed so the client can show a targeted mini-form rather than a generic error.
     const missing: string[] = []
-    if (!prop.lat)          missing.push('lat')
-    if (!prop.lng)          missing.push('lng')
-    if (!prop.price_asking) missing.push('price_asking')
+    if (!prop.lat)  missing.push('lat')
+    if (!prop.lng)  missing.push('lng')
+    // price_asking is only required for URL-based jobs where Parse.bot should have extracted it.
+    // Pin-only jobs (source_url = "pin:lat,lng") have no listing to scrape; financial indicators
+    // degrade gracefully when price is absent rather than blocking the whole analysis.
+    const isPinOnlyJob = job.source_url.startsWith('pin:')
+    if (!prop.price_asking && !isPinOnlyJob) missing.push('price_asking')
     if (missing.length > 0) {
       // Structured error: client detects NEEDS_INPUT: prefix and extracts field names
       throw new Error(`NEEDS_INPUT:${missing.join(',')}`)

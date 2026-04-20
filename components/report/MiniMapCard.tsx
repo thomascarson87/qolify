@@ -12,6 +12,10 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+// MapLibre CSS must be imported here because MiniMapCard is used on /analyse/[jobId]
+// where MapClient (which normally imports this CSS) is not present. Without it the
+// .maplibregl-marker positioning rules are missing and emoji markers render off-screen.
+import 'maplibre-gl/dist/maplibre-gl.css';
 
 export interface MiniMapCardProps {
   lat: number;
@@ -243,9 +247,12 @@ export function MiniMapCard({ lat, lng }: MiniMapCardProps) {
         <div
           ref={containerRef}
           style={{
-            width:      '100%',
-            height:     '100%',
-            visibility: mapState === 'loaded' ? 'visible' : 'hidden',
+            width:   '100%',
+            height:  '100%',
+            // opacity keeps the element in layout so MapLibre measures dimensions correctly
+            // on init. visibility:hidden was causing WebGL to skip rendering on some
+            // browsers, resulting in a blank canvas after the map became visible.
+            opacity: mapState === 'loaded' ? 1 : 0,
           }}
         />
       </div>

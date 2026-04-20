@@ -23,7 +23,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import * as turf from '@turf/turf';
@@ -60,6 +60,33 @@ interface ZoneProperties {
 type ZonesGeoJSON = GeoJSON.FeatureCollection<GeoJSON.MultiPolygon, ZoneProperties>;
 
 const EMPTY_FC: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] };
+
+// ---------------------------------------------------------------------------
+// Left panel — recent analyses (same shape as AnalyseClient)
+// ---------------------------------------------------------------------------
+
+interface RecentItem {
+  id: string;
+  url: string;
+  municipio: string;
+  price: number;
+  tvi: number;
+  analysedAt: string;
+}
+
+function timeAgo(iso: string): string {
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1)  return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24)  return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+function fmtEur(n: number): string {
+  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+}
 
 // ---------------------------------------------------------------------------
 // Profile → amenity layer mapping
@@ -121,6 +148,7 @@ const SELECTED_ZONE_COLOR_EXPR = [
 
 export default function MapClient() {
   const searchParams  = useSearchParams();
+  const router        = useRouter();
   const containerRef  = useRef<HTMLDivElement>(null);
   const mapRef        = useRef<maplibregl.Map | null>(null);
   const zonesDataRef  = useRef<ZonesGeoJSON | null>(null);
@@ -190,6 +218,12 @@ export default function MapClient() {
   const [resolvedStreet, setResolvedStreet] = useState<string | null>(null);
 
   const zonesUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/map-tiles/malaga/zones.geojson`;
+
+  // ---- Left panel: Idealista URL input + recent analyses --------------------
+  const [panelUrl,     setPanelUrl]     = useState('');
+  const [panelLoading, setPanelLoading] = useState(false);
+  const [panelError,   setPanelError]   = useState<string | null>(null);
+  const [panelRecent,  setPanelRecent]  = useState<RecentItem[]>([]);
 
   // Derived: pin panel is the authoritative signal that a pin is active.
   const isPinActive = pinPanelOpen;
@@ -511,6 +545,48 @@ export default function MapClient() {
   // Sync dropNewPin → ref so the contextmenu handler (stale closure) always
   // calls the latest version. Must appear after dropNewPin is declared.
   useEffect(() => { dropNewPinRef.current = dropNewPin; }, [dropNewPin]);
+
+  // ------------------------------------------------------------------
+  // Left panel: load recent analyses from localStorage on mount
+  // ------------------------------------------------------------------
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('qolify_recent');
+      if (stored) setPanelRecent(JSON.parse(stored) as RecentItem[]);
+    } catch { /* localStorage unavailable */ }
+  }, []);
+
+  // ------------------------------------------------------------------
+  // Left panel: Idealista URL submit — POST /api/analyse then navigate
+  // ------------------------------------------------------------------
+  const handlePanelUrlSubmit = useCallback(async (submitUrl: string) => {
+    if (!submitUrl.trim() || panelLoading) return;
+    setPanelLoading(true);
+    setPanelError(null);
+    try {
+      const res = await fetch('/api/analyse', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ url: submitUrl.trim() }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => null) as { message?: string; error?: string } | null;
+        throw new Error(err?.message ?? err?.error ?? `Server error (HTTP ${res.status})`);
+      }
+      const data = await res.json() as { jobId?: string; cached?: boolean; id?: string };
+      if (data.jobId) {
+        router.push(`/analyse/${data.jobId}`);
+      } else if (data.cached && data.id) {
+        router.push(`/analyse/${data.id}`);
+      } else {
+        throw new Error('Unexpected response from server.');
+      }
+    } catch (err) {
+      setPanelLoading(false);
+      setPanelError(err instanceof Error ? err.message : 'Something went wrong.');
+    }
+    // Note: don't reset loading on success — page navigates away
+  }, [panelLoading, router]);
 
   // ------------------------------------------------------------------
   // handleExpandRadius — called when the pin panel's "Expand to 800m"
@@ -1258,10 +1334,11 @@ export default function MapClient() {
 
         {/* ---- Left panel ---- */}
         <aside
-          className="relative z-10 w-80 shrink-0 flex flex-col gap-5 p-4 overflow-y-auto border-r"
+          className="relative z-10 shrink-0 flex flex-col gap-5 p-4 overflow-y-auto border-r"
           style={{
-            background:   'var(--map-panel-bg)',
-            borderColor:  'var(--map-chrome-border)',
+            width:          340,
+            background:     'var(--map-panel-bg)',
+            borderColor:    'var(--map-chrome-border)',
             backdropFilter: 'blur(24px)',
           }}
         >
@@ -1269,6 +1346,105 @@ export default function MapClient() {
           <section>
             <AddressSearch onSelect={handleAddressSelect} />
           </section>
+
+          {/* Idealista URL input — analyse a specific listing */}
+          <section>
+            <p className="font-[family-name:var(--font-dm-sans)] text-[10px] uppercase tracking-widest text-[#8A9BB0] mb-2">
+              Analyse a listing
+            </p>
+            <form
+              onSubmit={e => { e.preventDefault(); handlePanelUrlSubmit(panelUrl); }}
+              style={{ display: 'flex', flexDirection: 'column', gap: 6 }}
+            >
+              <input
+                type="text"
+                value={panelUrl}
+                onChange={e => setPanelUrl(e.target.value)}
+                placeholder="idealista.com/inmueble/…"
+                disabled={panelLoading}
+                style={{
+                  width:        '100%', boxSizing: 'border-box',
+                  background:   '#0A1825',
+                  border:       '1px solid #1E3050',
+                  borderRadius: 8,
+                  padding:      '8px 10px',
+                  fontFamily:   'var(--font-dm-sans)',
+                  fontSize:     12,
+                  color:        '#FFFFFF',
+                  outline:      'none',
+                  opacity:      panelLoading ? 0.6 : 1,
+                }}
+                onFocus={e  => (e.target.style.borderColor = '#34C97A')}
+                onBlur={e   => (e.target.style.borderColor = '#1E3050')}
+              />
+              <button
+                type="submit"
+                disabled={panelLoading || !panelUrl.trim()}
+                style={{
+                  background:   panelLoading ? '#1E3050' : '#0D2B4E',
+                  color:        '#34C97A',
+                  border:       '1px solid #1E3050',
+                  borderRadius: 8,
+                  padding:      '7px 0',
+                  fontFamily:   'var(--font-dm-sans)',
+                  fontSize:     12,
+                  fontWeight:   600,
+                  cursor:       panelLoading || !panelUrl.trim() ? 'not-allowed' : 'pointer',
+                  opacity:      panelLoading || !panelUrl.trim() ? 0.5 : 1,
+                  transition:   'opacity 150ms',
+                }}
+              >
+                {panelLoading ? 'Starting analysis…' : 'Analyse →'}
+              </button>
+              {panelError && (
+                <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 11, color: '#F5A07A', marginTop: 2 }}>
+                  {panelError}
+                </p>
+              )}
+            </form>
+          </section>
+
+          {/* Recent analyses — last 5 from localStorage */}
+          {panelRecent.length > 0 && (
+            <section>
+              <p className="font-[family-name:var(--font-dm-sans)] text-[10px] uppercase tracking-widest text-[#8A9BB0] mb-2">
+                Recent
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {panelRecent.slice(0, 5).map(item => (
+                  <button
+                    key={item.id}
+                    onClick={() => handlePanelUrlSubmit(item.url)}
+                    disabled={panelLoading}
+                    style={{
+                      background:   '#0A1825',
+                      border:       '1px solid #1E3050',
+                      borderRadius: 8,
+                      padding:      '8px 10px',
+                      cursor:       panelLoading ? 'not-allowed' : 'pointer',
+                      display:      'flex',
+                      alignItems:   'center',
+                      justifyContent: 'space-between',
+                      gap:          8,
+                      textAlign:    'left',
+                    }}
+                  >
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 12, color: '#C5D5E8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 1 }}>
+                        {item.municipio}
+                      </p>
+                      <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 10, color: '#4A6080' }}>
+                        {fmtEur(item.price)} · {timeAgo(item.analysedAt)}
+                      </p>
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 12, fontWeight: 600, color: '#34C97A', flexShrink: 0 }}>
+                      {item.tvi}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Profile tabs */}
           <section>
