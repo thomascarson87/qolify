@@ -63,8 +63,10 @@ describe('getStoredTheme', () => {
     vi.unstubAllGlobals()
   })
 
-  it('returns "light" when nothing is stored', () => {
-    expect(getStoredTheme()).toBe('light')
+  // Default theme is 'dark' — Qolify's map-centric UI is dark-themed, and
+  // only an explicit 'light' value in localStorage opts a user out of it.
+  it('returns "dark" when nothing is stored', () => {
+    expect(getStoredTheme()).toBe('dark')
   })
 
   it('returns "dark" when stored value is "dark"', () => {
@@ -77,16 +79,16 @@ describe('getStoredTheme', () => {
     expect(getStoredTheme()).toBe('light')
   })
 
-  it('returns "light" when stored value is something unexpected', () => {
+  it('returns "dark" when stored value is something unexpected', () => {
     storage.setItem(STORAGE_KEY, 'unknown')
-    expect(getStoredTheme()).toBe('light')
+    expect(getStoredTheme()).toBe('dark')
   })
 
-  it('returns "light" when localStorage throws', () => {
+  it('returns "dark" when localStorage throws', () => {
     vi.stubGlobal('localStorage', {
       getItem: () => { throw new Error('blocked') },
     })
-    expect(getStoredTheme()).toBe('light')
+    expect(getStoredTheme()).toBe('dark')
   })
 })
 
