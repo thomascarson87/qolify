@@ -949,6 +949,9 @@ async function calcExpatLiveability(
 ): Promise<IndicatorResult> {
   const alerts: Alert[] = []
 
+  // CHI-405: cast ROW_NUMBER() (BIGINT) to INT in SQL — without this, postgres
+  // returns a BigInt/string that fails strict equality in the Number(r.rn) === 1
+  // comparison below, and the function always returns score: null.
   const rows = await sql<{
     dist_m: number; nombre: string; iata_code: string; weekly_flights: number; rn: number
   }[]>`
@@ -956,7 +959,7 @@ async function calcExpatLiveability(
       SELECT
         ST_Distance(geom, ST_SetSRID(ST_MakePoint(${prop.lng}, ${prop.lat}), 4326)::GEOGRAPHY) AS dist_m,
         nombre, iata_code, weekly_flights,
-        ROW_NUMBER() OVER (ORDER BY geom <-> ST_SetSRID(ST_MakePoint(${prop.lng}, ${prop.lat}), 4326)::GEOGRAPHY) AS rn
+        ROW_NUMBER() OVER (ORDER BY geom <-> ST_SetSRID(ST_MakePoint(${prop.lng}, ${prop.lat}), 4326)::GEOGRAPHY)::int AS rn
       FROM airports
     )
     SELECT dist_m, nombre, iata_code, weekly_flights, rn

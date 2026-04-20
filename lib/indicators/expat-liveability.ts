@@ -19,7 +19,11 @@ export async function calcExpatLiveability(
 ): Promise<IndicatorResult & { details: Record<string, unknown> }> {
   const alerts: Alert[] = []
 
-  // --- Single CTE: top-2 nearest airports using RANK() ---
+  // --- Single CTE: top-2 nearest airports using ROW_NUMBER() ---
+  // Note: ROW_NUMBER() returns BIGINT, which postgres.js returns as a BigInt
+  // (or string, depending on config). Cast to INT in SQL AND use Number(r.rn) in JS
+  // so the strict === comparison below can never silently return undefined.
+  // Historical bug (CHI-405): without this, expat_liveability.score was always null.
   const rows = await sql<{
     dist_m: number; nombre: string; iata_code: string; weekly_flights: number; rn: number
   }[]>`
@@ -34,7 +38,7 @@ export async function calcExpatLiveability(
         weekly_flights,
         ROW_NUMBER() OVER (
           ORDER BY geom <-> ST_SetSRID(ST_MakePoint(${property.lng}, ${property.lat}), 4326)::GEOGRAPHY
-        ) AS rn
+        )::int AS rn
       FROM airports
     )
     SELECT dist_m, nombre, iata_code, weekly_flights, rn
@@ -42,8 +46,8 @@ export async function calcExpatLiveability(
     WHERE rn <= 2
   `
 
-  const nearest = rows.find((r) => r.rn === 1) ?? null
-  const second  = rows.find((r) => r.rn === 2) ?? null
+  const nearest = rows.find((r) => Number(r.rn) === 1) ?? null
+  const second  = rows.find((r) => Number(r.rn) === 2) ?? null
 
   const distM  = nearest?.dist_m ? Math.round(nearest.dist_m) : null
   const distKm = distM != null ? distM / 1000 : null
