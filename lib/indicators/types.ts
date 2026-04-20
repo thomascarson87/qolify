@@ -10,6 +10,7 @@ export interface PropertyInput {
   area_sqm: number
   comunidad_autonoma: string
   municipio?: string
+  municipio_code?: string        // 5-digit INE code (for municipio_income + climate_data joins)
   codigo_postal?: string
   ref_catastral?: string
   build_year?: number | null

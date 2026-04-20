@@ -22,6 +22,13 @@ const MONTHLY_COST_NATIONAL_MAX = 6000
 const IBI_RATE = 0.004
 const CATASTRO_PRICE_RATIO = 0.60
 
+// Fallback when municipio_income has no row for the property's municipio.
+// Source: INE ADRH 2023, national mean of "Renta neta media por persona" = €14,494.
+// We round to €13,500 as a slightly conservative national stand-in so that the
+// affordability score biases toward "show the user a lower score" rather than
+// hiding a local affordability problem behind an inflated median.
+const NATIONAL_MEDIAN_INCOME_EUR = 13500
+
 function estimateComunidadMonthly(buildYear: number | null, areaSqm: number): number {
   const year = buildYear ?? 1990
   const ratePerSqm = year < 1970 ? 8.0 : year < 1990 ? 5.0 : year < 2010 ? 3.5 : 2.5
@@ -47,6 +54,8 @@ export async function calcTrueAffordability(
     ico_max_price: number | null; ico_max_age: number | null; ico_guarantee_pct: number | null
     hdd_annual: number | null; cdd_annual: number | null
     aspect: string | null
+    income_annual: number | null; income_year: number | null
+    income_municipio_code: string | null
   }[]>`
     WITH
       constants AS (
@@ -76,6 +85,17 @@ export async function calcTrueAffordability(
         FROM building_orientation
         WHERE ref_catastral = ${property.ref_catastral ?? ''}
         LIMIT 1
+      ),
+      income AS (
+        -- Most recent year per municipio. Looks up by either the 5-digit INE
+        -- code (if PropertyInput.municipio_code is available) or by municipio
+        -- name — whichever matches first.
+        SELECT municipio_code, median_income_annual, year
+        FROM municipio_income
+        WHERE municipio_code = ${property.municipio_code ?? ''}
+           OR municipio_name = ${property.municipio ?? ''}
+        ORDER BY year DESC
+        LIMIT 1
       )
     SELECT
       c.ecb_base_rate_pct, c.typical_bank_spread_pct,
@@ -90,53 +110,69 @@ export async function calcTrueAffordability(
       ico.guarantee_pct        AS ico_guarantee_pct,
       climate.hdd_annual,
       climate.cdd_annual,
-      orientation.aspect
+      orientation.aspect,
+      income.median_income_annual AS income_annual,
+      income.year                  AS income_year,
+      income.municipio_code        AS income_municipio_code
     FROM constants c
     LEFT JOIN itp         ON TRUE
     LEFT JOIN ico         ON TRUE
     LEFT JOIN climate     ON TRUE
     LEFT JOIN orientation ON TRUE
+    LEFT JOIN income      ON TRUE
   `
 
   if (!row) throw new Error('eco_constants not seeded')
 
+  // postgres.js returns DECIMAL columns as strings. Coerce all numeric fields
+  // with Number() before arithmetic or string concat will corrupt the maths
+  // (CHI-405 / CHI-401: aff_score was null everywhere because
+  // "3.400" + "1.200" = "3.4001.200" → / 100 = NaN).
+  const n = (v: unknown): number => v == null ? NaN : Number(v)
+
   // EPC U-value from DB constants
   const epcUMap: Record<string, number> = {
-    A: row.u_value_epc_a, B: row.u_value_epc_b, C: row.u_value_epc_c, D: row.u_value_epc_d,
-    E: row.u_value_epc_e, F: row.u_value_epc_f, G: row.u_value_epc_g,
+    A: n(row.u_value_epc_a), B: n(row.u_value_epc_b), C: n(row.u_value_epc_c), D: n(row.u_value_epc_d),
+    E: n(row.u_value_epc_e), F: n(row.u_value_epc_f), G: n(row.u_value_epc_g),
   }
-  const uValue = (property.epc_rating ? epcUMap[property.epc_rating.toUpperCase()] : null) ?? row.u_value_epc_d
+  const uValue = (property.epc_rating ? epcUMap[property.epc_rating.toUpperCase()] : null) ?? n(row.u_value_epc_d)
 
   // Solar gain
   const aspectUpper = row.aspect?.toUpperCase() ?? null
   const solarGain =
-    aspectUpper === 'S'                            ? row.solar_gain_s     :
-    aspectUpper === 'SE' || aspectUpper === 'SW'   ? row.solar_gain_se_sw :
-    aspectUpper === 'E'  || aspectUpper === 'W'    ? row.solar_gain_e_w   :
-    aspectUpper === 'NE' || aspectUpper === 'NW'   ? row.solar_gain_ne_nw :
-    aspectUpper === 'N'                            ? row.solar_gain_n     :
-    row.solar_gain_e_w  // neutral fallback for unknown orientation
+    aspectUpper === 'S'                            ? n(row.solar_gain_s)     :
+    aspectUpper === 'SE' || aspectUpper === 'SW'   ? n(row.solar_gain_se_sw) :
+    aspectUpper === 'E'  || aspectUpper === 'W'    ? n(row.solar_gain_e_w)   :
+    aspectUpper === 'NE' || aspectUpper === 'NW'   ? n(row.solar_gain_ne_nw) :
+    aspectUpper === 'N'                            ? n(row.solar_gain_n)     :
+    n(row.solar_gain_e_w)  // neutral fallback for unknown orientation
 
-  const hdd = row.hdd_annual ?? 1500
-  const cdd = row.cdd_annual ?? 500
+  const hdd = row.hdd_annual != null ? Number(row.hdd_annual) : 1500
+  const cdd = row.cdd_annual != null ? Number(row.cdd_annual) : 500
 
   // ICO eligibility
+  const icoMaxPrice = row.ico_max_price != null ? Number(row.ico_max_price) : null
+  const icoMaxAge   = row.ico_max_age   != null ? Number(row.ico_max_age)   : null
   const icoEligible =
-    row.ico_max_price != null &&
-    property.price_asking <= row.ico_max_price &&
-    (buyerAge == null || row.ico_max_age == null || buyerAge <= row.ico_max_age)
+    icoMaxPrice != null &&
+    property.price_asking <= icoMaxPrice &&
+    (buyerAge == null || icoMaxAge == null || buyerAge <= icoMaxAge)
 
   // Deposit & mortgage
   const depositPct = icoEligible ? 0.05 : 0.20
   const principal  = property.price_asking * (1 - depositPct)
-  const annualRate = ((row.ecb_base_rate_pct ?? 3.5) + (row.typical_bank_spread_pct ?? 1.0)) / 100
+  const ecbRate    = row.ecb_base_rate_pct       != null ? Number(row.ecb_base_rate_pct)       : 3.5
+  const bankSpread = row.typical_bank_spread_pct != null ? Number(row.typical_bank_spread_pct) : 1.0
+  const annualRate = (ecbRate + bankSpread) / 100
   const mortgageMonthly = monthlyMortgage(principal, annualRate, 30)
 
   // Energy cost (climate-adjusted)
+  const gasPrice   = row.gas_price_kwh_eur         != null ? Number(row.gas_price_kwh_eur)         : 0.07
+  const elecPrice  = row.electricity_pvpc_kwh_eur  != null ? Number(row.electricity_pvpc_kwh_eur)  : 0.15
   const heatingKwh        = hdd * property.area_sqm * uValue * 0.024 * (1 - solarGain)
-  const heatingCostAnnual = heatingKwh * (row.gas_price_kwh_eur ?? 0.07)
+  const heatingCostAnnual = heatingKwh * gasPrice
   const coolingKwh        = cdd * property.area_sqm * uValue * 0.4 * 0.024
-  const coolingCostAnnual = coolingKwh * (row.electricity_pvpc_kwh_eur ?? 0.15)
+  const coolingCostAnnual = coolingKwh * elecPrice
   const energyMonthly     = (heatingCostAnnual + coolingCostAnnual) / 12
 
   // IBI + comunidad
@@ -150,31 +186,56 @@ export async function calcTrueAffordability(
   const rawScore = normalise(totalMonthly, MONTHLY_COST_NATIONAL_MIN, MONTHLY_COST_NATIONAL_MAX)
   const score = Math.round(100 - rawScore)
 
-  const itpRate = row.itp_rate ?? 8.0
-  const costRatio = totalMonthly / 2000  // proxy income (local income data: Phase 1)
+  const itpRate = row.itp_rate != null ? Number(row.itp_rate) : 8.0
+
+  // --- Real price-to-income + cost-to-income ratios (CHI-401) ---
+  // Use municipio-level income if we have a row, else the national fallback.
+  // Flag the source so the UI can show "local data" vs "national estimate".
+  const localIncome    = row.income_annual != null ? Number(row.income_annual) : null
+  const incomeAnnual   = localIncome ?? NATIONAL_MEDIAN_INCOME_EUR
+  const incomeSource   = localIncome != null ? 'ine_adrh_municipio' : 'national_fallback'
+  const incomeYear     = row.income_year ?? null
+  const monthlyIncome  = incomeAnnual / 12
+  const priceToIncome  = property.price_asking / incomeAnnual
+  const costRatio      = totalMonthly / monthlyIncome
+
   if (costRatio > 0.5) {
-    alerts.push({ type: 'red',   category: 'affordability', title: 'Coste excede el 50% de ingreso mediano', description: `El coste mensual estimado de €${Math.round(totalMonthly)} supera el 50% del ingreso mensual mediano.` })
+    alerts.push({ type: 'red',   category: 'affordability', title: 'Coste excede el 50 % del ingreso local', description: `El coste mensual estimado de €${Math.round(totalMonthly)} supera el 50 % del ingreso neto medio de la zona (€${Math.round(monthlyIncome)}/mes).` })
   } else if (costRatio > 0.4) {
-    alerts.push({ type: 'amber', category: 'affordability', title: 'Coste supera el 40% de ingreso mediano', description: `El coste mensual estimado de €${Math.round(totalMonthly)} supera el 40% del ingreso mensual mediano.` })
+    alerts.push({ type: 'amber', category: 'affordability', title: 'Coste supera el 40 % del ingreso local', description: `El coste mensual estimado de €${Math.round(totalMonthly)} supera el 40 % del ingreso neto medio de la zona (€${Math.round(monthlyIncome)}/mes).` })
+  }
+  if (priceToIncome > 10) {
+    alerts.push({ type: 'red',   category: 'affordability', title: 'Precio > 10× la renta anual local', description: `El precio de €${Math.round(property.price_asking).toLocaleString('es-ES')} equivale a ${priceToIncome.toFixed(1)} años de renta neta local.` })
+  } else if (priceToIncome > 7) {
+    alerts.push({ type: 'amber', category: 'affordability', title: 'Precio > 7× la renta anual local', description: `El precio equivale a ${priceToIncome.toFixed(1)} años de renta neta local.` })
   }
 
   return {
     score,
-    confidence: row.hdd_annual ? 'high' : 'medium',
+    // High confidence only when both climate and LOCAL income are available.
+    confidence: (row.hdd_annual && localIncome != null) ? 'high'
+              : (localIncome != null)                   ? 'medium'
+              :                                           'low',
     details: {
-      monthly_total_eur:     roundOrNull(totalMonthly),
-      monthly_mortgage_eur:  roundOrNull(mortgageMonthly),
-      monthly_energy_eur:    roundOrNull(energyMonthly),
-      monthly_ibi_eur:       roundOrNull(ibiMonthly),
-      monthly_comunidad_eur: roundOrNull(comunidadMonthly),
-      itp_rate_pct:          itpRate,
-      itp_total_eur:         roundOrNull(property.price_asking * (itpRate / 100)),
-      ico_eligible:          icoEligible,
-      deposit_pct:           depositPct * 100,
-      loan_rate_pct:         annualRate * 100,
-      hdd_used:              hdd,
-      cdd_used:              cdd,
-      building_aspect:       row.aspect ?? null,
+      monthly_total_eur:      roundOrNull(totalMonthly),
+      monthly_mortgage_eur:   roundOrNull(mortgageMonthly),
+      monthly_energy_eur:     roundOrNull(energyMonthly),
+      monthly_ibi_eur:        roundOrNull(ibiMonthly),
+      monthly_comunidad_eur:  roundOrNull(comunidadMonthly),
+      itp_rate_pct:           itpRate,
+      itp_total_eur:          roundOrNull(property.price_asking * (itpRate / 100)),
+      ico_eligible:           icoEligible,
+      deposit_pct:            depositPct * 100,
+      loan_rate_pct:          annualRate * 100,
+      hdd_used:               hdd,
+      cdd_used:               cdd,
+      building_aspect:        row.aspect ?? null,
+      // Income signals (CHI-401)
+      local_income_annual_eur: incomeAnnual,
+      local_income_year:       incomeYear,
+      income_source:           incomeSource,    // 'ine_adrh_municipio' | 'national_fallback'
+      price_to_income_ratio:   Math.round(priceToIncome * 10) / 10,
+      cost_to_income_ratio:    Math.round(costRatio     * 100) / 100,
     },
     alerts,
   }
