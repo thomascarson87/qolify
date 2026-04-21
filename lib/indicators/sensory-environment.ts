@@ -93,8 +93,9 @@ export async function calcSensoryEnvironment(
     LEFT JOIN green ON TRUE
   `
 
-  const noiseLden   = row?.noise_lden_min ?? null
-  const aqiAvg      = row?.aqi_annual_avg ?? null
+  // postgres.js returns DECIMAL columns as strings — coerce before arithmetic/.toFixed()
+  const noiseLden   = row?.noise_lden_min ?? null  // SMALLINT — already a number
+  const aqiAvg      = row?.aqi_annual_avg != null ? Number(row.aqi_annual_avg) : null
   const parkAreaSqm = row?.park_area_sqm  ?? 0
 
   // --- Noise score ---
@@ -136,15 +137,15 @@ export async function calcSensoryEnvironment(
     alerts.push({
       type: 'red',
       category: 'sensory',
-      title: 'Zona de alto ruido',
-      description: `Nivel de ruido Lden de ${noiseLden} dB — equivalente a una calle muy transitada. Fuente: Mapa Estratégico de Ruido UE.`,
+      title: 'High noise zone',
+      description: `Noise level Lden ${noiseLden} dB — equivalent to a busy road. Source: EU Strategic Noise Map.`,
     })
   } else if (noiseLden !== null && noiseLden >= 60) {
     alerts.push({
       type: 'amber',
       category: 'sensory',
-      title: 'Ruido moderado-alto',
-      description: `Nivel de ruido Lden de ${noiseLden} dB. Fuente: Mapa Estratégico de Ruido UE.`,
+      title: 'Moderate-high noise',
+      description: `Noise level Lden ${noiseLden} dB. Source: EU Strategic Noise Map.`,
     })
   }
 
@@ -152,8 +153,8 @@ export async function calcSensoryEnvironment(
     alerts.push({
       type: 'amber',
       category: 'sensory',
-      title: 'Calidad del aire mejorable',
-      description: `ICA medio anual: ${aqiAvg.toFixed(0)}. Por encima del promedio nacional (~25).`,
+      title: 'Air quality could be better',
+      description: `Annual average AQI: ${aqiAvg.toFixed(0)}. Above the national average (~25).`,
     })
   }
 
@@ -166,8 +167,8 @@ export async function calcSensoryEnvironment(
       aqi_annual_avg:      aqiAvg != null ? Math.round(aqiAvg * 10) / 10 : null,
       aqi_station_name:    row?.aqi_station_name ?? null,
       aqi_station_dist_m:  row?.aqi_station_dist ?? null,
-      pm25_ugm3:           row?.pm25_ugm3 ?? null,
-      no2_ugm3:            row?.no2_ugm3  ?? null,
+      pm25_ugm3:           row?.pm25_ugm3 != null ? Number(row.pm25_ugm3) : null,
+      no2_ugm3:            row?.no2_ugm3  != null ? Number(row.no2_ugm3)  : null,
       park_area_sqm_500m:  parkAreaSqm,
       nearest_green_m:     row?.nearest_park_m ?? null,
       sub_scores: {

@@ -85,9 +85,10 @@ export async function calcHealthSecurity(
     LEFT JOIN wait  ON TRUE
   `
 
+  // postgres.js returns DECIMAL columns as strings — coerce before arithmetic/.toFixed()
   const gpDistM    = row?.gp_dist_m ? Math.round(row.gp_dist_m) : null
   const erDistM    = row?.er_dist_m ? Math.round(row.er_dist_m) : null
-  const avgDaysGp  = row?.avg_days_gp ?? null
+  const avgDaysGp  = row?.avg_days_gp != null ? Number(row.avg_days_gp) : null
 
   const gpScore    = distanceToScore(gpDistM,  300,  3000)
   const erScore    = distanceToScore(erDistM, 1000,  8000)
@@ -107,14 +108,14 @@ export async function calcHealthSecurity(
     waitScore  * 0.15,
   )
 
-  if (gpDistM !== null && gpDistM > 3000) alerts.push({ type: 'amber', category: 'health', title: 'Centro de salud alejado',  description: `El centro de salud más cercano está a ${(gpDistM / 1000).toFixed(1)} km.` })
-  if (erDistM !== null && erDistM > 8000) alerts.push({ type: 'red',   category: 'health', title: 'Urgencias muy alejadas',  description: `Las urgencias 24h más cercanas están a ${(erDistM / 1000).toFixed(1)} km.` })
+  if (gpDistM !== null && gpDistM > 3000) alerts.push({ type: 'amber', category: 'health', title: 'GP surgery is far away',          description: `Nearest GP surgery is ${(gpDistM / 1000).toFixed(1)} km away.` })
+  if (erDistM !== null && erDistM > 8000) alerts.push({ type: 'red',   category: 'health', title: 'Emergency services are far away', description: `Nearest 24h emergency services are ${(erDistM / 1000).toFixed(1)} km away.` })
   if (avgDaysGp !== null && avgDaysGp > 7) {
     alerts.push({
       type: 'amber',
       category: 'health',
-      title: 'Espera larga para médico de cabecera',
-      description: `Espera media de ${avgDaysGp.toFixed(0)} días en ${row?.wait_health_area ?? 'esta comunidad autónoma'}.`,
+      title: 'Long wait for GP appointment',
+      description: `Average wait of ${avgDaysGp.toFixed(0)} days in ${row?.wait_health_area ?? 'this region'}.`,
     })
   }
 
@@ -129,8 +130,8 @@ export async function calcHealthSecurity(
       nearest_er_nombre:        row?.er_nombre ?? null,
       pharmacy_count_500m:      row?.pharmacy_count ?? 0,
       avg_days_gp_wait:         avgDaysGp,
-      avg_days_specialist_wait: row?.avg_days_specialist ?? null,
-      avg_days_surgery:         row?.avg_days_surgery    ?? null,
+      avg_days_specialist_wait: row?.avg_days_specialist != null ? Number(row.avg_days_specialist) : null,
+      avg_days_surgery:         row?.avg_days_surgery    != null ? Number(row.avg_days_surgery)    : null,
       wait_health_area:         row?.wait_health_area    ?? null,
     },
     alerts,

@@ -1154,12 +1154,13 @@ async function computeSolarPotential(
       LIMIT 1
     `
 
-    const pvpc      = consts?.electricity_pvpc_kwh_eur     ?? 0.185
-    const exportR   = consts?.solar_export_rate_eur        ?? 0.070
-    const installC  = consts?.solar_install_cost_per_kwp   ?? 1200
-    const ghiAnnual = solarRow?.ghi_annual_kwh_m2          ?? null
+    // postgres.js returns DECIMAL columns as strings — coerce before arithmetic
+    const pvpc      = consts?.electricity_pvpc_kwh_eur     != null ? Number(consts.electricity_pvpc_kwh_eur)     : 0.185
+    const exportR   = consts?.solar_export_rate_eur        != null ? Number(consts.solar_export_rate_eur)        : 0.070
+    const installC  = consts?.solar_install_cost_per_kwp   != null ? Number(consts.solar_install_cost_per_kwp)   : 1200
+    const ghiAnnual = solarRow?.ghi_annual_kwh_m2          != null ? Number(solarRow.ghi_annual_kwh_m2)          : null
     const aspect    = buildRow?.aspect                     ?? null
-    const footprint = buildRow?.footprint_area_m2          ?? null
+    const footprint = buildRow?.footprint_area_m2          != null ? Number(buildRow.footprint_area_m2)          : null
     const numFloors = buildRow?.num_floors                 ?? null
 
     // 4. First-pass calc (no PVGIS yet) — determines installed_kwp for the API call
