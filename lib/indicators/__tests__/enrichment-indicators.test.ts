@@ -393,7 +393,7 @@ describe('calcHealthSecurity — waiting time update', () => {
       wait_health_area: 'Zona Norte',
     }])
     const result = await calcHealthSecurity(sql, MALAGA)
-    const waitAlert = result.alerts.find((a) => a.title.includes('Espera'))
+    const waitAlert = result.alerts.find((a) => a.title.includes('Long wait'))
     expect(waitAlert).toBeDefined()
     expect(waitAlert?.type).toBe('amber')
   })

@@ -200,14 +200,14 @@ export async function calcTrueAffordability(
   const costRatio      = totalMonthly / monthlyIncome
 
   if (costRatio > 0.5) {
-    alerts.push({ type: 'red',   category: 'affordability', title: 'Coste excede el 50 % del ingreso local', description: `El coste mensual estimado de €${Math.round(totalMonthly)} supera el 50 % del ingreso neto medio de la zona (€${Math.round(monthlyIncome)}/mes).` })
+    alerts.push({ type: 'red',   category: 'affordability', title: 'Monthly cost exceeds 50% of local income', description: `Estimated monthly cost of €${Math.round(totalMonthly)} exceeds 50% of the area's average net income (€${Math.round(monthlyIncome)}/month).` })
   } else if (costRatio > 0.4) {
-    alerts.push({ type: 'amber', category: 'affordability', title: 'Coste supera el 40 % del ingreso local', description: `El coste mensual estimado de €${Math.round(totalMonthly)} supera el 40 % del ingreso neto medio de la zona (€${Math.round(monthlyIncome)}/mes).` })
+    alerts.push({ type: 'amber', category: 'affordability', title: 'Monthly cost exceeds 40% of local income', description: `Estimated monthly cost of €${Math.round(totalMonthly)} exceeds 40% of the area's average net income (€${Math.round(monthlyIncome)}/month).` })
   }
   if (priceToIncome > 10) {
-    alerts.push({ type: 'red',   category: 'affordability', title: 'Precio > 10× la renta anual local', description: `El precio de €${Math.round(property.price_asking).toLocaleString('es-ES')} equivale a ${priceToIncome.toFixed(1)} años de renta neta local.` })
+    alerts.push({ type: 'red',   category: 'affordability', title: 'Price is over 10× local annual income', description: `Asking price of €${Math.round(property.price_asking).toLocaleString('en-GB')} equals ${priceToIncome.toFixed(1)} years of local net income.` })
   } else if (priceToIncome > 7) {
-    alerts.push({ type: 'amber', category: 'affordability', title: 'Precio > 7× la renta anual local', description: `El precio equivale a ${priceToIncome.toFixed(1)} años de renta neta local.` })
+    alerts.push({ type: 'amber', category: 'affordability', title: 'Price is over 7× local annual income', description: `The asking price equals ${priceToIncome.toFixed(1)} years of local net income.` })
   }
 
   return {

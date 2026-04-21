@@ -90,17 +90,17 @@ export async function calcStructuralLiability(
   ))
 
   if (floodLevel === 'T10') {
-    alerts.push({ type: 'red',   category: 'flood',    title: 'Zona de inundación de alto riesgo', description: 'Esta propiedad está en una zona con periodo de retorno de 10 años (T10). Riesgo de inundación muy alto. Verificar seguro obligatorio.' })
+    alerts.push({ type: 'red',   category: 'flood',    title: 'High flood risk zone', description: 'This property is in a 10-year return period flood zone (T10). Very high flood risk. Verify mandatory insurance requirements.' })
   } else if (floodLevel === 'T100') {
-    alerts.push({ type: 'amber', category: 'flood',    title: 'Zona inundable (T100)',            description: 'La propiedad está en una zona con periodo de retorno de 100 años. Consultar el SNCZI antes de comprar.' })
+    alerts.push({ type: 'amber', category: 'flood',    title: 'Flood zone (T100)',    description: 'The property is in a 100-year return period flood zone. Check SNCZI before proceeding.' })
   } else if (floodLevel === 'T500') {
-    alerts.push({ type: 'amber', category: 'flood',    title: 'Zona inundable (T500)',            description: 'La propiedad está en una zona de inundación de periodo de retorno de 500 años. Riesgo bajo pero verificar cobertura de seguro.' })
+    alerts.push({ type: 'amber', category: 'flood',    title: 'Flood zone (T500)',    description: '500-year return period flood zone. Low risk, but verify insurance coverage.' })
   }
 
   if (sli > 75) {
-    alerts.push({ type: 'red',   category: 'structural', title: 'Alto riesgo de derrama',     description: row?.ite_status === 'failed' ? 'El edificio tiene una ITE desfavorable. Riesgo muy alto de derrama inminente.' : 'Edificio antiguo con alta probabilidad de gastos estructurales inesperados.' })
+    alerts.push({ type: 'red',   category: 'structural', title: 'High risk of major communal costs',     description: row?.ite_status === 'failed' ? 'The building has a failed building inspection (ITE). Very high risk of imminent structural levy.' : 'Older building with high probability of unexpected structural costs.' })
   } else if (sli > 55) {
-    alerts.push({ type: 'amber', category: 'structural', title: 'Riesgo moderado de derrama', description: 'El edificio tiene factores de riesgo estructural. Recomendamos revisar el libro del edificio.' })
+    alerts.push({ type: 'amber', category: 'structural', title: 'Moderate risk of communal costs', description: 'The building has structural risk factors. We recommend reviewing the building records.' })
   }
 
   return {

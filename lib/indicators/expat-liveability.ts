@@ -57,7 +57,7 @@ export async function calcExpatLiveability(
   const score        = Math.min(100, Math.round(airportScore * 0.80 + flightBonus))
 
   if (distKm !== null && distKm > 100) {
-    alerts.push({ type: 'amber', category: 'expat', title: 'Aeropuerto alejado', description: `El aeropuerto más cercano (${nearest?.iata_code}) está a ${Math.round(distKm)} km.` })
+    alerts.push({ type: 'amber', category: 'expat', title: 'Airport is far away', description: `Nearest airport (${nearest?.iata_code}) is ${Math.round(distKm)} km away.` })
   }
 
   return {

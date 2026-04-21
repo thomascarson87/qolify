@@ -84,12 +84,13 @@ function calcDampRisk(
   const currentYear = new Date().getFullYear()
 
   // Each component 0–100 (100 = highest damp contribution)
+  // DECIMAL columns from climate_data arrive as strings from postgres.js; coerce here.
 
   // Rainfall: 200mm (SE Spain dry) → 2,000mm (Galicia Atlantic) = full range
   const rainfallComponent = normalise(climate.rainfall_annual_mm ?? 600, 200, 2000)
 
   // Humidity: use winter humidity (Oct–Mar) if available, else annual
-  const humidity = climate.humidity_winter_pct ?? climate.humidity_annual_pct ?? 65
+  const humidity = Number(climate.humidity_winter_pct ?? climate.humidity_annual_pct ?? 65)
   const humidityComponent = normalise(humidity, 40, 90)
 
   // Orientation: north-facing = most damp risk (no sun for drying)
@@ -224,6 +225,11 @@ export async function calcClimateSolar(
 
   // ── 4. Sub-component scores (each 0–100; 100 = best for QoL) ──────────────
 
+  // postgres.js returns DECIMAL columns as strings — coerce to number before arithmetic.
+  // Without this, reduce((a,b)=>a+b,0) on monthly sunshine arrays concatenates strings
+  // ("5.2"+"4.1"="5.24.1") which divides to NaN and collapses the entire composite score.
+  const n = (v: unknown): number | null => v == null ? null : Number(v)
+
   // 8a — Solar resource (PVGIS GHI): primary signal for annual sunshine quality.
   //
   // Why PVGIS instead of AEMET sunshine_hours_annual:
@@ -237,7 +243,7 @@ export async function calcClimateSolar(
   //   Málaga: ~1,870 kWh/m²/yr → score ≈ 71 ✓
   //
   // AEMET sunshine_hours_annual is kept in details for display only.
-  const ghiAnnual       = solarRow?.ghi_annual_kwh_m2 ?? null
+  const ghiAnnual       = n(solarRow?.ghi_annual_kwh_m2)
   const solarResourceScore = ghiAnnual != null
     ? normalise(ghiAnnual, 1300, 2100)
     : 50   // no PVGIS data (very unlikely) → neutral
@@ -250,10 +256,11 @@ export async function calcClimateSolar(
   //      Uses AEMET monthly data when available; falls back to 50 (neutral) if
   //      the station is precipitation-only and all monthly values are 0.
   //      2.0h/day (Galicia winter) → 6.5h/day (Andalucía winter)
-  const winJ = (climateRow.sunshine_hours_jan ?? 0) > 0 ? climateRow.sunshine_hours_jan : null
-  const winF = (climateRow.sunshine_hours_feb ?? 0) > 0 ? climateRow.sunshine_hours_feb : null
-  const winD = (climateRow.sunshine_hours_dec ?? 0) > 0 ? climateRow.sunshine_hours_dec : null
-  const winterAvail = [winJ, winF, winD].filter((v): v is number => v != null)
+  const winJ = n(climateRow.sunshine_hours_jan)
+  const winF = n(climateRow.sunshine_hours_feb)
+  const winD = n(climateRow.sunshine_hours_dec)
+  // Filter out null and 0 (AEMET stations that don't record sunshine hours report 0)
+  const winterAvail = [winJ, winF, winD].filter((v): v is number => v != null && v > 0)
   const winterDailyAvg = winterAvail.length > 0
     ? winterAvail.reduce((a, b) => a + b, 0) / winterAvail.length
     : null

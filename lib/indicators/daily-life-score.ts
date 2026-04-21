@@ -147,8 +147,8 @@ export async function calcDailyLifeScore(
     alerts.push({
       type: 'amber',
       category: 'daily_life',
-      title: 'Sin servicios básicos a pie',
-      description: 'No se han encontrado farmacias, supermercados, cafés ni centros de salud en un radio de 400 m.',
+      title: 'No walkable daily services',
+      description: 'No pharmacy, supermarket, café or GP found within 400m.',
     })
   }
 
@@ -156,8 +156,8 @@ export async function calcDailyLifeScore(
     alerts.push({
       type: 'amber',
       category: 'daily_life',
-      title: 'Zona sin infraestructura peatonal/ciclista',
-      description: 'No se han detectado zonas peatonales ni carriles bici en un radio de 500 m.',
+      title: 'No pedestrian or cycling infrastructure',
+      description: 'No pedestrian zones or cycle lanes detected within 500m.',
     })
   }
 

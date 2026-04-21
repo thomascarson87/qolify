@@ -65,7 +65,8 @@ export async function calcEducationOpportunity(
   const totalSchools    = row?.total_count      ?? 0
   const inCatchment     = row?.in_catchment     ?? false
   const bilingualCount  = row?.bilingual_count  ?? 0
-  const avgDiagnostic   = row?.avg_diagnostic_score ?? null
+  // AVG(diagnostic_score) returns a DECIMAL string from postgres.js — coerce before arithmetic
+  const avgDiagnostic   = row?.avg_diagnostic_score != null ? Number(row.avg_diagnostic_score) : null
   const hasDiagnostic   = row?.has_diagnostic_data  ?? false
 
   const publicScore  = Math.min((row?.public_count     ?? 0) * 20, 60)
@@ -88,15 +89,15 @@ export async function calcEducationOpportunity(
   )
 
   if (totalSchools === 0) {
-    alerts.push({ type: 'amber', category: 'education', title: 'Sin colegios en 1km', description: 'No se han encontrado centros educativos en un radio de 1 km.' })
+    alerts.push({ type: 'amber', category: 'education', title: 'No schools within 1km', description: 'No schools found within a 1km radius.' })
   }
 
   if (bilingualCount > 0) {
     alerts.push({
       type: 'green',
       category: 'education',
-      title: `${bilingualCount} colegio${bilingualCount > 1 ? 's' : ''} bilingüe${bilingualCount > 1 ? 's' : ''} en 1 km`,
-      description: 'Centros con programa de educación bilingüe cerca de la propiedad.',
+      title: `${bilingualCount} bilingual school${bilingualCount > 1 ? 's' : ''} within 1km`,
+      description: 'Schools offering bilingual education programmes near this property.',
     })
   }
 

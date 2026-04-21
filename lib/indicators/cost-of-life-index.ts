@@ -92,10 +92,11 @@ export async function calcCostOfLifeIndex(
     CROSS JOIN supermarkets sm
   `
 
-  const coffeeEur      = row?.coffee_eur               ?? null
-  const groceryIndex   = row?.grocery_index             ?? null
-  const totalSm        = row?.total_supermarkets_500m   ?? 0
-  const discountCount  = row?.discount_count            ?? 0
+  // cost_of_living columns are DECIMAL — postgres.js returns them as strings; coerce first
+  const coffeeEur      = row?.coffee_eur      != null ? Number(row.coffee_eur)      : null
+  const groceryIndex   = row?.grocery_index   != null ? Number(row.grocery_index)   : null
+  const totalSm        = row?.total_supermarkets_500m ?? 0
+  const discountCount  = row?.discount_count          ?? 0
 
   // No cost_of_living data yet — blocked on CHI-376 (Numbeo API key)
   if (coffeeEur == null && groceryIndex == null) {
@@ -134,7 +135,7 @@ export async function calcCostOfLifeIndex(
   // Use Numbeo field if available, otherwise derive from OSM operator tags
   let discountPct: number
   if (row?.supermarket_discount_pct != null) {
-    discountPct = row.supermarket_discount_pct
+    discountPct = Number(row.supermarket_discount_pct)
   } else if (totalSm > 0) {
     discountPct = Math.round((discountCount / totalSm) * 100)
   } else {
@@ -154,12 +155,12 @@ export async function calcCostOfLifeIndex(
     confidence: 'medium',  // always medium — city-level data, not postcode
     details: {
       coffee_eur:               coffeeEur,
-      beer_eur:                 row?.beer_eur          ?? null,
-      meal_cheap_eur:           row?.meal_cheap_eur    ?? null,
-      meal_midrange_eur:        row?.meal_midrange_eur ?? null,
+      beer_eur:                 row?.beer_eur          != null ? Number(row.beer_eur)          : null,
+      meal_cheap_eur:           row?.meal_cheap_eur    != null ? Number(row.meal_cheap_eur)    : null,
+      meal_midrange_eur:        row?.meal_midrange_eur != null ? Number(row.meal_midrange_eur) : null,
       grocery_index:            groceryIndex,
       supermarket_discount_pct: discountPct,
-      supermarket_premium_pct:  row?.supermarket_premium_pct ?? null,
+      supermarket_premium_pct:  row?.supermarket_premium_pct != null ? Number(row.supermarket_premium_pct) : null,
       total_supermarkets_500m:  totalSm,
       discount_supermarkets:    discountCount,
       recorded_quarter:         row?.recorded_quarter ?? null,
