@@ -441,6 +441,14 @@ export default async function EducationReportPage({ params, searchParams }: Prop
                           Canteen
                         </span>
                       )}
+                      {s.teacher_ratio != null && (
+                        <span
+                          title="Students per teacher"
+                          style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 10, color: '#4A6080', background: 'rgba(74,96,128,0.10)', borderRadius: 4, padding: '1px 7px' }}
+                        >
+                          {s.teacher_ratio.toFixed(1)}:1 ratio
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>

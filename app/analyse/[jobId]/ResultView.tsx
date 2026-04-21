@@ -472,6 +472,11 @@ function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }
                     <span style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 12, color: 'var(--text)' }}>{val}</span>
                   </div>
                 ))}
+                {result.property.ref_catastral && (
+                  <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 10, color: 'var(--text-light)', marginTop: 10, paddingTop: 8, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
+                    Source: <a href="https://www.catastro.minhap.es/" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-light)', textDecoration: 'underline' }}>Dirección General del Catastro</a>
+                  </p>
+                )}
               </div>
             ) : <SkeletonCard label="Property" />}
 
@@ -514,6 +519,15 @@ function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }
                   if (p.lat != null) qs.set('lat', String(p.lat))
                   if (p.lng != null) qs.set('lng', String(p.lng))
                   detailUrl = `/map/report/education/${p.codigo_postal}?${qs}`
+                } else if (key === 'climate_solar' && p.ref_catastral) {
+                  // Solar deep-dive lives at /map/report/solar/[ref_catastral].
+                  // Only build the link when we actually have a ref_catastral;
+                  // otherwise the deep-dive page has nothing to key on.
+                  const qs = new URLSearchParams({ jobId })
+                  if (p.lat != null) qs.set('lat', String(p.lat))
+                  if (p.lng != null) qs.set('lng', String(p.lng))
+                  if (p.codigo_postal) qs.set('postcode', p.codigo_postal)
+                  detailUrl = `/map/report/solar/${encodeURIComponent(p.ref_catastral)}?${qs}`
                 }
                 return <IndicatorCard key={key} indicatorKey={key} data={data} detailUrl={detailUrl} />
               }
@@ -579,29 +593,9 @@ function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }
                   locked={isLocked}
                   city={result.property.municipio ?? 'Spain'}
                 />
-                {(() => {
-                  const ref = result.property.ref_catastral ?? 'none'
-                  const qs  = new URLSearchParams({ jobId })
-                  if (result.property.lat != null)  qs.set('lat', String(result.property.lat))
-                  if (result.property.lng != null)  qs.set('lng', String(result.property.lng))
-                  if (result.property.codigo_postal) qs.set('postcode', result.property.codigo_postal)
-                  return (
-                    <Link
-                      href={`/map/report/solar/${encodeURIComponent(ref)}?${qs}`}
-                      style={{
-                        display:    'inline-block',
-                        marginTop:  12,
-                        fontFamily: 'var(--font-dm-sans)',
-                        fontSize:   12,
-                        fontWeight: 600,
-                        color:      '#D4820A',
-                        textDecoration: 'none',
-                      }}
-                    >
-                      View full solar report →
-                    </Link>
-                  )
-                })()}
+                {/* Deep-dive entry point now lives on the climate_solar indicator
+                    card (see indicator grid above) so free-tier users encounter
+                    the same lock-then-upgrade flow as health/education. */}
               </div>
             </section>
           )
