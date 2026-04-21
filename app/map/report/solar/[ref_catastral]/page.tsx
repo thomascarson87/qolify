@@ -17,10 +17,80 @@
 import { notFound } from 'next/navigation';
 import db from '@/lib/db';
 import Anthropic from '@anthropic-ai/sdk';
+import { createClient } from '@/lib/supabase/server';
 import { ThemeToggle } from '@/components/report/ThemeToggle';
 import { callPvgisPvcalc, optimalTilt } from '@/lib/pvgis';
 import { calcSolarPotential } from '@/lib/indicators/solar-potential';
 import { SolarPotentialCard } from '@/components/report/SolarPotentialCard';
+
+// ---------------------------------------------------------------------------
+// Tier check
+// ---------------------------------------------------------------------------
+
+async function getUserTier(): Promise<string> {
+  try {
+    const supabase = await createClient();
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return 'free';
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('tier, tier_expires_at')
+      .eq('id', session.user.id)
+      .single();
+    if (!profile) return 'free';
+    if (profile.tier_expires_at && new Date(profile.tier_expires_at) < new Date()) return 'free';
+    return profile.tier ?? 'free';
+  } catch {
+    return 'free';
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Upgrade gate component
+// ---------------------------------------------------------------------------
+
+function UpgradeGate({ backUrl }: { backUrl: string }) {
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--background)', color: 'var(--text)', fontFamily: 'var(--font-dm-sans)' }}>
+      <nav style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 24px', height: 52,
+        borderBottom: '1px solid rgba(0,0,0,0.07)',
+        background: 'var(--surface-2)',
+      }}>
+        <a href={backUrl} style={{ fontSize: 13, color: '#8A9BB0', textDecoration: 'none' }}>
+          ← Back
+        </a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <ThemeToggle />
+          <span style={{ fontFamily: 'var(--font-playfair)', fontSize: 18, fontWeight: 600 }}>Qolify</span>
+        </div>
+      </nav>
+      <main style={{ maxWidth: 520, margin: '80px auto', padding: '0 24px', textAlign: 'center' }}>
+        <p style={{ fontSize: 11, letterSpacing: '0.12em', color: '#D4820A', textTransform: 'uppercase', marginBottom: 12 }}>
+          Pro Feature
+        </p>
+        <h1 style={{ fontFamily: 'var(--font-playfair)', fontSize: 28, fontWeight: 700, marginBottom: 16 }}>
+          Solar &amp; Climate Intelligence
+        </h1>
+        <p style={{ fontSize: 14, color: '#8A9BB0', lineHeight: 1.7, marginBottom: 32 }}>
+          Upgrade to Pro to unlock the full Solar &amp; Climate report — including building orientation,
+          solar yield projections, financial returns, and 30-year climate context.
+        </p>
+        <a
+          href="/pricing"
+          style={{
+            display: 'inline-block', background: '#D4820A', color: '#fff',
+            fontWeight: 700, fontSize: 14, padding: '12px 24px',
+            borderRadius: 8, textDecoration: 'none',
+          }}
+        >
+          Upgrade to Pro →
+        </a>
+      </main>
+    </div>
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Constants — Málaga 30yr monthly sunshine hours (AEMET normals, station 6155A)
@@ -126,6 +196,14 @@ interface EcoConstants {
   solar_install_cost_per_kwp: number;
 }
 
+interface BuildingOrientation {
+  aspect:           string | null;
+  aspect_degrees:   number | null;
+  source:           string | null;
+  confidence:       string | null;
+  footprint_area_m2: number | null;
+}
+
 // ---------------------------------------------------------------------------
 // Data fetchers
 // ---------------------------------------------------------------------------
@@ -196,6 +274,24 @@ async function getZoneSolarData(
     LIMIT 1`;
 
   return (rows[0] as unknown as ZoneSolar) ?? null;
+}
+
+/**
+ * Fetch building orientation from Catastro data stored during analysis.
+ * Returns null gracefully when ref is 'none' or row is not yet populated.
+ */
+async function getBuildingOrientation(ref_catastral: string): Promise<BuildingOrientation | null> {
+  if (!ref_catastral || ref_catastral === 'none') return null;
+  try {
+    const rows = await db`
+      SELECT aspect, aspect_degrees, source, confidence, footprint_area_m2::float
+      FROM building_orientation
+      WHERE ref_catastral = ${ref_catastral}
+      LIMIT 1`;
+    return (rows[0] as unknown as BuildingOrientation) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -318,7 +414,7 @@ function SunshineBarChart({
 
 interface Props {
   params:      Promise<{ ref_catastral: string }>;
-  searchParams: Promise<{ lat?: string; lng?: string; postcode?: string }>;
+  searchParams: Promise<{ lat?: string; lng?: string; postcode?: string; jobId?: string }>;
 }
 
 export default async function SolarReportPage({ params, searchParams }: Props) {
@@ -328,9 +424,11 @@ export default async function SolarReportPage({ params, searchParams }: Props) {
   const lat = sp.lat ? parseFloat(sp.lat) : null;
   const lng = sp.lng ? parseFloat(sp.lng) : null;
 
-  const backUrl = lat != null && lng != null
-    ? `/map?lat=${sp.lat}&lng=${sp.lng}&pin=true`
-    : '/map';
+  const jobId   = sp.jobId ?? null;
+  const backUrl = jobId
+    ? `/analyse/${jobId}`
+    : (lat != null && lng != null ? `/map?lat=${sp.lat}&lng=${sp.lng}&pin=true` : '/map');
+  const backLabel = jobId ? '← DNA Report' : '← Back to map';
 
   // Gate: ref_catastral = 'none' AND no location context → ask for address
   const isPlaceholder = !ref_catastral || ref_catastral === 'none';
@@ -340,12 +438,20 @@ export default async function SolarReportPage({ params, searchParams }: Props) {
     return <GatePage backUrl={backUrl} />;
   }
 
-  // Fetch zone data, eco constants, and PVGIS in parallel
+  // Tier check — Pro required
+  const tier = await getUserTier();
+  const isPro = tier === 'pro' || tier === 'intelligence';
+  if (!isPro) {
+    return <UpgradeGate backUrl={backUrl} />;
+  }
+
+  // Fetch zone data, eco constants, building orientation, and PVGIS in parallel
   const postcode = sp.postcode ?? null;
 
-  const [zoneData, ecoConstants] = await Promise.all([
+  const [zoneData, ecoConstants, orientation] = await Promise.all([
     getZoneSolarData(postcode),
     getEcoConstants(),
+    getBuildingOrientation(ref_catastral),
   ]);
 
   // PVGIS PVcalc — uses the clicked lat/lng, or falls back to null (financial calc uses GHI)
@@ -414,7 +520,7 @@ export default async function SolarReportPage({ params, searchParams }: Props) {
         position: 'sticky', top: 0, background: 'var(--surface-2)', zIndex: 10,
       }}>
         <a href={backUrl} style={{ fontSize: 13, color: '#8A9BB0', textDecoration: 'none' }}>
-          ← Back to map
+          {backLabel}
         </a>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <ThemeToggle />
@@ -441,6 +547,84 @@ export default async function SolarReportPage({ params, searchParams }: Props) {
         )}
 
         <div style={{ height: 1, background: 'rgba(0,0,0,0.07)', marginBottom: 32 }} />
+
+        {/* ── Building Orientation ── */}
+        {orientation && (
+          <section style={{ marginBottom: 40 }}>
+            <h2 style={{
+              fontSize: 11, fontWeight: 700, letterSpacing: '0.1em',
+              color: '#8A9BB0', textTransform: 'uppercase', marginBottom: 16,
+            }}>
+              Building Orientation
+            </h2>
+            <div style={{
+              background: 'var(--surface-2)', border: '1px solid rgba(0,0,0,0.07)',
+              borderRadius: 10, padding: '20px 18px',
+              display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '16px 24px', alignItems: 'start',
+            }}>
+              {/* Compass rose */}
+              <div style={{
+                width: 72, height: 72, borderRadius: '50%',
+                border: '2px solid rgba(212,130,10,0.3)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                position: 'relative', background: 'rgba(212,130,10,0.05)',
+              }}>
+                {/* Compass arrow rotated to aspect_degrees */}
+                <div style={{
+                  width: 4, height: 28,
+                  background: '#D4820A',
+                  borderRadius: 2,
+                  transform: `rotate(${orientation.aspect_degrees ?? 0}deg)`,
+                  transformOrigin: 'bottom center',
+                  position: 'absolute',
+                  bottom: '50%',
+                  left: 'calc(50% - 2px)',
+                }} />
+                <span style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 14, fontWeight: 700, color: '#D4820A', zIndex: 1 }}>
+                  {orientation.aspect ?? '—'}
+                </span>
+              </div>
+
+              <div>
+                <p style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 26, fontWeight: 500, color: 'var(--navy-deep)', margin: 0 }}>
+                  {orientation.aspect ?? 'Unknown'}
+                  {orientation.aspect_degrees != null && (
+                    <span style={{ fontSize: 14, color: '#8A9BB0', fontWeight: 400, marginLeft: 8 }}>
+                      ({orientation.aspect_degrees}°)
+                    </span>
+                  )}
+                </p>
+                <p style={{ fontSize: 13, color: '#4A5D74', marginTop: 6, lineHeight: 1.5 }}>
+                  {(() => {
+                    const a = orientation.aspect;
+                    if (a === 'S')  return 'South-facing — maximum solar gain year-round. Ideal for solar panels and passive heating.';
+                    if (a === 'SE') return 'South-east facing — excellent morning sun with strong solar gain. Very good for panels.';
+                    if (a === 'SW') return 'South-west facing — good afternoon sun with strong solar gain. Well-suited for panels.';
+                    if (a === 'E')  return 'East-facing — good morning sun but reduced afternoon solar gain. Moderate panel yield.';
+                    if (a === 'W')  return 'West-facing — afternoon sun exposure. Useful for summer cooling and moderate panel yield.';
+                    if (a === 'N')  return 'North-facing — limited direct sun. Panels not recommended on this façade.';
+                    if (a === 'NE') return 'North-east facing — minimal solar gain. Panels not recommended on this façade.';
+                    if (a === 'NW') return 'North-west facing — minimal solar gain. Panels not recommended on this façade.';
+                    return 'Orientation data not available.';
+                  })()}
+                </p>
+                {orientation.footprint_area_m2 != null && (
+                  <p style={{ fontSize: 12, color: '#8A9BB0', marginTop: 8 }}>
+                    Building footprint:{' '}
+                    <span style={{ fontFamily: 'var(--font-dm-mono)', color: '#4A5D74' }}>
+                      {Math.round(orientation.footprint_area_m2)} m²
+                    </span>
+                  </p>
+                )}
+                {orientation.confidence && (
+                  <p style={{ fontSize: 11, color: '#8A9BB0', marginTop: 4 }}>
+                    Source: {orientation.source ?? 'Catastro'} · Confidence: {orientation.confidence}
+                  </p>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* AI narrative */}
         {narrative && (

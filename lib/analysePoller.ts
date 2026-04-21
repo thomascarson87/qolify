@@ -27,6 +27,8 @@ export interface AnalysisProperty {
   bathrooms: number | null
   property_type: string | null
   floor: number | null
+  codigo_postal: string | null
+  ref_catastral: string | null
 }
 
 export interface AnalysisResult {
