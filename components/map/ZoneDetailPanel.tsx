@@ -423,6 +423,16 @@ function SchoolsAccordion({ data, onActivateLayer }: { data: ZoneDetail; onActiv
         School catchment boundaries overlap postcodes. Drop a pin for your specific address to confirm your catchment school.
       </AccordionNote>
       <MapLink label="Show schools on map" onClick={onActivateLayer ? () => onActivateLayer('schools') : undefined} />
+      <a
+        href={`/map/report/education/${data.codigo_postal}`}
+        style={{
+          display: 'inline-block', marginTop: 10,
+          fontFamily: 'var(--font-dm-sans)', fontSize: 11, fontWeight: 600,
+          color: '#34C97A', textDecoration: 'none',
+        }}
+      >
+        Education deep dive →
+      </a>
     </>
   );
 }
@@ -438,6 +448,16 @@ function HealthAccordion({ data, onActivateLayer }: { data: ZoneDetail; onActiva
       <AccordionRow label="Nearest 24h emergency" value={emergency ? `${emergency.name} · ${walkMins(emergency.distance_m)}` : '—'} />
       <AccordionRow label="Pharmacies within 500m" value={pharmacies > 0 ? `${pharmacies}` : 'None recorded'} />
       <MapLink label="Show health facilities on map" onClick={onActivateLayer ? () => onActivateLayer('health') : undefined} />
+      <a
+        href={`/map/report/health/${data.codigo_postal}`}
+        style={{
+          display: 'inline-block', marginTop: 10,
+          fontFamily: 'var(--font-dm-sans)', fontSize: 11, fontWeight: 600,
+          color: '#34C97A', textDecoration: 'none',
+        }}
+      >
+        Health deep dive →
+      </a>
     </>
   );
 }
@@ -583,6 +603,16 @@ function SolarAccordion({ data }: { data: ZoneDetail }) {
         </>
       )}
       {!chartValues && <AccordionNote>Monthly solar data not available for this postcode.</AccordionNote>}
+      <a
+        href={`/map/report/solar/none?postcode=${data.codigo_postal}`}
+        style={{
+          display: 'inline-block', marginTop: 10,
+          fontFamily: 'var(--font-dm-sans)', fontSize: 11, fontWeight: 600,
+          color: '#D4820A', textDecoration: 'none',
+        }}
+      >
+        Solar deep dive →
+      </a>
     </>
   );
 }

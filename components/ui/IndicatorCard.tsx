@@ -44,6 +44,8 @@ interface IndicatorCardProps {
   loading?:     boolean;
   /** True when the user's tier does not cover this indicator → LOCKED state. */
   locked?:      boolean;
+  /** When set, renders a "Full report →" link in the LOADED card footer. */
+  detailUrl?:   string;
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -305,7 +307,7 @@ function LockedCard({ label, icon }: { label: string; icon: string }) {
 
 // ─── LOADED state (main component) ───────────────────────────────────────────
 
-export function IndicatorCard({ indicatorKey, data, loading = false, locked = false }: IndicatorCardProps) {
+export function IndicatorCard({ indicatorKey, data, loading = false, locked = false, detailUrl }: IndicatorCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   // Look up metadata from the registry; fall back gracefully for unknown keys
@@ -415,7 +417,7 @@ export function IndicatorCard({ indicatorKey, data, loading = false, locked = fa
         </div>
       )}
 
-      {/* ── Footer: confidence + expand ── */}
+      {/* ── Footer: confidence + expand + detail link ── */}
       <div className="flex items-center justify-between" style={{ marginTop: "auto" }}>
         <div className="flex items-center gap-1.5">
           <span
@@ -427,22 +429,38 @@ export function IndicatorCard({ indicatorKey, data, loading = false, locked = fa
             {confidenceLabel(confidence)}
           </span>
         </div>
-        {dataRows.length > 0 && (
-          <button
-            onClick={() => setExpanded((v) => !v)}
-            style={{
-              fontFamily: "var(--font-dm-sans)",
-              fontSize:   11,
-              color:      "var(--text-mid)",
-              background: "none",
-              border:     "none",
-              cursor:     "pointer",
-              padding:    0,
-            }}
-          >
-            {expanded ? "Less ↑" : "Detail ›"}
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          {dataRows.length > 0 && (
+            <button
+              onClick={() => setExpanded((v) => !v)}
+              style={{
+                fontFamily: "var(--font-dm-sans)",
+                fontSize:   11,
+                color:      "var(--text-mid)",
+                background: "none",
+                border:     "none",
+                cursor:     "pointer",
+                padding:    0,
+              }}
+            >
+              {expanded ? "Less ↑" : "Detail ›"}
+            </button>
+          )}
+          {detailUrl && (
+            <a
+              href={detailUrl}
+              style={{
+                fontFamily:     "var(--font-dm-sans)",
+                fontSize:       11,
+                fontWeight:     600,
+                color:          "#34C97A",
+                textDecoration: "none",
+              }}
+            >
+              Full report →
+            </a>
+          )}
+        </div>
       </div>
     </CardShell>
   );

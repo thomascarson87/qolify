@@ -50,6 +50,9 @@ function buildCompleteResponse(row: {
   bathrooms: number | null
   property_type: string | null
   floor: number | null
+  codigo_postal: string | null
+  ref_catastral: string | null
+  solar_potential_result?: unknown
 }) {
   return {
     status:               'complete',
@@ -60,6 +63,7 @@ function buildCompleteResponse(row: {
     tvi_score:            row.tvi_score,
     composite_indicators: row.composite_indicators,
     alerts:               row.alerts ?? [],
+    solar_potential_result: row.solar_potential_result ?? null,
     property: {
       lat:           row.lat,
       lng:           row.lng,
@@ -75,6 +79,8 @@ function buildCompleteResponse(row: {
       bathrooms:     row.bathrooms,
       property_type: row.property_type,
       floor:         row.floor,
+      codigo_postal: row.codigo_postal,
+      ref_catastral: row.ref_catastral,
     },
   }
 }
@@ -116,6 +122,9 @@ export async function GET(req: NextRequest) {
     bathrooms: number | null
     property_type: string | null
     floor: number | null
+    codigo_postal: string | null
+    ref_catastral: string | null
+    solar_potential_result: unknown
   }[]>`
     SELECT
       j.status,
@@ -127,7 +136,7 @@ export async function GET(req: NextRequest) {
       c.composite_indicators,
       c.alerts,
       c.expires_at,
-      c.source_url      AS source_url_cache,
+      c.source_url          AS source_url_cache,
       c.lat,
       c.lng,
       c.price_asking,
@@ -141,7 +150,10 @@ export async function GET(req: NextRequest) {
       c.bedrooms,
       c.bathrooms,
       c.property_type,
-      c.floor
+      c.floor,
+      c.codigo_postal,
+      c.ref_catastral,
+      c.solar_potential_result
     FROM analysis_jobs j
     LEFT JOIN analysis_cache c ON j.cache_id = c.id
     WHERE j.id = ${jobId}
@@ -200,12 +212,16 @@ export async function GET(req: NextRequest) {
     bathrooms: number | null
     property_type: string | null
     floor: number | null
+    codigo_postal: string | null
+    ref_catastral: string | null
+    solar_potential_result: unknown
   }[]>`
     SELECT
       id, tvi_score, composite_indicators, alerts, expires_at, source_url,
       lat, lng, price_asking, price_per_sqm, area_sqm,
       provincia, municipio, build_year, epc_rating,
-      address, bedrooms, bathrooms, property_type, floor
+      address, bedrooms, bathrooms, property_type, floor,
+      codigo_postal, ref_catastral, solar_potential_result
     FROM analysis_cache
     WHERE id = ${jobId}
     LIMIT 1
@@ -213,26 +229,29 @@ export async function GET(req: NextRequest) {
 
   if (cached) {
     return NextResponse.json(buildCompleteResponse({
-      cache_id:             cached.id,
-      tvi_score:            cached.tvi_score,
-      composite_indicators: cached.composite_indicators,
-      alerts:               cached.alerts,
-      expires_at:           cached.expires_at,
-      source_url_cache:     cached.source_url,
-      lat:                  cached.lat,
-      lng:                  cached.lng,
-      price_asking:         cached.price_asking,
-      price_per_sqm:        cached.price_per_sqm,
-      area_sqm:             cached.area_sqm,
-      provincia:            cached.provincia,
-      municipio:            cached.municipio,
-      build_year:           cached.build_year,
-      epc_rating:           cached.epc_rating,
-      address:              cached.address,
-      bedrooms:             cached.bedrooms,
-      bathrooms:            cached.bathrooms,
-      property_type:        cached.property_type,
-      floor:                cached.floor,
+      cache_id:               cached.id,
+      tvi_score:              cached.tvi_score,
+      composite_indicators:   cached.composite_indicators,
+      alerts:                 cached.alerts,
+      expires_at:             cached.expires_at,
+      source_url_cache:       cached.source_url,
+      lat:                    cached.lat,
+      lng:                    cached.lng,
+      price_asking:           cached.price_asking,
+      price_per_sqm:          cached.price_per_sqm,
+      area_sqm:               cached.area_sqm,
+      provincia:              cached.provincia,
+      municipio:              cached.municipio,
+      build_year:             cached.build_year,
+      epc_rating:             cached.epc_rating,
+      address:                cached.address,
+      bedrooms:               cached.bedrooms,
+      bathrooms:              cached.bathrooms,
+      property_type:          cached.property_type,
+      floor:                  cached.floor,
+      codigo_postal:          cached.codigo_postal,
+      ref_catastral:          cached.ref_catastral,
+      solar_potential_result: cached.solar_potential_result,
     }))
   }
 

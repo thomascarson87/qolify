@@ -502,7 +502,20 @@ function FullReport({ result }: { result: AnalysisResult }) {
               // rather than an ambiguous loaded card with an empty badge.
               const data = ci[key]
               if (data && data.score !== null) {
-                return <IndicatorCard key={key} indicatorKey={key} data={data} />
+                // Build deep-dive URL for cards that have a full report page
+                let detailUrl: string | undefined
+                if (key === 'health_security' && p.codigo_postal) {
+                  const qs = new URLSearchParams({ jobId })
+                  if (p.lat != null) qs.set('lat', String(p.lat))
+                  if (p.lng != null) qs.set('lng', String(p.lng))
+                  detailUrl = `/map/report/health/${p.codigo_postal}?${qs}`
+                } else if (key === 'education_opportunity' && p.codigo_postal) {
+                  const qs = new URLSearchParams({ jobId })
+                  if (p.lat != null) qs.set('lat', String(p.lat))
+                  if (p.lng != null) qs.set('lng', String(p.lng))
+                  detailUrl = `/map/report/education/${p.codigo_postal}?${qs}`
+                }
+                return <IndicatorCard key={key} indicatorKey={key} data={data} detailUrl={detailUrl} />
               }
 
               // Live indicator, no data or null score — show unavailable
@@ -566,6 +579,29 @@ function FullReport({ result }: { result: AnalysisResult }) {
                   locked={isLocked}
                   city={result.property.municipio ?? 'Spain'}
                 />
+                {!isLocked && (() => {
+                  const ref = result.property.ref_catastral ?? 'none'
+                  const qs  = new URLSearchParams({ jobId })
+                  if (result.property.lat != null)  qs.set('lat', String(result.property.lat))
+                  if (result.property.lng != null)  qs.set('lng', String(result.property.lng))
+                  if (result.property.codigo_postal) qs.set('postcode', result.property.codigo_postal)
+                  return (
+                    <Link
+                      href={`/map/report/solar/${encodeURIComponent(ref)}?${qs}`}
+                      style={{
+                        display:    'inline-block',
+                        marginTop:  12,
+                        fontFamily: 'var(--font-dm-sans)',
+                        fontSize:   12,
+                        fontWeight: 600,
+                        color:      '#D4820A',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      View full solar report →
+                    </Link>
+                  )
+                })()}
               </div>
             </section>
           )
