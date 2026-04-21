@@ -458,6 +458,42 @@ The CTA calls `POST /api/analyse` with `{ url: null, lat, lng, name }`. The rout
 
 ---
 
+## D-044 — CHI-409 Education Quality Data programme scoped (replaces proximity-only view)
+**Status:** Active
+**Date:** 2026-04-21
+**Decision:** Created Linear ticket [CHI-409](https://linear.app/chimeopen/issue/CHI-409/education-quality-data-populate-schools-enrichment-bilingual) (Urgent, M6 Data Enrichment). The education deep-dive renders `schools.bilingual_languages`, `has_canteen`, `has_sports_facilities`, `diagnostic_score`, `teacher_ratio`, `evau_pass_rate`, but all 48,988 school rows have those columns NULL. The UI is wired; the gap is ingest, not build. Programme runs three waves:
+1. **MEFP national CSV** (`scripts/ingest/enrich_schools.py` — script already exists) → populates bilingual/canteen/sports for ~28K schools.
+2. **Andalucía + Madrid diagnostic Excel** → populates `diagnostic_score` + `diagnostic_year` for 2,500-4,000 schools. Spain has no Ofsted equivalent; regional diagnostic scores are the closest proxy.
+3. **Extension** — teacher_ratio (BOE/regional) and evau_pass_rate (blocked on CHI-387 university EVAU ingest).
+
+**Scope guardrails:** No fabricated scores. No scraping of sources that explicitly prohibit it. UNAVAILABLE state rendered where data genuinely does not exist.
+
+**Rationale:** User flagged the proximity-only deep-dive as a gap: "waiting times, school reports, costs, etc… why has this not been realised?". Investigation proved the components exist but the enrichment table columns are empty.
+
+**Affects:** `scripts/ingest/enrich_schools.py` · `app/map/report/education/[postcode]/page.tsx` · `schools` table.
+
+---
+
+## D-045 — CHI-375 MSCBS health waiting times ingested (2025-Q4, 19 CCAAs)
+**Status:** Active
+**Date:** 2026-04-21
+**Decision:** Loaded first batch into `health_waiting_times` — 19 rows covering all 17 comunidades + Ceuta + Melilla. Data is from the Ministerio de Sanidad SISLE-SNS PDF `Datos_ccaa_dic2025.pdf` (situación a 31 Dic 2025 → `recorded_quarter = 2025-10-01`). Coverage: `avg_days_surgery` + `surgery_waiting_list` (page 3/4) and `avg_days_specialist` (page 8). `avg_days_gp` remains NULL — not published at national level; only regional supplements exist (Andalucía, Madrid).
+
+**Script fixes during execution (`scripts/ingest/ingest_health_waiting.py`):**
+- `parse_quarter` bug: `"-Q"` split consumes the Q; the previous code left `qnum = "4"` which failed the `QUARTER_MONTHS` lookup. Now re-prepends `Q`.
+- PDF layout drift: pages 3/4/7/8 now emit two tables each (banner + data). Added `best_totals()` helper that tries every table and keeps the one with the most CCAA matches.
+- Header row false-positive: the two-line column header also contains `\n`, so the "big data row" detector now requires ≥3 of the split lines to match `CCAA_CODE_MAP`.
+- Added `"C.FORAL DE NAVARRA"` (no space after period) alias to `CCAA_CODE_MAP`.
+
+**Source URL:** https://www.sanidad.gob.es/estadEstudios/estadisticas/inforRecopilaciones/docs/Datos_ccaa_dic2025.pdf
+**Next quarterly run:** April 2026 (Q1 publication) — confirm URL at https://www.sanidad.gob.es/estadEstudios/estadisticas/inforRecopilaciones/listaEspera.htm
+
+**Known gaps:** GP wait times not covered (national source does not publish). Regional Andalucía/Madrid GP supplements are a follow-up task.
+
+**Affects:** `health_waiting_times` table · `zone_enrichment_scores` materialised view · `app/map/report/health/[postcode]/page.tsx`.
+
+---
+
 ## Future Decisions (pending)
 
 These decisions need to be made before the relevant phase begins:
