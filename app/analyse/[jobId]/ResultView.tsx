@@ -261,7 +261,14 @@ function tierRank(tier: UserTier): number {
 
 function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }) {
   const [compressed, setCompressed] = useState(false)
-  const [userTier, setUserTier] = useState<UserTier>('free')
+  // In development we unlock every indicator so Thomas can exercise the
+  // full DNA Report without a Pro auth session. Flip to 'free' (or remove
+  // this initializer) when billing is live. NODE_ENV is inlined by Next.js
+  // at build time so this constant tree-shakes out of production bundles.
+  const DEV_DEFAULT_TIER: UserTier = process.env.NODE_ENV === 'development'
+    ? 'intelligence'
+    : 'free'
+  const [userTier, setUserTier] = useState<UserTier>(DEV_DEFAULT_TIER)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
