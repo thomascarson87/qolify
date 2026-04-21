@@ -77,6 +77,7 @@ CCAA_CODE_MAP: dict[str, str] = {
     "MADRID":               "ES-MD",
     "MURCIA":               "ES-MC",
     "C. FORAL DE NAVARRA":  "ES-NC",
+    "C.FORAL DE NAVARRA":   "ES-NC",   # variant without space after period
     "PAÍS VASCO":           "ES-PV",
     "PAIS VASCO":           "ES-PV",   # alternate accent
     "RIOJA":                "ES-RI",
@@ -100,7 +101,7 @@ def parse_quarter(quarter_str: str) -> date:
         if len(parts) != 2:
             raise ValueError(f"Invalid quarter format: {quarter_str!r}. Expected e.g. '2025-Q2'")
         year = int(parts[0])
-        qnum = parts[1]
+        qnum = "Q" + parts[1]
         if qnum not in QUARTER_MONTHS:
             raise ValueError(f"Quarter must be Q1-Q4, got: {qnum!r}")
         return date(year, QUARTER_MONTHS[qnum], 1)
@@ -162,10 +163,19 @@ def extract_ccaa_totals_from_table(table: list[list]) -> dict[str, float | None]
     """
     result: dict[str, float | None] = {}
 
-    # Find the "big data row" — the one where cell[0] contains multiple CCAA names
+    # Find the "big data row" — the one where cell[0] contains multiple CCAA names.
+    # A header row can also contain newlines (multi-line column labels), so require
+    # that the split parts actually match known CCAAs.
     data_row_idx = None
     for i, row in enumerate(table):
-        if row and row[0] and '\n' in str(row[0]):
+        if not row or not row[0] or '\n' not in str(row[0]):
+            continue
+        parts = [p.strip() for p in str(row[0]).split('\n') if p.strip()]
+        matched = sum(
+            1 for p in parts
+            if p in CCAA_CODE_MAP or p.upper() in {k.upper() for k in CCAA_CODE_MAP}
+        )
+        if matched >= 3:
             data_row_idx = i
             break
 
@@ -233,34 +243,36 @@ def parse_pdf(pdf_path: str) -> dict[str, dict]:
         n_pages = len(pages)
         print(f"  PDF has {n_pages} pages")
 
+        def best_totals(page_idx: int) -> dict[str, float | None]:
+            # Some PDF versions emit multiple tables per page (banner + data).
+            # Try each and keep the one that yields the most CCAA rows.
+            tables = pages[page_idx].extract_tables() if page_idx < n_pages else []
+            best: dict[str, float | None] = {}
+            for tbl in tables:
+                got = extract_ccaa_totals_from_table(tbl)
+                if len(got) > len(best):
+                    best = got
+            return best
+
         # Page 3 (index 2): Surgical waiting list — number of patients → surgery_waiting_list
-        if n_pages >= 3:
-            tables = pages[2].extract_tables()
-            if tables:
-                counts = extract_ccaa_totals_from_table(tables[0])
-                for code, val in counts.items():
-                    data.setdefault(code, {})["surgery_waiting_list"] = (
-                        int(val) if val is not None else None
-                    )
-                print(f"  Page 3: {len(counts)} CCAA surgical patient counts")
+        counts = best_totals(2)
+        for code, val in counts.items():
+            data.setdefault(code, {})["surgery_waiting_list"] = (
+                int(val) if val is not None else None
+            )
+        print(f"  Page 3: {len(counts)} CCAA surgical patient counts")
 
         # Page 4 (index 3): Surgical waiting list — mean wait days → avg_days_surgery
-        if n_pages >= 4:
-            tables = pages[3].extract_tables()
-            if tables:
-                waits = extract_ccaa_totals_from_table(tables[0])
-                for code, val in waits.items():
-                    data.setdefault(code, {})["avg_days_surgery"] = val
-                print(f"  Page 4: {len(waits)} CCAA surgical wait times")
+        waits = best_totals(3)
+        for code, val in waits.items():
+            data.setdefault(code, {})["avg_days_surgery"] = val
+        print(f"  Page 4: {len(waits)} CCAA surgical wait times")
 
         # Page 8 (index 7): Consultation waiting list — mean wait days → avg_days_specialist
-        if n_pages >= 8:
-            tables = pages[7].extract_tables()
-            if tables:
-                consult = extract_ccaa_totals_from_table(tables[0])
-                for code, val in consult.items():
-                    data.setdefault(code, {})["avg_days_specialist"] = val
-                print(f"  Page 8: {len(consult)} CCAA consultation wait times")
+        consult = best_totals(7)
+        for code, val in consult.items():
+            data.setdefault(code, {})["avg_days_specialist"] = val
+        print(f"  Page 8: {len(consult)} CCAA consultation wait times")
 
     # Attach display names and initialise missing fields
     for code in list(data.keys()):
