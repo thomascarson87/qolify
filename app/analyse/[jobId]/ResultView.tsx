@@ -259,7 +259,7 @@ function tierRank(tier: UserTier): number {
   }
 }
 
-function FullReport({ result }: { result: AnalysisResult }) {
+function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }) {
   const [compressed, setCompressed] = useState(false)
   const [userTier, setUserTier] = useState<UserTier>('free')
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -579,7 +579,7 @@ function FullReport({ result }: { result: AnalysisResult }) {
                   locked={isLocked}
                   city={result.property.municipio ?? 'Spain'}
                 />
-                {!isLocked && (() => {
+                {(() => {
                   const ref = result.property.ref_catastral ?? 'none'
                   const qs  = new URLSearchParams({ jobId })
                   if (result.property.lat != null)  qs.set('lat', String(result.property.lat))
@@ -827,7 +827,7 @@ export function ResultView({
         />
       )}
 
-      {state.phase === 'complete' && <FullReport result={state.result} />}
+      {state.phase === 'complete' && <FullReport result={state.result} jobId={jobId} />}
 
       {state.phase === 'error' && (
         <CentredShell>

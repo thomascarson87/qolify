@@ -438,12 +438,9 @@ export default async function SolarReportPage({ params, searchParams }: Props) {
     return <GatePage backUrl={backUrl} />;
   }
 
-  // Tier check — Pro required
-  const tier = await getUserTier();
-  const isPro = tier === 'pro' || tier === 'intelligence';
-  if (!isPro) {
-    return <UpgradeGate backUrl={backUrl} />;
-  }
+  // Tier gate disabled during dev — everything open while we exercise the full report.
+  // TODO(re-enable when billing ships): restore Pro+ gate using getUserTier() + UpgradeGate.
+  void getUserTier; void UpgradeGate;
 
   // Fetch zone data, eco constants, building orientation, and PVGIS in parallel
   const postcode = sp.postcode ?? null;

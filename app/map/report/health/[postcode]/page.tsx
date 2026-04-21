@@ -287,17 +287,12 @@ export default async function HealthReportPage({ params, searchParams }: Props) 
 
   if (!/^\d{5}$/.test(postcode)) notFound();
 
-  // Tier gate — Intelligence only
-  const tier    = await getUserTier();
+  // Tier gate disabled during dev — everything open while we exercise the full report.
+  // TODO(re-enable when billing ships): restore Intelligence-only gate using getUserTier() + UpgradeGate.
+  void getUserTier; void UpgradeGate;
   const backUrl = sp.lat && sp.lng
     ? `/map?lat=${sp.lat}&lng=${sp.lng}&pin=true`
     : '/map';
-
-  const tierRank = { free: 0, pro: 1, explorer: 2, intelligence: 3 };
-  const rank     = tierRank[tier as keyof typeof tierRank] ?? 0;
-  if (rank < tierRank.intelligence) {
-    return <UpgradeGate backUrl={backUrl} />;
-  }
 
   // Fetch health data in parallel
   const { gp, hospital, urgencias, pharmacies, zone } = await getHealthData(postcode);
