@@ -97,15 +97,15 @@ export async function calcCommunityStability(
     alerts.push({
       type: 'red',
       category: 'community',
-      title: 'Alta concentración de VUT',
-      description: `${vutActive} viviendas turísticas activas en un radio de 500 m. El barrio puede tener alta rotación de residentes.`,
+      title: 'High tourist rental concentration',
+      description: `${vutActive} active tourist rental licences within 500m. The neighbourhood may have high resident turnover.`,
     })
   } else if (vutActive > 10) {
     alerts.push({
       type: 'amber',
       category: 'community',
-      title: 'Densidad VUT moderada',
-      description: `${vutActive} viviendas turísticas activas en un radio de 500 m.`,
+      title: 'Moderate tourist rental density',
+      description: `${vutActive} active tourist rental licences within 500m.`,
     })
   }
 
@@ -113,15 +113,15 @@ export async function calcCommunityStability(
     alerts.push({
       type: 'red',
       category: 'community',
-      title: 'Zona de alto ruido',
-      description: `Nivel de ruido Lden de ${noiseLden} dB — equivalente a una calle muy transitada. Fuente: Mapa Estratégico de Ruido UE.`,
+      title: 'High noise zone',
+      description: `Noise level Lden ${noiseLden} dB — equivalent to a busy road. Source: EU Strategic Noise Map.`,
     })
   } else if (noiseLden !== null && noiseLden >= 60) {
     alerts.push({
       type: 'amber',
       category: 'community',
-      title: 'Zona de ruido moderado-alto',
-      description: `Nivel de ruido Lden de ${noiseLden} dB. Fuente: Mapa Estratégico de Ruido UE.`,
+      title: 'Moderate-high noise zone',
+      description: `Noise level Lden ${noiseLden} dB. Source: EU Strategic Noise Map.`,
     })
   }
 

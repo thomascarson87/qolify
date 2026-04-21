@@ -678,14 +678,14 @@ async function calcTrueAffordability(
   const costRatio     = totalMonthly / monthlyIncome
 
   if (costRatio > 0.5) {
-    alerts.push({ type: 'red',   category: 'affordability', title: 'Coste excede el 50 % del ingreso local', description: `El coste mensual estimado de €${Math.round(totalMonthly)} supera el 50 % del ingreso neto medio de la zona (€${Math.round(monthlyIncome)}/mes).` })
+    alerts.push({ type: 'red',   category: 'affordability', title: 'Monthly cost exceeds 50% of local income', description: `Estimated monthly cost of €${Math.round(totalMonthly)} exceeds 50% of the area's average net income (€${Math.round(monthlyIncome)}/month).` })
   } else if (costRatio > 0.4) {
-    alerts.push({ type: 'amber', category: 'affordability', title: 'Coste supera el 40 % del ingreso local', description: `El coste mensual estimado de €${Math.round(totalMonthly)} supera el 40 % del ingreso neto medio de la zona (€${Math.round(monthlyIncome)}/mes).` })
+    alerts.push({ type: 'amber', category: 'affordability', title: 'Monthly cost exceeds 40% of local income', description: `Estimated monthly cost of €${Math.round(totalMonthly)} exceeds 40% of the area's average net income (€${Math.round(monthlyIncome)}/month).` })
   }
   if (priceToIncome > 10) {
-    alerts.push({ type: 'red',   category: 'affordability', title: 'Precio > 10× la renta anual local', description: `El precio de €${Math.round(prop.price_asking).toLocaleString('es-ES')} equivale a ${priceToIncome.toFixed(1)} años de renta neta local.` })
+    alerts.push({ type: 'red',   category: 'affordability', title: 'Price is over 10× local annual income', description: `Asking price of €${Math.round(prop.price_asking).toLocaleString('en-GB')} equals ${priceToIncome.toFixed(1)} years of local net income.` })
   } else if (priceToIncome > 7) {
-    alerts.push({ type: 'amber', category: 'affordability', title: 'Precio > 7× la renta anual local', description: `El precio equivale a ${priceToIncome.toFixed(1)} años de renta neta local.` })
+    alerts.push({ type: 'amber', category: 'affordability', title: 'Price is over 7× local annual income', description: `The asking price equals ${priceToIncome.toFixed(1)} years of local net income.` })
   }
 
   return {
@@ -782,12 +782,12 @@ async function calcStructuralLiability(
 
   const sli = Math.min(100, Math.round(ageScore * 0.30 + iteScore * 0.40 + epcScore * 0.20 + permitScore * 0.10 + floodPenalty))
 
-  if (floodLevel === 'T10')  alerts.push({ type: 'red',   category: 'flood',    title: 'Zona de inundación de alto riesgo', description: 'Esta propiedad está en una zona con periodo de retorno de 10 años (T10). Riesgo de inundación muy alto.' })
-  else if (floodLevel === 'T100') alerts.push({ type: 'amber', category: 'flood',    title: 'Zona inundable (T100)',            description: 'La propiedad está en una zona con periodo de retorno de 100 años.' })
-  else if (floodLevel === 'T500') alerts.push({ type: 'amber', category: 'flood',    title: 'Zona inundable (T500)',            description: 'Zona de inundación de periodo de retorno de 500 años. Riesgo bajo.' })
+  if (floodLevel === 'T10')  alerts.push({ type: 'red',   category: 'flood',    title: 'High flood risk zone',  description: 'This property is in a 10-year return period flood zone (T10). Very high flood risk.' })
+  else if (floodLevel === 'T100') alerts.push({ type: 'amber', category: 'flood',    title: 'Flood zone (T100)',     description: 'The property is in a 100-year return period flood zone.' })
+  else if (floodLevel === 'T500') alerts.push({ type: 'amber', category: 'flood',    title: 'Flood zone (T500)',     description: '500-year return period flood zone. Low risk.' })
 
-  if (sli > 75) alerts.push({ type: 'red',   category: 'structural', title: 'Alto riesgo de derrama',     description: row?.ite_status === 'failed' ? 'El edificio tiene una ITE desfavorable.' : 'Edificio antiguo con alta probabilidad de gastos estructurales inesperados.' })
-  else if (sli > 55) alerts.push({ type: 'amber', category: 'structural', title: 'Riesgo moderado de derrama', description: 'El edificio tiene factores de riesgo estructural. Recomendamos revisar el libro del edificio.' })
+  if (sli > 75) alerts.push({ type: 'red',   category: 'structural', title: 'High risk of major communal costs',     description: row?.ite_status === 'failed' ? 'The building has a failed building inspection (ITE).' : 'Older building with high probability of unexpected structural costs.' })
+  else if (sli > 55) alerts.push({ type: 'amber', category: 'structural', title: 'Moderate risk of communal costs', description: 'The building has structural risk factors. We recommend reviewing the building records.' })
 
   return {
     score: sli,
@@ -851,9 +851,9 @@ async function calcDigitalViability(
   const score = Math.min(100, Math.round(fibreScore + coworkBonus))
 
   if (!fibreType || fibreType === 'none') {
-    alerts.push({ type: 'red',   category: 'connectivity', title: 'Sin cobertura de fibra',  description: 'Esta propiedad no tiene cobertura de fibra óptica registrada.' })
+    alerts.push({ type: 'red',   category: 'connectivity', title: 'No fibre broadband coverage', description: 'No registered fibre optic coverage for this property.' })
   } else if (fibreType === 'FTTC' || fibreType === 'HFC') {
-    alerts.push({ type: 'amber', category: 'connectivity', title: 'Fibra parcial',            description: `La cobertura disponible es ${fibreType}, no fibra directa al hogar (FTTP).` })
+    alerts.push({ type: 'amber', category: 'connectivity', title: 'Partial fibre coverage',       description: `Available coverage is ${fibreType}, not direct fibre to the home (FTTP).` })
   }
 
   return {
@@ -922,8 +922,8 @@ async function calcHealthSecurity(
   const pharmScore = Math.min((row?.pharmacy_count ?? 0) * 25, 100)
   const score      = Math.round(gpScore * 0.40 + erScore * 0.40 + pharmScore * 0.20)
 
-  if (gpDistM != null && gpDistM > 3000) alerts.push({ type: 'amber', category: 'health', title: 'Centro de salud alejado',  description: `El centro de salud más cercano está a ${(gpDistM / 1000).toFixed(1)} km.` })
-  if (erDistM != null && erDistM > 8000) alerts.push({ type: 'red',   category: 'health', title: 'Urgencias muy alejadas', description: `Las urgencias 24h más cercanas están a ${(erDistM / 1000).toFixed(1)} km.` })
+  if (gpDistM != null && gpDistM > 3000) alerts.push({ type: 'amber', category: 'health', title: 'GP surgery is far away',          description: `Nearest GP surgery is ${(gpDistM / 1000).toFixed(1)} km away.` })
+  if (erDistM != null && erDistM > 8000) alerts.push({ type: 'red',   category: 'health', title: 'Emergency services are far away', description: `Nearest 24h emergency services are ${(erDistM / 1000).toFixed(1)} km away.` })
 
   const hasData = row?.gp_dist_m != null || row?.er_dist_m != null
   return {
@@ -984,7 +984,7 @@ async function calcEducationOpportunity(
   const catchBonus    = inCatchment ? 15 : 0
   const score         = Math.min(100, Math.round(publicScore + concertScore + privateScore + catchBonus))
 
-  if (totalSchools === 0) alerts.push({ type: 'amber', category: 'education', title: 'Sin colegios en 1km', description: 'No se han encontrado centros educativos en un radio de 1 km.' })
+  if (totalSchools === 0) alerts.push({ type: 'amber', category: 'education', title: 'No schools within 1km', description: 'No schools found within a 1km radius.' })
 
   return {
     score: totalSchools > 0 ? score : null,
@@ -1031,7 +1031,7 @@ async function calcExpatLiveability(
   const flightBonus  = nearest ? Math.min(nearest.weekly_flights / 100, 20) : 0
   const score        = Math.min(100, Math.round(airportScore * 0.80 + flightBonus))
 
-  if (distKm != null && distKm > 100) alerts.push({ type: 'amber', category: 'expat', title: 'Aeropuerto alejado', description: `El aeropuerto más cercano (${nearest?.iata_code}) está a ${Math.round(distKm)} km.` })
+  if (distKm != null && distKm > 100) alerts.push({ type: 'amber', category: 'expat', title: 'Airport is far away', description: `Nearest airport (${nearest?.iata_code}) is ${Math.round(distKm)} km away.` })
 
   return {
     score: nearest ? score : null,
@@ -1154,12 +1154,13 @@ async function computeSolarPotential(
       LIMIT 1
     `
 
-    const pvpc      = consts?.electricity_pvpc_kwh_eur     ?? 0.185
-    const exportR   = consts?.solar_export_rate_eur        ?? 0.070
-    const installC  = consts?.solar_install_cost_per_kwp   ?? 1200
-    const ghiAnnual = solarRow?.ghi_annual_kwh_m2          ?? null
+    // postgres.js returns DECIMAL columns as strings — coerce before arithmetic
+    const pvpc      = consts?.electricity_pvpc_kwh_eur     != null ? Number(consts.electricity_pvpc_kwh_eur)     : 0.185
+    const exportR   = consts?.solar_export_rate_eur        != null ? Number(consts.solar_export_rate_eur)        : 0.070
+    const installC  = consts?.solar_install_cost_per_kwp   != null ? Number(consts.solar_install_cost_per_kwp)   : 1200
+    const ghiAnnual = solarRow?.ghi_annual_kwh_m2          != null ? Number(solarRow.ghi_annual_kwh_m2)          : null
     const aspect    = buildRow?.aspect                     ?? null
-    const footprint = buildRow?.footprint_area_m2          ?? null
+    const footprint = buildRow?.footprint_area_m2          != null ? Number(buildRow.footprint_area_m2)          : null
     const numFloors = buildRow?.num_floors                 ?? null
 
     // 4. First-pass calc (no PVGIS yet) — determines installed_kwp for the API call
