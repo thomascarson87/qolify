@@ -79,7 +79,7 @@ CREATE INDEX properties_tvi_idx ON properties (tvi_score) WHERE is_active = TRUE
 ```
 
 ### `analysis_cache`
-Model B. On-demand analysis results. 48h TTL.
+Model B. On-demand analysis results. Reports are **durable** (CHI-347 / migration 015) — `expires_at` is nullable and defaults to `NULL`, meaning "never expires". A future tier-gated "Refresh report" action may set a short expiry to force a pipeline re-run; the column itself is retained for that purpose. Both the `POST /api/analyse` cache lookup and the `GET /api/analyse/status` fallback treat `expires_at IS NULL` as "still valid".
 
 ```sql
 CREATE TABLE analysis_cache (
@@ -118,7 +118,7 @@ CREATE TABLE analysis_cache (
   solar_potential_result JSONB,            -- added: migration 014
 
   extracted_at          TIMESTAMPTZ DEFAULT NOW(),
-  expires_at            TIMESTAMPTZ DEFAULT NOW() + INTERVAL '48 hours',
+  expires_at            TIMESTAMPTZ,             -- NULL = durable report (default since migration 015 / CHI-347)
   extraction_version    TEXT DEFAULT '1.0',
   price_logged          BOOLEAN DEFAULT FALSE
 );

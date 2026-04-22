@@ -623,10 +623,11 @@ function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }
           </p>
         </section>
 
-        {/* Cache notice */}
-        {result.cached && (
+        {/* Cache notice — CHI-347: reports are durable, banner retained only when
+            a legacy row still has an expires_at (pre-migration). */}
+        {result.cached && result.expires_at && (
           <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 12, color: 'var(--text-light)' }}>
-            Analysis from {formatDate(result.expires_at)} — refreshes automatically after 48 hours.
+            Analysis cached. Saved to your account.
           </p>
         )}
 
