@@ -507,6 +507,10 @@ def build_query_by_area() -> str:
     We filter down to just the city postcodes in osm_to_features() if --malaga-only is set.
     Using a broad query is safer than a tight one — extra postcodes cost nothing to skip.
     """
+    # Note: the "^29" prefix matches both Spanish (Málaga) and German (Lower
+    # Saxony) postcodes. osm_to_features() drops anything outside the Spain
+    # bbox as a client-side guard (CHI-410). A server-side `(area.spain)`
+    # constraint was tried but returned 0 features via Overpass.
     return """
 [out:json][timeout:180];
 (
@@ -567,7 +571,21 @@ def osm_to_features(overpass_data: dict) -> list[dict]:
     geojson_fc = osm2geojson.json2geojson(overpass_data, filter_used_refs=False)
 
     features = []
-    skipped_no_cp = skipped_no_geom = skipped_bad_cp = 0
+    skipped_no_cp = skipped_no_geom = skipped_bad_cp = skipped_out_of_spain = 0
+
+    # Spain mainland + Balearics + Canaries bbox — any coord outside this is
+    # a foreign postcode (e.g. German 29xxx) and must be rejected. This is the
+    # defence-in-depth for CHI-410 alongside the Spain-area Overpass filter.
+    SPAIN_BBOX = (-19.0, 27.0, 5.0, 44.0)  # (min_lng, min_lat, max_lng, max_lat)
+
+    def _first_coord(g):
+        """Return the first (lng, lat) tuple found in a GeoJSON geometry, or None."""
+        coords = g.get("coordinates") if g else None
+        while isinstance(coords, list) and coords and isinstance(coords[0], list):
+            coords = coords[0]
+        if isinstance(coords, list) and len(coords) >= 2:
+            return (float(coords[0]), float(coords[1]))
+        return None
 
     for feat in geojson_fc.get("features", []):
         props = feat.get("properties", {}) or {}
@@ -589,6 +607,14 @@ def osm_to_features(overpass_data: dict) -> list[dict]:
             skipped_no_geom += 1
             continue  # relation exists but osm2geojson couldn't reconstruct a polygon
 
+        # Reject polygons whose first vertex is outside Spain (foreign 29xxx)
+        pt = _first_coord(geom)
+        if pt is not None:
+            lng, lat = pt
+            if not (SPAIN_BBOX[0] <= lng <= SPAIN_BBOX[2] and SPAIN_BBOX[1] <= lat <= SPAIN_BBOX[3]):
+                skipped_out_of_spain += 1
+                continue
+
         municipio = (
             tags.get("addr:city")
             or tags.get("addr:municipality")
@@ -602,9 +628,10 @@ def osm_to_features(overpass_data: dict) -> list[dict]:
             "geometry":      geom,
         })
 
-    total = len(features) + skipped_no_cp + skipped_no_geom + skipped_bad_cp
+    total = len(features) + skipped_no_cp + skipped_no_geom + skipped_bad_cp + skipped_out_of_spain
     print(f"  {total} OSM features → {len(features)} valid postcode polygons "
-          f"(skipped: {skipped_no_cp} no-cp, {skipped_bad_cp} bad-cp, {skipped_no_geom} no-geom)")
+          f"(skipped: {skipped_no_cp} no-cp, {skipped_bad_cp} bad-cp, "
+          f"{skipped_no_geom} no-geom, {skipped_out_of_spain} out-of-Spain)")
 
     if len(features) < 5:
         print(
@@ -663,11 +690,17 @@ def ingest_features(conn, features: list[dict], malaga_only: bool) -> int:
 
 
 def compute_centroids(conn) -> int:
-    """SET centroid = ST_Centroid(geom) for all rows where centroid is NULL."""
+    """SET centroid = ST_PointOnSurface(geom) for all rows where centroid is NULL.
+
+    CHI-410: ST_PointOnSurface guarantees a point INSIDE the polygon even for
+    concave / multi-part shapes, where ST_Centroid can fall outside and break
+    downstream radius searches (e.g. school catchment lookup for the
+    education deep-dive).
+    """
     with conn.cursor() as cur:
         cur.execute("""
             UPDATE postal_zones
-            SET centroid = ST_Centroid(geom)
+            SET centroid = ST_PointOnSurface(geom)
             WHERE centroid IS NULL
         """)
         updated = cur.rowcount
