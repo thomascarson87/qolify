@@ -246,11 +246,19 @@ def build_climate_record(
     monthly_hum   = extract_monthly(normals, "hr_md")       # mean monthly humidity (%)
 
     # Annual sunshine: sum of monthly inso_md (h/day) × days_in_month.
-    # inso_md is available for full climate stations. Synoptic-only stations return
-    # empty strings, resulting in 0 — those are filtered out by the quality gate in run().
-    sunshine_annual = int(sum(
-        monthly_sun[i] * DAYS_PER_MONTH[i] for i in range(12)
-    ))
+    # CHI-384: inso_md is empty for precipitation-only stations. _safe_float() turns
+    # empties into 0.0, which would silently write sunshine_hours_annual=0 — a
+    # factually wrong value that pollutes solar-potential scores. Detect "no
+    # insolation data" by checking that at least one month has a non-zero value;
+    # if all twelve are zero, persist NULL for annual + monthly sunshine fields
+    # so the quality gate in run() can treat the station as precip-only.
+    has_sunshine_data = any(v > 0 for v in monthly_sun)
+    if has_sunshine_data:
+        sunshine_annual: int | None = int(sum(
+            monthly_sun[i] * DAYS_PER_MONTH[i] for i in range(12)
+        ))
+    else:
+        sunshine_annual = None
     hdd = calc_hdd(monthly_temps)
     cdd = calc_cdd(monthly_temps)
 
@@ -281,9 +289,9 @@ def build_climate_record(
         "data_year_to":    2020,
     }
 
-    # Monthly sunshine (avg daily hours for each month)
+    # Monthly sunshine (avg daily hours for each month) — NULL when station has no insol data
     for i, month in enumerate(MONTHS_SHORT):
-        record[f"sunshine_hours_{month}"] = round(monthly_sun[i], 1)
+        record[f"sunshine_hours_{month}"] = round(monthly_sun[i], 1) if has_sunshine_data else None
 
     return record
 
@@ -534,9 +542,11 @@ def run(args):
                 station_id=station_id,
                 normals=normals,
             )
+            sun_val = record['sunshine_hours_annual']
+            sun_str = f"{sun_val}h" if sun_val is not None else "NULL (precip-only)"
             tqdm.write(
                 f"  [DRY] {station_id} → municipio={record['municipio_code']} "
-                f"sun={record['sunshine_hours_annual']}h "
+                f"sun={sun_str} "
                 f"HDD={record['hdd_annual']} CDD={record['cdd_annual']}"
             )
             n_upserted += 1
@@ -548,13 +558,25 @@ def run(args):
                 station_id=station_id,
                 normals=normals,
             )
-            # Quality gate: skip stations that lack temperature AND sunshine data
-            # (synoptic stations that measure wind/pressure but not climate normals)
-            if record["sunshine_hours_annual"] == 0 and record["temp_mean_annual_c"] == 0.0:
+            # Quality gate: skip stations with no usable data at all (no temp AND no sunshine).
+            # CHI-384: sunshine_hours_annual is now NULL (not 0) when the station lacks
+            # insol data, so treat missing-or-zero the same here. A precip-only station
+            # with valid temp still passes — it writes temp/rain/humidity, leaves
+            # sunshine as NULL, and the UPSERT's "WHEN EXCLUDED.sunshine_hours_annual > 0"
+            # guard (NULL > 0 is NULL/false) preserves any existing good sunshine data.
+            sun_val = record["sunshine_hours_annual"]
+            has_sun = sun_val is not None and sun_val > 0
+            has_temp = record["temp_mean_annual_c"] != 0.0
+            if not has_sun and not has_temp:
                 tqdm.write(
                     f"  [SKIP] {station_id}: no temp/sunshine data (synoptic-only station)"
                 )
                 continue
+            if not has_sun:
+                tqdm.write(
+                    f"  [WARN] {station_id}: no sunshine data → writing sunshine fields as NULL "
+                    f"(municipio={record['municipio_code']})"
+                )
             try:
                 upsert_climate_record(conn, record)
             except psycopg2.OperationalError:
