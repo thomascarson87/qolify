@@ -71,7 +71,7 @@ function MonthlyBarChart({ monthlyKwh }: { monthlyKwh: number[] }) {
         const g = Math.round(201 + (220 - 201) * (1 - ratio));
         const b = Math.round(122 + (200 - 122) * (1 - ratio));
         return (
-          <g key={labels[i]}>
+          <g key={i}>
             <rect x={x} y={y} width={barW} height={barH} fill={`rgb(${r},${g},${b})`} rx={2} opacity={0.9} />
             <text x={x + barW / 2} y={chartH + 13} textAnchor="middle" fill="#4A6080" fontSize={8} fontFamily="var(--font-dm-sans)">
               {labels[i]}
