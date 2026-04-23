@@ -85,8 +85,13 @@ function SectionShell({ children }: { children: React.ReactNode }) {
 }
 
 export function NeighbourhoodIntel({
-  lat, lng, codigoPostal, municipio, priceAsking, areaSqm,
+  lat: latRaw, lng: lngRaw, codigoPostal, municipio, priceAsking, areaSqm,
 }: NeighbourhoodIntelProps) {
+  // Numeric columns from Postgres can arrive as strings in JSON — coerce once
+  // here so every downstream consumer (fetch body, toFixed guard) sees a number.
+  const lat = typeof latRaw === 'number' ? latRaw : Number(latRaw);
+  const lng = typeof lngRaw === 'number' ? lngRaw : Number(lngRaw);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
   const [pin,            setPin]            = useState<PinFetch | null>(null);
   const [pinLoading,     setPinLoading]     = useState(true);
   const [pinError,       setPinError]       = useState(false);
