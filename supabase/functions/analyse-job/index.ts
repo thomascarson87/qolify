@@ -1586,15 +1586,32 @@ Deno.serve(async (req: Request) => {
       .eq('id', jobId)
 
     // --- Log to property_price_history ---
-    await supabase.from('property_price_history').insert({
-      cache_id:     cacheRow.id,
-      source_url:   job.source_url,
-      codigo_postal: prop.codigo_postal ?? null,
-      price:        prop.price_asking,
-      price_per_sqm: pricePerSqm,
-      observed_at:  new Date().toISOString(),
-      source:       'user_submission',
-    })
+    // CHI-412: only log real listing prices. Skip when (a) this is a pin-drop
+    // job (source_url = "pin:lat,lng") which has no listing at all, or (b) the
+    // extractor returned a non-positive price (listing removed, paywalled, or
+    // Parse.bot layout drift). Either case would write a €0 row that poisons
+    // postcode-level price aggregates. analysis_cache still writes above so
+    // the user sees a report with null-safe downstream rendering.
+    if (
+      !isPinOnlyJob &&
+      typeof prop.price_asking === 'number' &&
+      prop.price_asking > 0
+    ) {
+      await supabase.from('property_price_history').insert({
+        cache_id:     cacheRow.id,
+        source_url:   job.source_url,
+        codigo_postal: prop.codigo_postal ?? null,
+        price:        prop.price_asking,
+        price_per_sqm: pricePerSqm,
+        observed_at:  new Date().toISOString(),
+        source:       'user_submission',
+      })
+    } else {
+      console.warn(
+        `[analyse-job] CHI-412: skipping property_price_history insert ` +
+        `(price_asking=${prop.price_asking}) for source_url=${job.source_url}`,
+      )
+    }
 
     return new Response(JSON.stringify({ success: true, cacheId: cacheRow.id }), {
       status: 200,
