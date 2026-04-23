@@ -30,6 +30,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { FloodSafetySection } from '@/components/map/FloodSafetySection';
 import { ProximitySummary, type FacilityCounts, type UserProfile } from '@/components/map/ProximitySummary';
+import { AreaSummarySection } from '@/components/map/AreaSummarySection';
+import { CommunityCharacterTriage } from '@/components/map/CommunityCharacterTriage';
 import { generateAreaSummary, type AreaSummaryInput } from '@/app/actions/generateAreaSummary';
 
 // ---------------------------------------------------------------------------
@@ -138,17 +140,6 @@ function fmtCoord(n: number, pos: string, neg: string): string {
   return `${Math.abs(n).toFixed(4)}° ${n >= 0 ? pos : neg}`;
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p
-      style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 10, letterSpacing: '0.1em' }}
-      className="uppercase text-[#8A9BB0] mb-2"
-    >
-      {children}
-    </p>
-  );
-}
-
 function Divider() {
   return <div style={{ height: 1, background: '#1E3050', margin: '4px 0' }} />;
 }
@@ -160,20 +151,6 @@ function gradeLetter(score: number): string {
   if (score >= 55) return 'C';
   if (score >= 40) return 'D';
   return 'F';
-}
-
-// Strip common markdown so AI-generated text renders as clean prose.
-// Handles: headings (#), bold, italic, inline code, bullet points.
-function stripMarkdown(text: string): string {
-  return text
-    .replace(/^#{1,6}\s+/gm, '')        // # Heading → Heading
-    .replace(/\*\*(.+?)\*\*/g, '$1')    // **bold** → bold
-    .replace(/\*(.+?)\*/g, '$1')         // *italic* → italic
-    .replace(/_(.+?)_/g, '$1')           // _italic_ → italic
-    .replace(/`(.+?)`/g, '$1')           // `code` → code
-    .replace(/^[\-\*]\s+/gm, '')         // - bullet → stripped
-    .replace(/\n{3,}/g, '\n\n')          // collapse excess blank lines
-    .trim();
 }
 
 // ---------------------------------------------------------------------------
@@ -188,79 +165,6 @@ function PanelSkeleton() {
       <div className="h-32 rounded bg-[#1E3050]" />
       <div className="h-24 rounded bg-[#1E3050]" />
     </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Section 2 — AI area summary
-// ---------------------------------------------------------------------------
-
-function AreaSummarySection({
-  loading,
-  summary,
-}: {
-  loading: boolean;
-  summary: string | null;
-}) {
-  if (!loading && !summary) return null;
-
-  return (
-    <section>
-      <SectionLabel>Area Overview</SectionLabel>
-      {loading ? (
-        /* Skeleton while Claude generates the summary */
-        <div className="flex flex-col gap-2 animate-pulse">
-          <div style={{ height: 13, width: '100%', background: '#1E3050', borderRadius: 4 }} />
-          <div style={{ height: 13, width: '92%',  background: '#1E3050', borderRadius: 4 }} />
-          <div style={{ height: 13, width: '78%',  background: '#1E3050', borderRadius: 4 }} />
-        </div>
-      ) : (
-        <p style={{
-          fontFamily: 'var(--font-dm-sans)',
-          fontSize:   14,
-          color:      '#C5D5E8',
-          lineHeight: 1.6,
-          margin:     0,
-        }}>
-          {/* stripMarkdown prevents headings like "# Málaga Property Summary" rendering as raw text */}
-          {stripMarkdown(summary!)}
-        </p>
-      )}
-    </section>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Section 5 — Community character (VUT count only, per triage card spec)
-// ---------------------------------------------------------------------------
-
-function CommunityCharacterTriage({ vutCount }: { vutCount: number }) {
-  const color    = vutCount <= 3 ? '#34C97A' : vutCount <= 10 ? '#D4820A' : '#C94B1A';
-  const icon     = vutCount <= 3 ? '✓' : '⚠';
-  const bodyText = vutCount <= 3
-    ? 'Low tourist saturation in this immediate area.'
-    : vutCount <= 10
-    ? 'Moderate tourist rentals present — worth checking your specific building.'
-    : 'High tourist rental density. Residential character may be reduced.';
-
-  return (
-    <section>
-      <SectionLabel>Community Character</SectionLabel>
-      <div style={{
-        borderLeft:   `3px solid ${color}`,
-        background:   `${color}10`,
-        borderRadius: '0 8px 8px 0',
-        padding:      '12px 14px',
-      }}>
-        <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 13, fontWeight: 600, color: '#FFFFFF', marginBottom: 2 }}>
-          <span style={{ color }}>{icon}</span>
-          {' '}{vutCount} active tourist rental licence{vutCount !== 1 ? 's' : ''} within 200m.
-        </p>
-        <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 12, color: '#8A9BB0', margin: 0 }}>
-          {bodyText}
-        </p>
-      </div>
-    </section>
   );
 }
 

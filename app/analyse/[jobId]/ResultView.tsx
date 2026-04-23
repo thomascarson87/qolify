@@ -26,6 +26,7 @@ import Link from 'next/link'
 import { MiniMapCard } from '@/components/report/MiniMapCard'
 import { ProximitySummary, type FacilityCounts } from '@/components/map/ProximitySummary'
 import { SolarPotentialCard } from '@/components/report/SolarPotentialCard'
+import { NeighbourhoodIntel } from '@/components/report/NeighbourhoodIntel'
 import type { SolarPotentialResult } from '@/lib/indicators/solar-potential'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -523,6 +524,20 @@ function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }
 
           </div>
         </section>
+
+        {/* Neighbourhood Intelligence — AI summary + Flood + VUT tourist density.
+            Only rendered when we have coordinates (Parse.bot occasionally can't
+            geocode a listing; in that case the rest of the report still works). */}
+        {result.property.lat != null && result.property.lng != null && (
+          <NeighbourhoodIntel
+            lat={result.property.lat}
+            lng={result.property.lng}
+            codigoPostal={result.property.codigo_postal ?? null}
+            municipio={result.property.municipio ?? null}
+            priceAsking={result.property.price_asking ?? null}
+            areaSqm={result.property.area_sqm ?? null}
+          />
+        )}
 
         {/* All indicators — driven by registry */}
         <section style={{ marginBottom: 48 }}>
