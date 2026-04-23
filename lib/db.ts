@@ -1,25 +1,18 @@
 /**
- * Direct PostgreSQL connection for PostGIS spatial queries.
+ * PostgreSQL connection for PostGIS spatial queries.
  * Uses the `postgres` package (sql template tag — safe from injection).
  *
  * This client is server-only. Never import from client components.
  *
- * Connection priority:
- *   - On Vercel: DATABASE_URL (direct connection, port 5432) — DNS resolves in Vercel infra
- *   - Locally:   DATABASE_URL_POOLER (transaction pooler, port 6543) — direct host DNS
- *                doesn't resolve from local dev; pooler works from everywhere
- *
- * Why: db.btnnaoitbrgyjjzpwoze.supabase.co is a DNS-restricted direct host that
- * only resolves inside Vercel's eu-west-1 region. Locally the connection times out
- * causing the first SQL query to throw an unhandled error and return a 500.
+ * Always prefer DATABASE_URL_POOLER (Supabase transaction-mode pooler, :6543).
+ * The session-mode pooler / direct connection (:5432) has a hard client cap
+ * and throws `MaxClientsInSessionMode` under serverless concurrency.
+ * Transaction mode multiplexes a pool of real connections across many
+ * clients, which is what Vercel Fluid Compute needs.
  */
 import postgres from 'postgres'
 
-const isVercel = Boolean(process.env.VERCEL)
-
-const url = isVercel
-  ? (process.env.DATABASE_URL || process.env.DATABASE_URL_POOLER)
-  : (process.env.DATABASE_URL_POOLER || process.env.DATABASE_URL)
+const url = process.env.DATABASE_URL_POOLER || process.env.DATABASE_URL
 
 if (!url) {
   throw new Error('DATABASE_URL or DATABASE_URL_POOLER must be set')
