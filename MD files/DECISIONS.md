@@ -494,6 +494,20 @@ The CTA calls `POST /api/analyse` with `{ url: null, lat, lng, name }`. The rout
 
 ---
 
+## D-046 — Supabase transaction-mode pooler as the default Vercel DB connection
+**Status:** Active
+**Date:** 2026-04-23
+**Decision:** `lib/db.ts` always prefers `DATABASE_URL_POOLER` (Supabase Supavisor transaction pooler, port 6543) over `DATABASE_URL`, on Vercel and locally. The previous logic selected the session-mode pooler (`:5432`) on Vercel on the theory that direct-host connections were only reachable inside Vercel's eu-west-1 region.
+
+**Rationale:**
+- Production was returning HTTP 500 on `/api/analyse`, `/api/analyse/status`, and `/api/map/zone/*` with `MaxClientsInSessionMode`. Session-mode has a hard client cap that Vercel Fluid Compute (instance reuse + concurrency) trivially exceeds.
+- Transaction mode multiplexes a pool of real Postgres connections across many short-lived clients — exactly what serverless needs. Trade-off: prepared statements are disabled (already handled in `lib/db.ts` via `prepare: !isPooler`).
+- Keeping the local/Vercel selection identical also removes an environment-specific code path that was only ever a workaround for DNS.
+
+**Affects:** `lib/db.ts` · every API route that imports `@/lib/db`. Requires `DATABASE_URL_POOLER` to be set in Vercel Production + Preview env vars.
+
+---
+
 ## Future Decisions (pending)
 
 These decisions need to be made before the relevant phase begins:
