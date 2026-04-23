@@ -29,6 +29,9 @@ export interface AnalysisProperty {
   floor: number | null
   codigo_postal: string | null
   ref_catastral: string | null
+  // CHI-401: surfaced on True Affordability card for negotiation-gap row.
+  catastro_valor_referencia: number | null
+  negotiation_gap_pct: number | null
 }
 
 export interface AnalysisResult {
