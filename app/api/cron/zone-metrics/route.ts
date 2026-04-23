@@ -171,7 +171,10 @@ SELECT
   'submissions_only'                                                     AS data_source
 FROM analysis_cache
 WHERE codigo_postal IS NOT NULL
-  AND expires_at > NOW()
+  -- CHI-347: analysis_cache rows are now durable (expires_at can be NULL).
+  -- We still only want *recent* submissions to feed today's zone aggregates,
+  -- so filter by extracted_at instead of the (now-deprecated) expires_at TTL.
+  AND extracted_at > NOW() - INTERVAL '48 hours'
   AND NOT EXISTS (
     SELECT 1 FROM zone_metrics_history zmh
     WHERE zmh.zone_type   = 'codigo_postal'

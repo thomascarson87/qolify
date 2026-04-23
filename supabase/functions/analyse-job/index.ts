@@ -229,31 +229,162 @@ async function fetchListing(sourceUrl: string): Promise<Partial<PropertyInput> |
 }
 
 // ─── Catastro OVC lookup ───────────────────────────────────────────────────────
+// Two Catastro entry points are used:
+//   - OVCCoordenadas.asmx/Consulta_RCCOOR — coord → 14-char referencia catastral
+//     ("parcel" reference). Called when Parse.bot didn't extract one (the common
+//     case for Idealista listings).
+//   - OVCCallejero.asmx/Consulta_DNPRC   — 14-char ref → list of sub-units with
+//     build year and built surface. We pick the first residential unit.
+//
+// These are the *.asmx SOAP-over-GET endpoints, which return XML. The newer
+// *.svc/json/* REST endpoints exist but silently ignore their query parameters
+// (observed via curl: "LA COORDENADA X OBLIGATORIA" even when Coordenada_X is
+// sent). So XML + regex parsing is the path that actually works; the regex
+// approach is already established in app/api/catastro/route.ts.
 
-async function fetchCatastro(
-  refCatastral: string | null | undefined,
+const CATASTRO_RCCOOR_URL =
+  'https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCoordenadas.asmx/Consulta_RCCOOR'
+const CATASTRO_DNPRC_URL  =
+  'https://ovc.catastro.meh.es/ovcservweb/OVCSWLocalizacionRC/OVCCallejero.asmx/Consulta_DNPRC'
+
+async function fetchCatastroByCoord(
   lat: number,
   lng: number,
-): Promise<{ build_year?: number; ref_catastral?: string } | null> {
-  // Catastro OVC API: if we have a ref_catastral, fetch the building year directly.
-  // Graceful degradation: return null on any failure.
-  if (!refCatastral) return null
-
+): Promise<string | null> {
+  if (!lat || !lng) return null
   try {
-    const res = await fetchWithTimeout(
-      `https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/COVCCoordenadas.svc/json/Consulta_DNPRC?SRS=EPSG:4326&RC=${encodeURIComponent(refCatastral)}`,
-      { method: 'GET' },
-      10_000,
-    )
-    const data = await res.json()
-    const building = data?.consulta_dnprcResult?.bico?.bi
-    const yearBuilt = building?.debi?.anoc ? parseInt(building.debi.anoc, 10) : undefined
-
-    return {
-      ref_catastral: refCatastral,
-      build_year:    yearBuilt && !isNaN(yearBuilt) ? yearBuilt : undefined,
+    const url = `${CATASTRO_RCCOOR_URL}?SRS=EPSG:4326&Coordenada_X=${lng}&Coordenada_Y=${lat}`
+    const res = await fetchWithTimeout(url, { method: 'GET' }, 10_000)
+    if (!res.ok) {
+      console.log(`[catastro] RCCOOR http ${res.status} for ${lat},${lng}`)
+      return null
     }
-  } catch {
+    const xml = await res.text()
+    // Extract the 14-char parcel ref from <pc><pc1>...</pc1><pc2>...</pc2></pc>.
+    // Same regex pattern used in app/api/catastro/route.ts.
+    const pc1 = xml.match(/<pc1>([^<]+)<\/pc1>/i)?.[1]?.trim()
+    const pc2 = xml.match(/<pc2>([^<]+)<\/pc2>/i)?.[1]?.trim()
+    if (pc1 && pc2) {
+      const ref = `${pc1}${pc2}`
+      if (ref.length >= 14) {
+        console.log(`[catastro] RCCOOR ok: ${lat},${lng} → ${ref}`)
+        return ref
+      }
+    }
+    const err = xml.match(/<des>([^<]+)<\/des>/i)?.[1]?.trim()
+    console.log(`[catastro] RCCOOR no match for ${lat},${lng} (${err ?? 'no <pc> block'})`)
+    return null
+  } catch (e) {
+    console.log(`[catastro] RCCOOR threw: ${(e as Error).message}`)
+    return null
+  }
+}
+
+interface CatastroUnit {
+  car: string       // 4-char unit suffix (e.g. "0001")
+  cc1: string       // 1 char
+  cc2: string       // 1 char
+  build_year?: number
+  built_surface_m2?: number
+  use?: string      // "Residencial", "Comercial", etc.
+}
+
+/**
+ * Call Consulta_DNPRC with a 14-char parcel reference. The response contains
+ * every sub-unit in the building (flats, shops, parkings…). For the MVP we
+ * return the first residential unit's year/surface as the representative
+ * sample; commercial/parking units are skipped. The full 20-char reference of
+ * the chosen unit is reconstructed from pc1+pc2+car+cc1+cc2.
+ */
+async function fetchCatastro(
+  parcelRef: string | null | undefined,
+): Promise<{
+  ref_catastral?: string          // 20-char reference of the chosen unit
+  parcel_ref?: string             // 14-char parcel reference (same as input)
+  build_year?: number
+  built_surface_m2?: number
+} | null> {
+  if (!parcelRef) return null
+  try {
+    const url = `${CATASTRO_DNPRC_URL}?Provincia=&Municipio=&RC=${encodeURIComponent(parcelRef)}`
+    const res = await fetchWithTimeout(url, { method: 'GET' }, 10_000)
+    if (!res.ok) {
+      console.log(`[catastro] DNPRC http ${res.status} for ${parcelRef}`)
+      return null
+    }
+    const xml = await res.text()
+
+    // The 14-char RC returns a <consulta_dnp> with <lrcdnp><rcdnp>… list (no
+    // year/surface per unit). The 20-char RC returns <bico><bi> with <debi>.
+    // We hit it twice when needed, but usually we just want a single
+    // representative residential unit. Strategy: parse all rcdnp blocks, find
+    // the first residential one (by its direcc "pt" floor != 00 usually, or
+    // absence of "Comercial" hint), then re-query with its full 20-char ref.
+    //
+    // Simplification: parse the rcdnp blocks and pick the first entry whose
+    // <pt> (piso) is not "00" (ground floor → usually commercial). If all are
+    // 00 (houses, parcelas rústicas), fall back to the first unit.
+    const rcdnpBlocks = Array.from(xml.matchAll(/<rcdnp>([\s\S]*?)<\/rcdnp>/gi))
+    const units: CatastroUnit[] = rcdnpBlocks.map((m) => {
+      const block = m[1]
+      return {
+        car: block.match(/<car>([^<]+)<\/car>/i)?.[1]?.trim() ?? '',
+        cc1: block.match(/<cc1>([^<]+)<\/cc1>/i)?.[1]?.trim() ?? '',
+        cc2: block.match(/<cc2>([^<]+)<\/cc2>/i)?.[1]?.trim() ?? '',
+      }
+    }).filter((u) => u.car && u.cc1 && u.cc2)
+
+    if (units.length === 0) {
+      // The endpoint may return a <bico><bi> directly when there is only one
+      // dwelling in the parcel. Parse that shape too.
+      const year = xml.match(/<ant>([^<]+)<\/ant>/i)?.[1]?.trim()
+      const sfc  = xml.match(/<sfc>([^<]+)<\/sfc>/i)?.[1]?.trim()
+      const out = {
+        ref_catastral:   parcelRef,
+        parcel_ref:      parcelRef,
+        build_year:      year ? parseInt(year, 10) : undefined,
+        built_surface_m2: sfc  ? parseFloat(sfc)    : undefined,
+      }
+      console.log(`[catastro] DNPRC single-unit: ref=${parcelRef} year=${out.build_year ?? 'n/a'} sfc=${out.built_surface_m2 ?? 'n/a'}`)
+      return out
+    }
+
+    // Pick a candidate unit. Prefer one whose floor ("pt") is not "00" and
+    // sub-unit index ("pu") exists — that's typically a residential flat.
+    // We need to re-parse each rcdnp block with more detail to access pt.
+    const chosen = units.find((u, i) => {
+      const block = rcdnpBlocks[i][1]
+      const pt = block.match(/<pt>([^<]+)<\/pt>/i)?.[1]?.trim() ?? '00'
+      return pt !== '00'
+    }) ?? units[0]
+
+    const fullRef = `${parcelRef}${chosen.car}${chosen.cc1}${chosen.cc2}`
+
+    // Second fetch for year + surface (only available on 20-char ref response).
+    const detailUrl = `${CATASTRO_DNPRC_URL}?Provincia=&Municipio=&RC=${encodeURIComponent(fullRef)}`
+    const detailRes = await fetchWithTimeout(detailUrl, { method: 'GET' }, 10_000)
+    let buildYear: number | undefined
+    let sfc: number | undefined
+    if (detailRes.ok) {
+      const detailXml = await detailRes.text()
+      const ant = detailXml.match(/<ant>([^<]+)<\/ant>/i)?.[1]?.trim()
+      const sf  = detailXml.match(/<sfc>([^<]+)<\/sfc>/i)?.[1]?.trim()
+      if (ant) buildYear = parseInt(ant, 10)
+      if (sf)  sfc = parseFloat(sf)
+    }
+
+    console.log(
+      `[catastro] DNPRC ok: parcel=${parcelRef} chosen=${fullRef} ` +
+      `units=${units.length} year=${buildYear ?? 'n/a'} sfc=${sfc ?? 'n/a'}`,
+    )
+    return {
+      ref_catastral:    fullRef,
+      parcel_ref:       parcelRef,
+      build_year:       buildYear && !isNaN(buildYear) ? buildYear : undefined,
+      built_surface_m2: sfc && !isNaN(sfc) ? sfc : undefined,
+    }
+  } catch (e) {
+    console.log(`[catastro] DNPRC threw: ${(e as Error).message}`)
     return null
   }
 }
@@ -1136,23 +1267,21 @@ async function computeSolarPotential(
     `
 
     // 3. Building orientation + Catastro footprint/floors
-    const [buildRow] = await sql<{
+    // CHI-411: the original query had an `OR ST_DWithin(geom, …)` branch, but
+    // `building_orientation.geom` does not exist in the schema. Postgres parsed
+    // the column reference, threw, and computeSolarPotential's catch swallowed
+    // the error → every solar result came back NULL. Look up strictly by
+    // ref_catastral; when absent, fall through to listing_area_fallback.
+    const [buildRow] = prop.ref_catastral ? await sql<{
       aspect:           string | null
       footprint_area_m2: number | null
       num_floors:        number | null
     }[]>`
       SELECT aspect, footprint_area_m2, num_floors
       FROM building_orientation
-      WHERE ref_catastral = ${prop.ref_catastral ?? ''}
-         OR ST_DWithin(
-              geom,
-              ST_SetSRID(ST_MakePoint(${prop.lng}, ${prop.lat}), 4326)::geography,
-              30
-            )
-      ORDER BY
-        CASE WHEN ref_catastral = ${prop.ref_catastral ?? ''} THEN 0 ELSE 1 END
+      WHERE ref_catastral = ${prop.ref_catastral}
       LIMIT 1
-    `
+    ` : [undefined]
 
     // postgres.js returns DECIMAL columns as strings — coerce before arithmetic
     const pvpc      = consts?.electricity_pvpc_kwh_eur     != null ? Number(consts.electricity_pvpc_kwh_eur)     : 0.185
@@ -1279,9 +1408,40 @@ Deno.serve(async (req: Request) => {
     ) as Partial<PropertyInput>
     const merged: Partial<PropertyInput> = { ...listing, ...cleanPropInput }
 
-    // --- Step 2: Catastro ---
+    // --- Step 2: Catastro (CHI-411) ---
+    // Parse.bot rarely returns ref_catastral for Idealista listings. Fall back
+    // to a coord→ref_catastral lookup (Consulta_RCCOOR) before attempting the
+    // DNPRC details call. This is the single biggest enrichment unlock — without
+    // it, build_year / ref_catastral / building_orientation / solar footprint
+    // all stay NULL for the majority of jobs.
     await supabase.from('analysis_jobs').update({ step: 2 }).eq('id', jobId)
-    const catastro = await fetchCatastro(merged.ref_catastral, merged.lat ?? 0, merged.lng ?? 0)
+    console.log(`[pipeline] step 2: catastro — parse.bot ref=${merged.ref_catastral ?? 'none'} coords=${merged.lat},${merged.lng}`)
+    let resolvedRef = merged.ref_catastral ?? null
+    if (!resolvedRef && merged.lat && merged.lng) {
+      resolvedRef = await fetchCatastroByCoord(merged.lat, merged.lng)
+      console.log(`[pipeline] coord→ref lookup: ${resolvedRef ?? 'null'}`)
+    }
+    const catastro = await fetchCatastro(resolvedRef)
+
+    // Upsert building_orientation with what Catastro gave us. Keyed by ref_catastral.
+    // We only set footprint_area_m2 / build_year when present; aspect/num_floors
+    // remain NULL until CHI-361 adds the Cartografía orientation extraction.
+    if (resolvedRef && catastro?.built_surface_m2) {
+      const { error: boErr } = await supabase
+        .from('building_orientation')
+        .upsert(
+          {
+            ref_catastral:     resolvedRef,
+            footprint_area_m2: catastro.built_surface_m2,
+            source:            'catastro_explicit',
+            confidence:        'medium',
+            updated_at:        new Date().toISOString(),
+          },
+          { onConflict: 'ref_catastral' },
+        )
+      if (boErr) console.log(`[pipeline] building_orientation upsert failed: ${boErr.message}`)
+    }
+
     const prop: PropertyInput = {
       lat:                merged.lat ?? 0,
       lng:                merged.lng ?? 0,
@@ -1290,7 +1450,7 @@ Deno.serve(async (req: Request) => {
       comunidad_autonoma: merged.comunidad_autonoma,
       municipio:          merged.municipio,
       codigo_postal:      merged.codigo_postal,
-      ref_catastral:      catastro?.ref_catastral ?? merged.ref_catastral,
+      ref_catastral:      catastro?.ref_catastral ?? resolvedRef ?? merged.ref_catastral,
       build_year:         catastro?.build_year ?? merged.build_year,
       epc_rating:         merged.epc_rating,
       epc_potential:      merged.epc_potential,
@@ -1368,6 +1528,11 @@ Deno.serve(async (req: Request) => {
 
     // --- Step 4: Write analysis_cache ---
     await supabase.from('analysis_jobs').update({ step: 4 }).eq('id', jobId)
+    console.log(
+      `[pipeline] step 4: writing cache — ref=${prop.ref_catastral ?? 'null'} ` +
+      `year=${prop.build_year ?? 'null'} epc=${prop.epc_rating ?? 'null'} ` +
+      `cp=${prop.codigo_postal ?? 'null'} solar=${solarResult ? 'ok' : 'null'}`
+    )
 
     // Pass composite_indicators as object — supabase-js serialises JSONB correctly (no double-encode)
     const { data: cacheRow, error: cacheErr } = await supabase
@@ -1399,7 +1564,11 @@ Deno.serve(async (req: Request) => {
           condition:            prop.condition     ?? null,
           solar_potential_result: solarResult ?? null,
           extracted_at:         new Date().toISOString(),
-          expires_at:           new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+          // CHI-347: reports are now durable. Never auto-expire the cache row so
+          // /analyse/[jobId] can be reloaded indefinitely without burning Parse.bot
+          // / Catastro / PVGIS credits. A future "Refresh report" action can re-run
+          // the pipeline on demand; until then, users read the original result.
+          expires_at:           null,
           extraction_version:   '2.0',  // bumped: marks Apify migration
           price_logged:         false,
         },

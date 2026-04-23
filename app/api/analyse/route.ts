@@ -14,6 +14,7 @@
  * The client polls GET /api/analyse/status?jobId=xxx for progress and results.
  */
 import { NextRequest, NextResponse } from 'next/server'
+import { after } from 'next/server'
 import sql from '@/lib/db'
 
 export const runtime = 'nodejs'
@@ -139,7 +140,7 @@ export async function POST(req: NextRequest) {
       address, bedrooms, bathrooms, property_type, floor
     FROM analysis_cache
     WHERE source_url = ${sourceUrl}
-      AND expires_at > NOW()
+      AND (expires_at IS NULL OR expires_at > NOW())
     LIMIT 1
   `
 
@@ -190,18 +191,48 @@ export async function POST(req: NextRequest) {
 
   const jobId = job.id
 
-  // --- 4. Fire-and-forget: trigger Edge Function ---
-  // Do NOT await — the Edge Function runs async. The client polls /api/analyse/status.
-  fetch(`${SUPABASE_URL}/functions/v1/analyse-job`, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ jobId }),
-  }).catch((err) => {
-    // Log but don't fail the request — the job row is created and can be retried
-    console.error('[analyse] Edge Function trigger failed:', err)
+  // --- 4. Trigger Edge Function via after() (CHI-347) ---
+  // We do NOT want to block the HTTP response on the Edge Function's own runtime
+  // (which can take 30-60s), but we DO need to guarantee the trigger fetch() is
+  // actually sent. A bare fire-and-forget `fetch(...)` in a Vercel serverless
+  // function can be cancelled when the response returns, leaving jobs stuck
+  // 'pending' forever. `after()` keeps the invocation alive until the callback
+  // completes, and we await the fetch inside it so we know the Edge Function
+  // accepted the trigger. If the trigger itself fails, mark the job as errored
+  // so the UI can show a useful message instead of polling forever.
+  after(async () => {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/analyse-job`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ jobId }),
+      })
+      if (!res.ok) {
+        const body = await res.text().catch(() => '')
+        console.error('[analyse] Edge Function trigger returned non-OK:', res.status, body)
+        await sql`
+          UPDATE analysis_jobs
+             SET status = 'error',
+                 error_message = ${`edge_trigger_failed: ${res.status} ${body.slice(0, 200)}`},
+                 completed_at = NOW()
+           WHERE id = ${jobId}
+             AND status = 'pending'
+        `
+      }
+    } catch (err) {
+      console.error('[analyse] Edge Function trigger threw:', err)
+      await sql`
+        UPDATE analysis_jobs
+           SET status = 'error',
+               error_message = ${`edge_trigger_threw: ${(err as Error).message ?? String(err)}`},
+               completed_at = NOW()
+         WHERE id = ${jobId}
+           AND status = 'pending'
+      `.catch(() => { /* swallow — nothing more we can do */ })
+    }
   })
 
   // --- 5. Return job reference immediately ---
