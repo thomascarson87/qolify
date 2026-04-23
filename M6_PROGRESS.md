@@ -64,7 +64,25 @@ Three changes shipped together:
 
 - CHI-394 — SNCZI flood zones · ⏸
 - CHI-395 — CNMC fibre coverage · ⏸
+- CHI-318 — CNMC fibre coverage seed · ✅
 - CHI-372 / CHI-390 — EEA noise zones · 🚧 (started pre-M6)
+
+### CHI-318 — CNMC fibre coverage seed · ✅
+
+`fibre_coverage` held 1 polygon (stale Málaga bbox) → Digital Viability was "unavailable" everywhere else.
+
+Shipped a DB-driven seed (`scripts/ingest/seed_fibre_municipios.py`) built on `municipios.geom` centroids + PostGIS buffers — no hand-tuned bboxes. 69 polygons now cover:
+- **30 Tier-1** (FTTP 1000 Mbps) — all provincial capitals + top-5 cities
+- **22 Tier-2** (FTTP 600 Mbps) — Madrid/Barcelona satellites + major coastal
+- **17 Tier-3** (FTTP 300 Mbps) — Costa del Sol / Blanca / Brava / Balearics / Canarias expat hubs
+
+Buffer radii tuned by city size (2–8 km) — urban core only, not rural farmland. Idempotent: `source='seed_municipios_v1'` delete-then-insert so re-running reshapes rather than duplicates.
+
+Verified: Málaga centre (36.72, -4.42) → FTTP 1000 Mbps; Madrid Salamanca → FTTP 1000 Mbps; Ronda (not seeded) → no coverage. Digital Viability card now populates for all 69 cities.
+
+Follow-ups (out of scope):
+- Per-property SETELECO lookup (CHI-395 — supersedes this seed, gives exact coverage at analysis time).
+- Mobile 4G/5G coverage (CHI-393 — new `mobile_coverage` table).
 
 ## Phase 5 — Health data
 
