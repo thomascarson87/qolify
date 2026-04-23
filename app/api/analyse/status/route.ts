@@ -52,6 +52,8 @@ function buildCompleteResponse(row: {
   floor: number | null
   codigo_postal: string | null
   ref_catastral: string | null
+  catastro_valor_referencia: number | null
+  negotiation_gap_pct: number | null
   solar_potential_result?: unknown
 }) {
   return {
@@ -81,6 +83,8 @@ function buildCompleteResponse(row: {
       floor:         row.floor,
       codigo_postal: row.codigo_postal,
       ref_catastral: row.ref_catastral,
+      catastro_valor_referencia: row.catastro_valor_referencia,
+      negotiation_gap_pct:       row.negotiation_gap_pct,
     },
   }
 }
@@ -124,6 +128,8 @@ export async function GET(req: NextRequest) {
     floor: number | null
     codigo_postal: string | null
     ref_catastral: string | null
+    catastro_valor_referencia: number | null
+    negotiation_gap_pct: number | null
     solar_potential_result: unknown
   }[]>`
     SELECT
@@ -153,6 +159,8 @@ export async function GET(req: NextRequest) {
       c.floor,
       c.codigo_postal,
       c.ref_catastral,
+      c.catastro_valor_referencia,
+      c.negotiation_gap_pct,
       c.solar_potential_result
     FROM analysis_jobs j
     LEFT JOIN analysis_cache c ON j.cache_id = c.id
@@ -214,6 +222,8 @@ export async function GET(req: NextRequest) {
     floor: number | null
     codigo_postal: string | null
     ref_catastral: string | null
+    catastro_valor_referencia: number | null
+    negotiation_gap_pct: number | null
     solar_potential_result: unknown
   }[]>`
     SELECT
@@ -221,7 +231,8 @@ export async function GET(req: NextRequest) {
       lat, lng, price_asking, price_per_sqm, area_sqm,
       provincia, municipio, build_year, epc_rating,
       address, bedrooms, bathrooms, property_type, floor,
-      codigo_postal, ref_catastral, solar_potential_result
+      codigo_postal, ref_catastral, catastro_valor_referencia, negotiation_gap_pct,
+      solar_potential_result
     FROM analysis_cache
     WHERE id = ${jobId}
     LIMIT 1
@@ -249,9 +260,11 @@ export async function GET(req: NextRequest) {
       bathrooms:              cached.bathrooms,
       property_type:          cached.property_type,
       floor:                  cached.floor,
-      codigo_postal:          cached.codigo_postal,
-      ref_catastral:          cached.ref_catastral,
-      solar_potential_result: cached.solar_potential_result,
+      codigo_postal:             cached.codigo_postal,
+      ref_catastral:             cached.ref_catastral,
+      catastro_valor_referencia: cached.catastro_valor_referencia,
+      negotiation_gap_pct:       cached.negotiation_gap_pct,
+      solar_potential_result:    cached.solar_potential_result,
     }))
   }
 

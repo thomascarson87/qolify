@@ -445,6 +445,40 @@ function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }
                     </p>
                   </div>
                 )}
+
+                {/* ICO eligibility (CHI-401) — only shown when buyer data lets
+                    us evaluate a real yes/no against the regional cap. */}
+                {ci.true_affordability.details.ico_eligible != null && (
+                  <div style={{ borderTop: '1px dashed var(--border)', marginTop: 14, paddingTop: 12, display: 'flex', justifyContent: 'space-between' }}>
+                    <span style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 12, color: 'var(--text-mid)' }}>ICO Aval eligible</span>
+                    <span style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 13, color: ci.true_affordability.details.ico_eligible ? 'var(--emerald-bright)' : 'var(--text-light)' }}>
+                      {ci.true_affordability.details.ico_eligible ? 'Yes' : 'No'}
+                    </span>
+                  </div>
+                )}
+
+                {/* Negotiation gap (CHI-401) — listed price vs Catastro
+                    reference value. Lets the buyer see how aggressively the
+                    listing is priced above its fiscal base. */}
+                {result.property?.catastro_valor_referencia != null && result.property?.price_asking != null && (
+                  <div style={{ borderTop: '1px dashed var(--border)', marginTop: 14, paddingTop: 12 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <span style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 12, color: 'var(--text-mid)' }}>Catastro reference</span>
+                      <span style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 13, color: 'var(--text)' }}>
+                        {formatCurrency(Number(result.property.catastro_valor_referencia))}
+                      </span>
+                    </div>
+                    {result.property.negotiation_gap_pct != null && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 12, color: 'var(--text-mid)' }}>Listed vs fiscal value</span>
+                        <span style={{ fontFamily: 'var(--font-dm-mono)', fontSize: 13, color: Number(result.property.negotiation_gap_pct) > 0 ? 'var(--amber)' : 'var(--emerald-bright)' }}>
+                          {Number(result.property.negotiation_gap_pct) > 0 ? '+' : ''}
+                          {Number(result.property.negotiation_gap_pct).toFixed(1)}%
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             ) : <SkeletonCard label="True Monthly Cost" />}
 

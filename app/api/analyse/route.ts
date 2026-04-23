@@ -132,12 +132,15 @@ export async function POST(req: NextRequest) {
     bathrooms: number | null
     property_type: string | null
     floor: number | null
+    catastro_valor_referencia: number | null
+    negotiation_gap_pct: number | null
   }[]>`
     SELECT
       id, composite_indicators, alerts, tvi_score, expires_at,
       lat, lng, price_asking, price_per_sqm, area_sqm,
       provincia, municipio, build_year, epc_rating,
-      address, bedrooms, bathrooms, property_type, floor
+      address, bedrooms, bathrooms, property_type, floor,
+      catastro_valor_referencia, negotiation_gap_pct
     FROM analysis_cache
     WHERE source_url = ${sourceUrl}
       AND (expires_at IS NULL OR expires_at > NOW())
@@ -168,6 +171,8 @@ export async function POST(req: NextRequest) {
         bathrooms:     cached.bathrooms,
         property_type: cached.property_type,
         floor:         cached.floor,
+        catastro_valor_referencia: cached.catastro_valor_referencia,
+        negotiation_gap_pct:       cached.negotiation_gap_pct,
       },
     })
   }
