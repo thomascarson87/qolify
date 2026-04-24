@@ -21,12 +21,11 @@ import { PillarScoreBar } from '@/components/ui/PillarScoreBar'
 import { SkeletonCard } from '@/components/ui/SkeletonCard'
 import { pollJob, type AnalysisResult, type PollState } from '@/lib/analysePoller'
 import { INDICATOR_REGISTRY, PILLAR_GROUPS } from '@/lib/indicators/registry'
-import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { MiniMapCard } from '@/components/report/MiniMapCard'
 import { ProximitySummary, type FacilityCounts } from '@/components/map/ProximitySummary'
-import { SolarPotentialCard } from '@/components/report/SolarPotentialCard'
 import { NeighbourhoodIntel } from '@/components/report/NeighbourhoodIntel'
+import { SolarAccordion } from '@/components/report/SolarAccordion'
+import { SectionNav } from '@/components/report/SectionNav'
 import type { SolarPotentialResult } from '@/lib/indicators/solar-potential'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -57,10 +56,6 @@ const MISSING_FIELD_PLACEHOLDERS: Record<string, string> = {
 
 function formatCurrency(n: number): string {
   return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n)
-}
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -239,55 +234,20 @@ function NeedsInputForm({
   )
 }
 
-// ─── Tier helpers ─────────────────────────────────────────────────────────────
-
-type UserTier = 'free' | 'pro' | 'explorer' | 'intelligence'
-
-/**
- * Maps a user tier string to a numeric rank so we can compare it against
- * the indicator's tier number from the registry.
- *
- * Registry tier 1 = all users (free and above)
- * Registry tier 2 = pro and above
- * Registry tier 3 = intelligence only
- */
-function tierRank(tier: UserTier): number {
-  switch (tier) {
-    case 'free':         return 1
-    case 'pro':          return 2
-    case 'explorer':     return 2
-    case 'intelligence': return 3
-  }
-}
-
 function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }) {
   const [compressed, setCompressed] = useState(false)
-  // In development we unlock every indicator so Thomas can exercise the
-  // full DNA Report without a Pro auth session. Flip to 'free' (or remove
-  // this initializer) when billing is live. NODE_ENV is inlined by Next.js
-  // at build time so this constant tree-shakes out of production bundles.
-  const DEV_DEFAULT_TIER: UserTier = process.env.NODE_ENV === 'development'
-    ? 'intelligence'
-    : 'free'
-  const [userTier, setUserTier] = useState<UserTier>(DEV_DEFAULT_TIER)
+  // MVP: every signal is unlocked. When billing goes live, restore the
+  // Supabase JWT tier lookup (see git history for the previous implementation).
   const scrollRef = useRef<HTMLDivElement>(null)
+  const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const el = scrollRef.current
     if (!el) return
+    setScrollRoot(el)
     const onScroll = () => setCompressed(el.scrollTop > 80)
     el.addEventListener('scroll', onScroll, { passive: true })
     return () => el.removeEventListener('scroll', onScroll)
-  }, [])
-
-  // Fetch the authenticated user's tier from Supabase JWT claims.
-  // Defaults to 'free' for unauthenticated users so locked cards render correctly.
-  useEffect(() => {
-    const supabase = createClient()
-    supabase.auth.getSession().then(({ data }) => {
-      const tier = data.session?.user?.app_metadata?.tier as UserTier | undefined
-      if (tier) setUserTier(tier)
-    })
   }, [])
 
   const ci = result.composite_indicators as Partial<Record<string, IndicatorData>>
@@ -333,6 +293,39 @@ function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }
   if (p?.floor != null) descriptorParts.push(`Floor ${p.floor}`)
   const descriptorPill = descriptorParts.join(' · ')
 
+  // Split indicator registry into live + coming-soon (CHANGE 7).
+  // MVP unlocks everything, so "locked" isn't a separate bucket — there is
+  // no upgrade-prompt card. Coming-soon cards still group at the end so the
+  // grid reads as "what you have" then "what's coming".
+  const liveIndicators       = INDICATOR_REGISTRY.filter(i =>  i.live)
+  const comingSoonIndicators = INDICATOR_REGISTRY.filter(i => !i.live)
+
+  // Sticky anchor nav — order matches the prompt's original brief. Solar is
+  // conditional on solar_potential_result being present; omit the anchor when
+  // the section wouldn't render.
+  const navSections: Array<{ id: string; label: string }> = [
+    { id: 'financial',     label: 'Financial'     },
+    { id: 'signals',       label: 'Signals'       },
+    { id: 'neighbourhood', label: 'Neighbourhood' },
+    { id: 'environment',   label: 'Environment'   },
+    { id: 'proximity',     label: 'Proximity'     },
+  ]
+  if (result.solar_potential_result) navSections.push({ id: 'solar', label: 'Solar' })
+
+  // Section header micro-helper — keeps the six H2 rows visually consistent.
+  const sectionTitleStyle: React.CSSProperties = {
+    fontFamily:   'var(--font-playfair)', fontSize: 'clamp(20px, 3vw, 26px)',
+    fontWeight:   600, color: 'var(--text)', marginBottom: 6,
+  }
+  const sectionLedeStyle: React.CSSProperties = {
+    fontFamily: 'var(--font-playfair)', fontStyle: 'italic',
+    fontSize:   16, color: 'var(--text-mid)', marginBottom: 24,
+  }
+  // scrollMarginTop offsets anchor jumps so the sticky header + nav don't
+  // cover the section heading. ~140px = property header (~80 compressed)
+  // + SectionNav (~44). Applied to every navigated section.
+  const anchorScrollStyle: React.CSSProperties = { scrollMarginTop: 140 }
+
   return (
     <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', height: 'calc(100vh - 57px)' }}>
       {/* Sticky property header */}
@@ -369,11 +362,14 @@ function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }
         </div>
       </div>
 
+      {/* Sticky section nav — activates as the user scrolls past the header */}
+      <SectionNav sections={navSections} scrollRoot={scrollRoot} />
+
       <div style={{ padding: '0 24px 80px', maxWidth: 900, margin: '0 auto' }}>
 
         {/* Alert banners */}
         {(result.alerts?.length ?? 0) > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 32, marginTop: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 32, marginTop: 16 }}>
             {[...result.alerts]
               .sort((a, b) => ({ red: 0, amber: 1, green: 2 }[a.type] ?? 3) - ({ red: 0, amber: 1, green: 2 }[b.type] ?? 3))
               .map((alert, i) => (
@@ -382,8 +378,81 @@ function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }
           </div>
         )}
 
+        {/* Score breakdown — "How this property scores". Moved from bottom
+            to top to anchor the report's narrative: here's the summary,
+            then here's the detail. Not included in the sticky nav —
+            the nav starts at Financial. */}
+        <section style={{ marginBottom: 48, marginTop: (result.alerts?.length ?? 0) > 0 ? 0 : 16 }}>
+          <h2 style={sectionTitleStyle}>How this property scores</h2>
+          <div style={{ background: 'var(--surface-2)', borderRadius: 18, padding: 24, boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 520 }}>
+            {pillarScores().map((pb, i) => (
+              <PillarScoreBar key={pb.label} label={pb.label} score={pb.score} delayMs={i * 60} />
+            ))}
+          </div>
+        </section>
+
+        {/* The 15 Signals — live cards first, coming-soon grouped at end. */}
+        <section id="signals" style={{ ...anchorScrollStyle, marginBottom: 48 }}>
+          <h2 style={sectionTitleStyle}>The {INDICATOR_REGISTRY.length} signals</h2>
+          <p style={sectionLedeStyle}>What the listing doesn&apos;t tell you.</p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
+            {liveIndicators.map(({ key }) => {
+              const data = ci[key]
+
+              // Deep-dive URLs — preserved from prior implementation so the
+              // health/education/solar report pages remain reachable.
+              let detailUrl: string | undefined
+              if (key === 'health_security' && p.codigo_postal) {
+                const qs = new URLSearchParams({ jobId })
+                if (p.lat != null) qs.set('lat', String(p.lat))
+                if (p.lng != null) qs.set('lng', String(p.lng))
+                detailUrl = `/map/report/health/${p.codigo_postal}?${qs}`
+              } else if (key === 'education_opportunity' && p.codigo_postal) {
+                const qs = new URLSearchParams({ jobId })
+                if (p.lat != null) qs.set('lat', String(p.lat))
+                if (p.lng != null) qs.set('lng', String(p.lng))
+                detailUrl = `/map/report/education/${p.codigo_postal}?${qs}`
+              } else if (key === 'climate_solar' && p.ref_catastral) {
+                const qs = new URLSearchParams({ jobId })
+                if (p.lat != null) qs.set('lat', String(p.lat))
+                if (p.lng != null) qs.set('lng', String(p.lng))
+                if (p.codigo_postal) qs.set('postcode', p.codigo_postal)
+                detailUrl = `/map/report/solar/${encodeURIComponent(p.ref_catastral)}?${qs}`
+              }
+
+              // Data present with a real score → loaded card.
+              // score === null means pipeline ran but had insufficient data;
+              // treat the same as absent data so the UNAVAILABLE state renders.
+              if (data && data.score !== null) {
+                return <IndicatorCard key={key} indicatorKey={key} data={data} detailUrl={detailUrl} />
+              }
+              return <IndicatorCard key={key} indicatorKey={key} />
+            })}
+          </div>
+
+          {/* Coming-soon group — visually separated so it reads as a distinct
+              bucket rather than intermingled with the live cards. */}
+          {comingSoonIndicators.length > 0 && (
+            <div style={{ marginTop: 28 }}>
+              <p style={{
+                fontFamily: 'var(--font-dm-sans)', fontSize: 11, fontWeight: 600,
+                color: 'var(--text-light)', textTransform: 'uppercase',
+                letterSpacing: '0.08em', marginBottom: 12,
+              }}>
+                Data coming soon
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
+                {comingSoonIndicators.map(({ key, label }) => (
+                  <SkeletonCard key={key} label={label} />
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+
         {/* Financial Intelligence */}
-        <section style={{ marginBottom: 48 }}>
+        <section id="financial" style={{ ...anchorScrollStyle, marginBottom: 48 }}>
           <h2 style={{ fontFamily: 'var(--font-playfair)', fontSize: 'clamp(20px, 3vw, 26px)', fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>
             Financial Intelligence
           </h2>
@@ -525,9 +594,10 @@ function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }
           </div>
         </section>
 
-        {/* Neighbourhood Intelligence — AI summary + Flood + VUT tourist density.
-            Only rendered when we have coordinates (Parse.bot occasionally can't
-            geocode a listing; in that case the rest of the report still works). */}
+        {/* Neighbourhood Intelligence + Environment — both sections are
+            rendered internally by <NeighbourhoodIntel/> so the pin data
+            fetch is shared. Only renders when we have coordinates
+            (Parse.bot occasionally can't geocode a listing). */}
         {result.property.lat != null && result.property.lng != null && (
           <NeighbourhoodIntel
             lat={result.property.lat}
@@ -539,83 +609,16 @@ function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }
           />
         )}
 
-        {/* All indicators — driven by registry */}
-        <section style={{ marginBottom: 48 }}>
-          <h2 style={{ fontFamily: 'var(--font-playfair)', fontSize: 'clamp(20px, 3vw, 26px)', fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>
-            The {INDICATOR_REGISTRY.length} signals
-          </h2>
-          <p style={{ fontFamily: 'var(--font-playfair)', fontStyle: 'italic', fontSize: 16, color: 'var(--text-mid)', marginBottom: 24 }}>
-            What the listing doesn&apos;t tell you.
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
-            {INDICATOR_REGISTRY.map(({ key, label, live, tier }) => {
-              // Not yet built as a live feature — show "coming soon" skeleton unchanged
-              if (!live) return <SkeletonCard key={key} label={label} />
-
-              // User's tier doesn't cover this indicator — show locked state
-              if (tierRank(userTier) < tier) {
-                return <IndicatorCard key={key} indicatorKey={key} locked />
-              }
-
-              // Live indicator, data present with a real score — show full loaded card.
-              // score === null means the pipeline ran but had insufficient data;
-              // treat that the same as absent data so UnavailableCard renders
-              // rather than an ambiguous loaded card with an empty badge.
-              const data = ci[key]
-              if (data && data.score !== null) {
-                // Build deep-dive URL for cards that have a full report page
-                let detailUrl: string | undefined
-                if (key === 'health_security' && p.codigo_postal) {
-                  const qs = new URLSearchParams({ jobId })
-                  if (p.lat != null) qs.set('lat', String(p.lat))
-                  if (p.lng != null) qs.set('lng', String(p.lng))
-                  detailUrl = `/map/report/health/${p.codigo_postal}?${qs}`
-                } else if (key === 'education_opportunity' && p.codigo_postal) {
-                  const qs = new URLSearchParams({ jobId })
-                  if (p.lat != null) qs.set('lat', String(p.lat))
-                  if (p.lng != null) qs.set('lng', String(p.lng))
-                  detailUrl = `/map/report/education/${p.codigo_postal}?${qs}`
-                } else if (key === 'climate_solar' && p.ref_catastral) {
-                  // Solar deep-dive lives at /map/report/solar/[ref_catastral].
-                  // Only build the link when we actually have a ref_catastral;
-                  // otherwise the deep-dive page has nothing to key on.
-                  const qs = new URLSearchParams({ jobId })
-                  if (p.lat != null) qs.set('lat', String(p.lat))
-                  if (p.lng != null) qs.set('lng', String(p.lng))
-                  if (p.codigo_postal) qs.set('postcode', p.codigo_postal)
-                  detailUrl = `/map/report/solar/${encodeURIComponent(p.ref_catastral)}?${qs}`
-                }
-                return <IndicatorCard key={key} indicatorKey={key} data={data} detailUrl={detailUrl} />
-              }
-
-              // Live indicator, no data or null score — show unavailable
-              return <IndicatorCard key={key} indicatorKey={key} />
-            })}
-          </div>
-        </section>
-
-        {/* Section 4 — Life Proximity + Mini-Map */}
-        {/* Per REPORT_PAGE_SPEC.md §4: two-column, LEFT=MiniMapCard 220px, RIGHT=ProximitySummary full categories */}
-        <section style={{ marginBottom: 48 }}>
-          <h2 style={{ fontFamily: 'var(--font-playfair)', fontSize: 'clamp(20px, 3vw, 26px)', fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>
-            Life Proximity
-          </h2>
-          <p style={{ fontFamily: 'var(--font-playfair)', fontStyle: 'italic', fontSize: 16, color: 'var(--text-mid)', marginBottom: 24 }}>
-            What&apos;s within a 5-minute walk.
-          </p>
+        {/* Life Proximity — amenity list only. The map that used to live
+            here has been merged into the shared NeighbourhoodMap under the
+            Environment section (see CHANGE 2 of the restructure). */}
+        <section id="proximity" style={{ ...anchorScrollStyle, marginBottom: 48 }}>
+          <h2 style={sectionTitleStyle}>Life Proximity</h2>
+          <p style={sectionLedeStyle}>What&apos;s within a 5-minute walk.</p>
 
           {result.property.lat != null && result.property.lng != null ? (
-            <div style={{
-              display:             'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-              gap:                 24,
-              alignItems:          'start',
-            }}>
-              <MiniMapCard lat={result.property.lat} lng={result.property.lng} />
-              <ProximitySummaryFromCoords lat={result.property.lat} lng={result.property.lng} />
-            </div>
+            <ProximitySummaryFromCoords lat={result.property.lat} lng={result.property.lng} />
           ) : (
-            /* Coordinates null — proximity data cannot be fetched */
             <div style={{ background: 'var(--surface-2)', borderRadius: 12, padding: 20 }}>
               <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 13, color: 'var(--text-mid)', marginBottom: 12 }}>
                 Location data not available for this property.
@@ -630,47 +633,24 @@ function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }
           )}
         </section>
 
-        {/* Solar Potential — CHI-380 */}
-        {/* Only rendered when the edge function has populated solar_potential_result */}
-        {result.solar_potential_result && (() => {
-          const solarData = result.solar_potential_result as unknown as SolarPotentialResult
-          const isLocked  = tierRank(userTier) < 2
-          return (
-            <section style={{ marginBottom: 48 }}>
-              <h2 style={{ fontFamily: 'var(--font-playfair)', fontSize: 'clamp(20px, 3vw, 26px)', fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>
-                Solar Potential
-              </h2>
-              <p style={{ fontFamily: 'var(--font-playfair)', fontStyle: 'italic', fontSize: 16, color: 'var(--text-mid)', marginBottom: 24 }}>
-                What a solar installation could save — and earn — at this property.
-              </p>
-              <div style={{ background: 'var(--surface-2)', borderRadius: 18, padding: 24, boxShadow: 'var(--shadow-sm)', maxWidth: 560 }}>
-                <SolarPotentialCard
-                  result={solarData}
-                  locked={isLocked}
-                  city={result.property.municipio ?? 'Spain'}
-                />
-                {/* Deep-dive entry point now lives on the climate_solar indicator
-                    card (see indicator grid above) so free-tier users encounter
-                    the same lock-then-upgrade flow as health/education. */}
-              </div>
-            </section>
-          )
-        })()}
-
-        {/* Pillar Scores */}
-        <section style={{ marginBottom: 48 }}>
-          <h2 style={{ fontFamily: 'var(--font-playfair)', fontSize: 'clamp(20px, 3vw, 26px)', fontWeight: 600, color: 'var(--text)', marginBottom: 24 }}>
-            How this property scores
-          </h2>
-          <div style={{ background: 'var(--surface-2)', borderRadius: 18, padding: 24, boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 520 }}>
-            {pillarScores().map((p, i) => (
-              <PillarScoreBar key={p.label} label={p.label} score={p.score} delayMs={i * 60} />
-            ))}
-          </div>
-          <p style={{ fontFamily: 'var(--font-playfair)', fontStyle: 'italic', fontSize: 13, color: 'var(--text-light)', marginTop: 16 }}>
-            Overall TVI based on available live signals. More indicators unlock as data is ingested.
-          </p>
-        </section>
+        {/* Solar Potential — CHI-380. Collapsed by default via SolarAccordion;
+            expanding reveals the full SolarPotentialCard. Only rendered
+            when the edge function has populated solar_potential_result. */}
+        {result.solar_potential_result && (
+          <section id="solar" style={{ ...anchorScrollStyle, marginBottom: 48 }}>
+            <h2 style={sectionTitleStyle}>Solar Potential</h2>
+            <p style={sectionLedeStyle}>
+              What a solar installation could save — and earn — at this property.
+            </p>
+            <div style={{ maxWidth: 560 }}>
+              <SolarAccordion
+                result={result.solar_potential_result as unknown as SolarPotentialResult}
+                locked={false}
+                city={result.property.municipio ?? 'Spain'}
+              />
+            </div>
+          </section>
+        )}
 
         {/* Cache notice — CHI-347: reports are durable, banner retained only when
             a legacy row still has an expires_at (pre-migration). */}

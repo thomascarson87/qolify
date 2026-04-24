@@ -1,28 +1,23 @@
 'use client';
 
 /**
- * NeighbourhoodIntel — merges three pin-panel sections into the DNA Report.
+ * NeighbourhoodIntel — renders two adjacent DNA Report sections:
  *
- * Sections (in order):
- *   1. Area Overview       — Claude-generated summary
- *   2. Flood Safety        — SNCZI T10/T100/T500 membership
- *   3. Community Character — VUT tourist-rental licences within 200m
+ *   • Neighbourhood Intelligence — Area Overview (AI paragraph) + a single
+ *     inline VUT line (tourist-rental licence count within 200m), per the
+ *     analysis-page-UX-restructure: Community Character is no longer its
+ *     own section.
  *
- * Data sources:
- *   - POST /api/map/pin          → flood result + vut_count_200m + facilities
- *   - GET  /api/map/zone/{cp}    → zone-level context (TVI, avg price, T10)
+ *   • Environment — one shared <NeighbourhoodMap/> (flood/noise/amenities
+ *     layer switcher) followed by three collapsed-by-default sub-cards:
+ *     Flood, Noise, Air Quality.
+ *
+ * Data sources (unchanged from previous revision):
+ *   - POST /api/map/pin          → flood + vut_count_200m + noise + air_quality
+ *   - GET  /api/map/zone/{cp}    → zone context (TVI, avg price) for AI input
  *   - generateAreaSummary()      → Claude summary using the two above as input
  *
- * Why fetch client-side instead of extending the analyse-job pipeline?
- *   The pin endpoint already answers every sub-query in < 1 s against the
- *   same PostGIS indexes the background job would use. Persisting those fields
- *   on the job row buys us one-round-trip load but adds a schema change,
- *   duplicated SQL, and a migration cost. We can promote to server-side
- *   persistence later if DNA-report opens become a hot path.
- *
- * States:
- *   - Skeleton for each section while its data is loading
- *   - On fetch failure, each section falls back to its own unavailable state
+ * See previous file header for rationale on client-side fetching.
  */
 
 import { useEffect, useRef, useState } from 'react';
@@ -30,7 +25,7 @@ import { FloodIntelligenceCard } from '@/components/report/FloodIntelligenceCard
 import { NoiseExposureCard } from '@/components/report/NoiseExposureCard';
 import { AirQualityCard } from '@/components/report/AirQualityCard';
 import { AreaSummarySection } from '@/components/map/AreaSummarySection';
-import { CommunityCharacterTriage } from '@/components/map/CommunityCharacterTriage';
+import { NeighbourhoodMap, type NeighbourhoodMapLayer } from '@/components/report/NeighbourhoodMap';
 import { generateAreaSummary, type AreaSummaryInput } from '@/app/actions/generateAreaSummary';
 
 interface ZoneSummary {
@@ -43,7 +38,6 @@ interface ZoneSummary {
   municipio:         string | null;
 }
 
-// Shape mirrors PinReport (only the fields this component consumes).
 interface PinFetch {
   flood: { in_t10: boolean; in_t100: boolean; in_t500: boolean };
   vut_count_200m: number;
@@ -56,15 +50,11 @@ interface PinFetch {
   };
   fibre: { coverage_type: string } | null;
   codigo_postal: string | null;
-  // Noise exposure — all three fields are null when the coordinate sits
-  // outside every mapped noise contour polygon (treated as < 55 dB Lden).
   noise?: {
     lden:        number | null;
     band:        string | null;
     source_type: 'road' | 'rail' | 'airport' | 'industry' | null;
   };
-  // Air quality — null when no station within 25 km has a rolling annual
-  // mean available. Card renders its own UNAVAILABLE state in that case.
   air_quality?: {
     station_name:   string;
     municipio_name: string | null;
@@ -100,10 +90,15 @@ function gradeLetter(score: number): string {
   return 'F';
 }
 
+// Merged VUT line — replaces the old standalone Community Character section.
+// Tone + copy match the prior CommunityCharacterTriage green/amber/red bands.
+function vutLineCopy(n: number): { dot: string; text: string } {
+  if (n <= 3)  return { dot: '#34C97A', text: `${n} active tourist-rental licences within 200m — predominantly residential.` };
+  if (n <= 10) return { dot: '#D4820A', text: `${n} active tourist-rental licences within 200m — moderate tourist activity.` };
+  return            { dot: '#C94B1A', text: `${n} active tourist-rental licences within 200m — high tourist-rental density.` };
+}
+
 function SectionShell({ children }: { children: React.ReactNode }) {
-  // Light-surface wrapper that matches the DNA Report's other cards. The
-  // inner components (Flood, Community) draw their own severity-coloured
-  // left border; this shell supplies the card chrome around them.
   return (
     <div style={{ background: 'var(--surface-2)', borderRadius: 12, padding: 20, boxShadow: 'var(--shadow-sm)' }}>
       {children}
@@ -114,11 +109,10 @@ function SectionShell({ children }: { children: React.ReactNode }) {
 export function NeighbourhoodIntel({
   lat: latRaw, lng: lngRaw, codigoPostal, municipio, priceAsking, areaSqm,
 }: NeighbourhoodIntelProps) {
-  // Numeric columns from Postgres can arrive as strings in JSON — coerce once
-  // here so every downstream consumer (fetch body, toFixed guard) sees a number.
   const lat = typeof latRaw === 'number' ? latRaw : Number(latRaw);
   const lng = typeof lngRaw === 'number' ? lngRaw : Number(lngRaw);
   const coordsValid = Number.isFinite(lat) && Number.isFinite(lng);
+
   const [pin,            setPin]            = useState<PinFetch | null>(null);
   const [pinLoading,     setPinLoading]     = useState(true);
   const [pinError,       setPinError]       = useState(false);
@@ -126,8 +120,11 @@ export function NeighbourhoodIntel({
   const [areaSummary,    setAreaSummary]    = useState<string | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(true);
 
-  // Guard: coordinates occasionally change reference between polls — only
-  // re-fire the intel fetches when the effective value changes.
+  // Active layer for the shared Environment map. Starts on flood — the most
+  // safety-critical overlay, per D-035 (flood always leads the Environment
+  // story). User can switch to noise or amenities at any time.
+  const [mapLayer, setMapLayer] = useState<NeighbourhoodMapLayer>('flood');
+
   const firedKey = useRef<string | null>(null);
 
   useEffect(() => {
@@ -142,7 +139,6 @@ export function NeighbourhoodIntel({
     setPin(null);
     setAreaSummary(null);
 
-    // 1. Pin data (flood + VUT + facilities) — single POST to /api/map/pin.
     const pinPromise = fetch('/api/map/pin', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -155,7 +151,6 @@ export function NeighbourhoodIntel({
       .then(r => r.ok ? r.json() as Promise<PinFetch> : null)
       .catch(() => null);
 
-    // 2. Zone data — only needed for AI summary input (price context, TVI).
     const postcode = codigoPostal ?? null;
     const zonePromise: Promise<ZoneSummary | null> = postcode
       ? fetch(`/api/map/zone/${postcode}`)
@@ -209,79 +204,97 @@ export function NeighbourhoodIntel({
 
   if (!coordsValid) return null;
 
+  const vutLine = pin ? vutLineCopy(pin.vut_count_200m) : null;
+
   return (
-    <section style={{ marginBottom: 48 }}>
-      <h2 style={{ fontFamily: 'var(--font-playfair)', fontSize: 'clamp(20px, 3vw, 26px)', fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>
-        Neighbourhood Intelligence
-      </h2>
-      <p style={{ fontFamily: 'var(--font-playfair)', fontStyle: 'italic', fontSize: 16, color: 'var(--text-mid)', marginBottom: 24 }}>
-        What the street feels like.
-      </p>
+    <>
+      {/* ── Neighbourhood Intelligence ─────────────────────────────────── */}
+      <section id="neighbourhood" style={{ marginBottom: 48, scrollMarginTop: 140 }}>
+        <h2 style={{ fontFamily: 'var(--font-playfair)', fontSize: 'clamp(20px, 3vw, 26px)', fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>
+          Neighbourhood Intelligence
+        </h2>
+        <p style={{ fontFamily: 'var(--font-playfair)', fontStyle: 'italic', fontSize: 16, color: 'var(--text-mid)', marginBottom: 24 }}>
+          What the street feels like.
+        </p>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {/* 1. Area overview — AI summary. Hidden entirely when we have neither
-            a loading state nor a generated summary (e.g. the /pin call failed
-            before we could even try). */}
-        {(summaryLoading || areaSummary) && (
+        {(summaryLoading || areaSummary || vutLine) && (
           <SectionShell>
-            <AreaSummarySection tone="light" loading={summaryLoading} summary={areaSummary} />
+            {(summaryLoading || areaSummary) && (
+              <AreaSummarySection tone="light" loading={summaryLoading} summary={areaSummary} />
+            )}
+
+            {/* VUT line — merged from the former Community Character section.
+                Renders as a single dot + sentence beneath the AI paragraph. */}
+            {vutLine && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                marginTop: (summaryLoading || areaSummary) ? 14 : 0,
+                paddingTop: (summaryLoading || areaSummary) ? 14 : 0,
+                borderTop: (summaryLoading || areaSummary) ? '1px solid var(--border)' : 'none',
+              }}>
+                <span aria-hidden="true" style={{
+                  width: 8, height: 8, borderRadius: '50%', background: vutLine.dot,
+                  flexShrink: 0, boxShadow: `0 0 0 3px ${vutLine.dot}22`,
+                }} />
+                <p style={{ fontFamily: 'var(--font-dm-sans)', fontSize: 13, color: 'var(--text-mid)', margin: 0, lineHeight: 1.5 }}>
+                  {vutLine.text}
+                </p>
+              </div>
+            )}
           </SectionShell>
         )}
+      </section>
 
-        {/* 2. Flood — always rendered (see D-035). During load we show a
-            skeleton rather than the "could not retrieve" fallback so a slow
-            pin fetch doesn't flash a false-negative. */}
-        <SectionShell>
-          {pinLoading ? (
-            <div className="animate-pulse" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div style={{ height: 11, width: 80,    background: 'var(--border)',    borderRadius: 4 }} />
-              <div style={{ height: 48, width: '100%', background: 'var(--surface-3, #EEF2F7)', borderRadius: 8 }} />
-            </div>
-          ) : (
-            <FloodIntelligenceCard
+      {/* ── Environment — shared map + Flood/Noise/AQ collapsible cards ── */}
+      <section id="environment" style={{ marginBottom: 48, scrollMarginTop: 140 }}>
+        <h2 style={{ fontFamily: 'var(--font-playfair)', fontSize: 'clamp(20px, 3vw, 26px)', fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>
+          Environment
+        </h2>
+        <p style={{ fontFamily: 'var(--font-playfair)', fontStyle: 'italic', fontSize: 16, color: 'var(--text-mid)', marginBottom: 24 }}>
+          Flood risk, noise exposure, and air quality at this address.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <SectionShell>
+            <NeighbourhoodMap
               lat={lat}
               lng={lng}
-              floodResult={pin && !pinError ? pin.flood : undefined}
+              activeLayer={mapLayer}
+              onLayerChange={setMapLayer}
             />
+          </SectionShell>
+
+          {/* Flood — always rendered (see D-035); loading shows skeleton. */}
+          <SectionShell>
+            {pinLoading ? (
+              <div className="animate-pulse" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ height: 11, width: 80,    background: 'var(--border)',    borderRadius: 4 }} />
+                <div style={{ height: 20, width: '70%', background: 'var(--surface-3, #EEF2F7)', borderRadius: 6 }} />
+              </div>
+            ) : (
+              <FloodIntelligenceCard floodResult={pin && !pinError ? pin.flood : undefined} />
+            )}
+          </SectionShell>
+
+          {pin && !pinLoading && (
+            <SectionShell>
+              <NoiseExposureCard
+                exposure={{
+                  lden:        pin.noise?.lden        ?? null,
+                  band:        pin.noise?.band        ?? null,
+                  source_type: pin.noise?.source_type ?? null,
+                }}
+              />
+            </SectionShell>
           )}
-        </SectionShell>
 
-        {/* 3. Noise exposure — EEA / ENAIRE / modelled Lden contours.
-            Rendered once pin data arrives; the card itself handles the
-            "below all mapped thresholds" case with a green reassurance
-            state, so we never hide the section for a quiet address. */}
-        {pin && !pinLoading && (
-          <SectionShell>
-            <NoiseExposureCard
-              lat={lat}
-              lng={lng}
-              exposure={{
-                lden:        pin.noise?.lden        ?? null,
-                band:        pin.noise?.band        ?? null,
-                source_type: pin.noise?.source_type ?? null,
-              }}
-            />
-          </SectionShell>
-        )}
-
-        {/* 4. Air quality — nearest EEA/MITECO station within 25 km.
-            AirQualityCard renders its own UNAVAILABLE state when no
-            station is close enough, so we still render the section for
-            rural addresses rather than silently omitting air-quality
-            information. */}
-        {pin && !pinLoading && (
-          <SectionShell>
-            <AirQualityCard data={pin.air_quality ?? null} />
-          </SectionShell>
-        )}
-
-        {/* 5. Community character — shown once pin data arrives. */}
-        {pin && !pinLoading && (
-          <SectionShell>
-            <CommunityCharacterTriage tone="light" vutCount={pin.vut_count_200m} />
-          </SectionShell>
-        )}
-      </div>
-    </section>
+          {pin && !pinLoading && (
+            <SectionShell>
+              <AirQualityCard data={pin.air_quality ?? null} />
+            </SectionShell>
+          )}
+        </div>
+      </section>
+    </>
   );
 }
