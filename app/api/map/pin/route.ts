@@ -403,13 +403,30 @@ export async function POST(request: NextRequest) {
             )
           ),
           noise AS (
-            SELECT lden_min, lden_band, source
+            SELECT lden_min, lden_band, source_type
             FROM noise_zones
             WHERE ST_Intersects(
               ST_SetSRID(ST_MakePoint(${lng}::float, ${lat}::float), 4326)::geography,
               geom
             )
             ORDER BY lden_min DESC
+            LIMIT 1
+          ),
+          aqi AS (
+            -- Nearest active air-quality station with a rolling annual mean.
+            -- 25 km cap filters out "nearest station" fallbacks that would be
+            -- misleading as a reading for this address.
+            SELECT
+              station_name, municipio_name,
+              aqi_value, aqi_category, aqi_annual_avg, aqi_trend_12m,
+              pm25_ugm3, pm10_ugm3, no2_ugm3, o3_ugm3, so2_ugm3, co_mgm3,
+              reading_at,
+              ST_Distance(geom, ST_MakePoint(${lng}::float, ${lat}::float)::geography)::int AS dist_m
+            FROM air_quality_readings
+            WHERE geom IS NOT NULL
+              AND aqi_annual_avg IS NOT NULL
+              AND ST_DWithin(geom, ST_MakePoint(${lng}::float, ${lat}::float)::geography, 25000)
+            ORDER BY geom <-> ST_SetSRID(ST_MakePoint(${lng}::float, ${lat}::float), 4326)
             LIMIT 1
           ),
           beach AS (
@@ -423,13 +440,28 @@ export async function POST(request: NextRequest) {
         SELECT
           mobility.ped_count,
           mobility.cyc_count,
-          noise.lden_min   AS noise_lden,
-          noise.lden_band  AS noise_band,
-          noise.source     AS noise_source,
+          noise.lden_min     AS noise_lden,
+          noise.lden_band    AS noise_band,
+          noise.source_type  AS noise_source_type,
+          aqi.station_name   AS aqi_station_name,
+          aqi.municipio_name AS aqi_municipio_name,
+          aqi.dist_m         AS aqi_station_dist_m,
+          aqi.aqi_value      AS aqi_value,
+          aqi.aqi_category   AS aqi_category,
+          aqi.aqi_annual_avg AS aqi_annual_avg,
+          aqi.aqi_trend_12m  AS aqi_trend_12m,
+          aqi.pm25_ugm3      AS pm25_ugm3,
+          aqi.pm10_ugm3      AS pm10_ugm3,
+          aqi.no2_ugm3       AS no2_ugm3,
+          aqi.o3_ugm3        AS o3_ugm3,
+          aqi.so2_ugm3       AS so2_ugm3,
+          aqi.co_mgm3        AS co_mgm3,
+          aqi.reading_at     AS aqi_reading_at,
           CASE WHEN beach.dist_m <= 15000 THEN beach.dist_m  ELSE NULL END AS nearest_beach_m,
           CASE WHEN beach.dist_m <= 15000 THEN beach.nombre  ELSE NULL END AS nearest_beach_name
         FROM mobility
         LEFT JOIN noise  ON TRUE
+        LEFT JOIN aqi    ON TRUE
         LEFT JOIN beach  ON TRUE`,
       'qol_extras',
     ),
@@ -453,7 +485,15 @@ export async function POST(request: NextRequest) {
   const ecoRow       = settled(results[12], [], 'eco');
   const postalZone   = settled(results[13], [], 'postal_zone');
   const amenityRow   = settled(results[14], [{}], 'amenities');
-  const qolExtras    = settled(results[15], [{ ped_count: 0, cyc_count: 0, noise_lden: null, noise_band: null, noise_source: null, nearest_beach_m: null, nearest_beach_name: null }], 'qol_extras');
+  const qolExtras    = settled(results[15], [{
+    ped_count: 0, cyc_count: 0,
+    noise_lden: null, noise_band: null, noise_source_type: null,
+    aqi_station_name: null, aqi_municipio_name: null, aqi_station_dist_m: null,
+    aqi_value: null, aqi_category: null, aqi_annual_avg: null, aqi_trend_12m: null,
+    pm25_ugm3: null, pm10_ugm3: null, no2_ugm3: null, o3_ugm3: null, so2_ugm3: null, co_mgm3: null,
+    aqi_reading_at: null,
+    nearest_beach_m: null, nearest_beach_name: null,
+  }], 'qol_extras');
 
   // ---- Typed accessors ------------------------------------------------------
 
@@ -474,7 +514,21 @@ export async function POST(request: NextRequest) {
   };
   type QolExtrasRow = {
     ped_count: number; cyc_count: number;
-    noise_lden: number | null; noise_band: string | null; noise_source: string | null;
+    noise_lden: number | null; noise_band: string | null; noise_source_type: string | null;
+    aqi_station_name:   string | null;
+    aqi_municipio_name: string | null;
+    aqi_station_dist_m: number | null;
+    aqi_value:          number | null;
+    aqi_category:       string | null;
+    aqi_annual_avg:     number | string | null;
+    aqi_trend_12m:      number | string | null;
+    pm25_ugm3:          number | string | null;
+    pm10_ugm3:          number | string | null;
+    no2_ugm3:           number | string | null;
+    o3_ugm3:            number | string | null;
+    so2_ugm3:           number | string | null;
+    co_mgm3:            number | string | null;
+    aqi_reading_at:     string | null;
     nearest_beach_m: number | null; nearest_beach_name: string | null;
   };
 
@@ -600,6 +654,37 @@ export async function POST(request: NextRequest) {
         nearest_beach_m:           nearestBeachM,
         nearest_beach_name:        qe?.nearest_beach_name  ?? null,
       },
+
+      // Noise pollution detail for NoiseExposureCard. When the coordinate
+      // falls outside any mapped noise polygon, all three fields are null.
+      noise: {
+        lden:        noiseLden,
+        band:        qe?.noise_band             ?? null,
+        source_type: qe?.noise_source_type      ?? null,
+      },
+
+      // Air quality detail for AirQualityCard. Null when no station within
+      // 25 km has a rolling annual mean — the card renders UNAVAILABLE state.
+      // postgres.js returns DECIMAL as strings, so cast via Number() here.
+      air_quality: qe?.aqi_station_name
+        ? {
+            station_name:   qe.aqi_station_name,
+            municipio_name: qe.aqi_municipio_name,
+            distance_m:     qe.aqi_station_dist_m,
+            aqi_value:      qe.aqi_value,
+            aqi_category:   qe.aqi_category,
+            aqi_annual_avg: qe.aqi_annual_avg != null ? Number(qe.aqi_annual_avg) : null,
+            aqi_trend_12m:  qe.aqi_trend_12m  != null ? Number(qe.aqi_trend_12m)  : null,
+            pm25_ugm3:      qe.pm25_ugm3      != null ? Number(qe.pm25_ugm3)      : null,
+            pm10_ugm3:      qe.pm10_ugm3      != null ? Number(qe.pm10_ugm3)      : null,
+            no2_ugm3:       qe.no2_ugm3       != null ? Number(qe.no2_ugm3)       : null,
+            o3_ugm3:        qe.o3_ugm3        != null ? Number(qe.o3_ugm3)        : null,
+            so2_ugm3:       qe.so2_ugm3       != null ? Number(qe.so2_ugm3)       : null,
+            co_mgm3:        qe.co_mgm3        != null ? Number(qe.co_mgm3)        : null,
+            reading_at:     qe.aqi_reading_at,
+          }
+        : null,
+
       generated_at: new Date().toISOString(),
     },
     {

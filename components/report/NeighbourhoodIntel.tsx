@@ -26,7 +26,9 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { FloodSafetySection } from '@/components/map/FloodSafetySection';
+import { FloodIntelligenceCard } from '@/components/report/FloodIntelligenceCard';
+import { NoiseExposureCard } from '@/components/report/NoiseExposureCard';
+import { AirQualityCard } from '@/components/report/AirQualityCard';
 import { AreaSummarySection } from '@/components/map/AreaSummarySection';
 import { CommunityCharacterTriage } from '@/components/map/CommunityCharacterTriage';
 import { generateAreaSummary, type AreaSummaryInput } from '@/app/actions/generateAreaSummary';
@@ -54,6 +56,31 @@ interface PinFetch {
   };
   fibre: { coverage_type: string } | null;
   codigo_postal: string | null;
+  // Noise exposure — all three fields are null when the coordinate sits
+  // outside every mapped noise contour polygon (treated as < 55 dB Lden).
+  noise?: {
+    lden:        number | null;
+    band:        string | null;
+    source_type: 'road' | 'rail' | 'airport' | 'industry' | null;
+  };
+  // Air quality — null when no station within 25 km has a rolling annual
+  // mean available. Card renders its own UNAVAILABLE state in that case.
+  air_quality?: {
+    station_name:   string;
+    municipio_name: string | null;
+    distance_m:     number | null;
+    aqi_value:      number | null;
+    aqi_category:   string | null;
+    aqi_annual_avg: number | null;
+    aqi_trend_12m:  number | null;
+    pm25_ugm3:      number | null;
+    pm10_ugm3:      number | null;
+    no2_ugm3:       number | null;
+    o3_ugm3:        number | null;
+    so2_ugm3:       number | null;
+    co_mgm3:        number | null;
+    reading_at:     string | null;
+  } | null;
 }
 
 interface NeighbourhoodIntelProps {
@@ -91,7 +118,7 @@ export function NeighbourhoodIntel({
   // here so every downstream consumer (fetch body, toFixed guard) sees a number.
   const lat = typeof latRaw === 'number' ? latRaw : Number(latRaw);
   const lng = typeof lngRaw === 'number' ? lngRaw : Number(lngRaw);
-  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  const coordsValid = Number.isFinite(lat) && Number.isFinite(lng);
   const [pin,            setPin]            = useState<PinFetch | null>(null);
   const [pinLoading,     setPinLoading]     = useState(true);
   const [pinError,       setPinError]       = useState(false);
@@ -104,6 +131,7 @@ export function NeighbourhoodIntel({
   const firedKey = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!coordsValid) return;
     const key = `${lat.toFixed(5)}_${lng.toFixed(5)}`;
     if (firedKey.current === key) return;
     firedKey.current = key;
@@ -177,7 +205,9 @@ export function NeighbourhoodIntel({
           setSummaryLoading(false);
         }
       });
-  }, [lat, lng, codigoPostal, municipio, priceAsking, areaSqm]);
+  }, [coordsValid, lat, lng, codigoPostal, municipio, priceAsking, areaSqm]);
+
+  if (!coordsValid) return null;
 
   return (
     <section style={{ marginBottom: 48 }}>
@@ -208,11 +238,44 @@ export function NeighbourhoodIntel({
               <div style={{ height: 48, width: '100%', background: 'var(--surface-3, #EEF2F7)', borderRadius: 8 }} />
             </div>
           ) : (
-            <FloodSafetySection floodResult={pin && !pinError ? pin.flood : undefined} />
+            <FloodIntelligenceCard
+              lat={lat}
+              lng={lng}
+              floodResult={pin && !pinError ? pin.flood : undefined}
+            />
           )}
         </SectionShell>
 
-        {/* 3. Community character — shown once pin data arrives. */}
+        {/* 3. Noise exposure — EEA / ENAIRE / modelled Lden contours.
+            Rendered once pin data arrives; the card itself handles the
+            "below all mapped thresholds" case with a green reassurance
+            state, so we never hide the section for a quiet address. */}
+        {pin && !pinLoading && (
+          <SectionShell>
+            <NoiseExposureCard
+              lat={lat}
+              lng={lng}
+              exposure={{
+                lden:        pin.noise?.lden        ?? null,
+                band:        pin.noise?.band        ?? null,
+                source_type: pin.noise?.source_type ?? null,
+              }}
+            />
+          </SectionShell>
+        )}
+
+        {/* 4. Air quality — nearest EEA/MITECO station within 25 km.
+            AirQualityCard renders its own UNAVAILABLE state when no
+            station is close enough, so we still render the section for
+            rural addresses rather than silently omitting air-quality
+            information. */}
+        {pin && !pinLoading && (
+          <SectionShell>
+            <AirQualityCard data={pin.air_quality ?? null} />
+          </SectionShell>
+        )}
+
+        {/* 5. Community character — shown once pin data arrives. */}
         {pin && !pinLoading && (
           <SectionShell>
             <CommunityCharacterTriage tone="light" vutCount={pin.vut_count_200m} />
