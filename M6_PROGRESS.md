@@ -65,6 +65,7 @@ Three changes shipped together:
 - CHI-394 — SNCZI flood zones · ⏸
 - CHI-395 — CNMC fibre coverage · ⏸
 - CHI-318 — CNMC fibre coverage seed · ✅
+- CHI-393 — mobile_coverage table + CNMC 4G/5G seed · ✅
 - CHI-372 / CHI-390 — EEA noise zones · 🚧 (started pre-M6)
 
 ### CHI-318 — CNMC fibre coverage seed · ✅
@@ -82,7 +83,33 @@ Verified: Málaga centre (36.72, -4.42) → FTTP 1000 Mbps; Madrid Salamanca →
 
 Follow-ups (out of scope):
 - Per-property SETELECO lookup (CHI-395 — supersedes this seed, gives exact coverage at analysis time).
-- Mobile 4G/5G coverage (CHI-393 — new `mobile_coverage` table).
+- Mobile 4G/5G coverage (CHI-393 — now shipped, see below).
+
+### CHI-393 — mobile_coverage (4G/5G) · ✅
+
+New `mobile_coverage` table (migration `017_mobile_coverage.sql`) — same GEOGRAPHY(POLYGON, 4326) shape as `fibre_coverage` plus a `technology` check (3G/4G/5G).
+
+**Seeded via `scripts/ingest/seed_mobile_coverage.py`:**
+- 8,339 × 4G polygons (5 km buffer around every municipio centroid — CNMC 2024 reports >99% population 4G, so we treat it as national baseline).
+- 52 × 5G polygons (Tier-1 + Tier-2 urban cores from the CHI-318 fibre list, 2.5–8 km tier-aware buffers).
+- 2 × manual gap-fill rows for Palma de Mallorca + Córdoba (both missing from the `municipios` table — known ingest defect, also gap-filled in `fibre_coverage`).
+
+**Indicator wiring — Digital Viability (both `lib/indicators/digital-viability.ts` and the edge function):**
+- Added `mobile` CTE (`BOOL_OR(technology='5G')`, `BOOL_OR(technology='4G')`).
+- New scoring: `max(fibreScore, mobileScore)` then + cowork bonus. Mobile fallback: `5G → 75`, `4G → 40`.
+- Score is no longer null when fibre data is missing but 5G/4G is present — confidence becomes `medium`.
+- Alerts refined: "No fibre — 5G available" (amber), "No fibre — 4G only" (amber), "No broadband coverage" (red) replace the single fibre-only red flag.
+
+**Card / DNA Report:** `lib/indicators/registry.ts` adds a `Mobile` row (5G / 4G / —) and the summarise string surfaces mobile as either a fallback or a backup. No custom `ResultView` code for Digital Viability, so the card picks up the new row automatically.
+
+**Verified at sample coords:** Madrid Salamanca → FTTP + 5G; Málaga centre → FTTP + 5G; Palma → FTTP + 5G (via manual row); Extremadura farmland → no fibre but 4G; Ronda → unavailable (expected — no seed).
+
+**Edge function redeployed** (`analyse-job`) after the index.ts change.
+
+**Known gaps (not blocking):**
+- 4G buffer radius (5 km centroid) doesn't cover the full footprint of the largest municipios (Madrid, Barcelona, Sevilla), so some deep-suburbia points show 5G-only rather than 5G+4G. Harmless — 5G present implies 4G in reality, and the indicator falls back correctly.
+- True per-operator coverage (Movistar/Vodafone/Orange/MásMóvil/Yoigo) requires the CNMC shapefile download workflow — not yet automated; the seed writes aggregate `multi_operator` rows.
+- `municipios` table is missing Palma + Córdoba (and leaks Portuguese municipios into provincia='Córdoba'). Filed as follow-up.
 
 ## Phase 5 — Health data
 

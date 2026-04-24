@@ -477,6 +477,24 @@ CREATE TABLE fibre_coverage (
 CREATE INDEX fibre_coverage_geom_idx ON fibre_coverage USING GIST (geom);
 ```
 
+### `mobile_coverage`
+```sql
+CREATE TABLE mobile_coverage (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  geom              GEOGRAPHY(POLYGON, 4326) NOT NULL,
+  technology        TEXT CHECK (technology IN ('3G', '4G', '5G')),
+  operator          TEXT,
+  download_mbps_typ INTEGER,
+  source            TEXT DEFAULT 'cnmc',
+  updated_at        TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX mobile_coverage_geom_idx       ON mobile_coverage USING GIST (geom);
+CREATE INDEX mobile_coverage_technology_idx ON mobile_coverage (technology);
+```
+CNMC 4G/5G mobile coverage polygons. Seeded via `scripts/ingest/seed_mobile_coverage.py`
+from `municipios.geom` centroids buffered by tier (4G = 5 km national baseline,
+5G = 3–8 km urban cores). Queried by Digital Viability with ST_DWithin(..., 0).
+
 ### `ite_status`
 ```sql
 CREATE TABLE ite_status (

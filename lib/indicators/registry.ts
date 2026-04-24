@@ -119,13 +119,22 @@ export const INDICATOR_REGISTRY: IndicatorMeta[] = [
     summarise(d) {
       const fibre = d.fibre_type as string | null
       const speed = d.max_speed_mbps as number | null
-      if (!fibre || fibre === 'none') return 'No registered fibre coverage at this address.'
-      return `${fibre} fibre coverage${speed != null ? ` — up to ${speed} Mbps` : ''}. ${fibre === 'FTTP' ? 'Full fibre to the home.' : 'Not full fibre to the home — shared last-mile segment.'}`
+      const mobile = (d.mobile_class as string | null) ?? 'none'
+      if (fibre && fibre !== 'none') {
+        const base = `${fibre} fibre coverage${speed != null ? ` — up to ${speed} Mbps` : ''}.`
+        const full = fibre === 'FTTP' ? 'Full fibre to the home.' : 'Not full fibre to the home — shared last-mile segment.'
+        const mob  = mobile !== 'none' ? ` ${mobile} mobile available as backup.` : ''
+        return `${base} ${full}${mob}`
+      }
+      if (mobile === '5G') return 'No fibre — 5G mobile broadband is the primary remote-work option.'
+      if (mobile === '4G') return 'No fibre — 4G mobile only. Usable for most remote work.'
+      return 'No registered fibre or mobile coverage at this address.'
     },
     dataRows(d) {
       return [
         { label: 'Fibre type',      value: fmt(d.fibre_type)           },
         { label: 'Max speed',       value: d.max_speed_mbps != null ? `${d.max_speed_mbps} Mbps` : '—' },
+        { label: 'Mobile',          value: fmt(d.mobile_class)         },
         { label: 'Coworking (2km)', value: fmt(d.coworking_count_2km)  },
       ]
     },
