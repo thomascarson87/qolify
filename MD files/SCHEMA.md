@@ -1059,6 +1059,54 @@ CREATE INDEX saved_pins_geom_idx ON saved_pins USING GIST (geom);
 -- RLS: users can only access their own pins
 ```
 
+### `saved_analyses`
+Property Library — authenticated users save a full analysis result so it's durable and retrievable independent of `analysis_cache`. `analysis_json` stores a snapshot of the `GET /api/analyse/status` response at save/refresh time. `tvi_score` is extracted for cheap sort. `source_url` is UNIQUE per user (same listing can be saved by different users). `source` discriminates manual saves from Idealista bulk imports. See migration 018.
+```sql
+CREATE TABLE saved_analyses (
+  id                UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id           UUID        NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
+  source_url        TEXT        NOT NULL,
+  analysis_cache_id UUID        REFERENCES analysis_cache(id) ON DELETE SET NULL,
+  analysis_json     JSONB       NOT NULL,
+  tvi_score         DECIMAL(5,2),
+  source            TEXT        NOT NULL DEFAULT 'manual'
+                      CHECK (source IN ('manual','idealista_import')),
+  notes             TEXT,
+  analysed_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  import_batch_id   UUID REFERENCES import_batches(id) ON DELETE SET NULL,
+  UNIQUE (user_id, source_url)
+);
+CREATE INDEX saved_analyses_user_created_idx ON saved_analyses (user_id, created_at DESC);
+CREATE INDEX saved_analyses_user_tvi_idx     ON saved_analyses (user_id, tvi_score DESC NULLS LAST);
+-- RLS: saved_analyses_owner — user_id = auth.uid()
+```
+
+### `import_batches`
+Tracks a bulk import job (e.g. Idealista shared favourites list). Lifecycle: `pending → running → complete | partial | error`. `items` jsonb holds per-listing state for live progress rendering without a second table. See migration 018.
+```sql
+CREATE TABLE import_batches (
+  id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id         UUID        NOT NULL REFERENCES user_profiles(id) ON DELETE CASCADE,
+  source          TEXT        NOT NULL DEFAULT 'idealista',
+  source_url      TEXT        NOT NULL,
+  status          TEXT        NOT NULL DEFAULT 'pending'
+                    CHECK (status IN ('pending','running','complete','partial','error')),
+  total_count     INTEGER     NOT NULL DEFAULT 0,
+  success_count   INTEGER     NOT NULL DEFAULT 0,
+  failure_count   INTEGER     NOT NULL DEFAULT 0,
+  items           JSONB       NOT NULL DEFAULT '[]'::jsonb,
+  errors          JSONB       NOT NULL DEFAULT '[]'::jsonb,
+  started_at      TIMESTAMPTZ,
+  completed_at    TIMESTAMPTZ,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX import_batches_user_created_idx ON import_batches (user_id, created_at DESC);
+-- RLS: import_batches_owner — user_id = auth.uid()
+```
+
 ### `user_filter_presets`
 ```sql
 CREATE TABLE user_filter_presets (

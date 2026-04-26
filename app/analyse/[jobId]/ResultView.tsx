@@ -28,6 +28,7 @@ import { ProximitySummary, type FacilityCounts } from '@/components/map/Proximit
 import { SolarPotentialCard } from '@/components/report/SolarPotentialCard'
 import { NeighbourhoodIntel } from '@/components/report/NeighbourhoodIntel'
 import type { SolarPotentialResult } from '@/lib/indicators/solar-potential'
+import { SaveToLibraryButton } from '@/components/library/SaveToLibraryButton'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -365,7 +366,12 @@ function FullReport({ result, jobId }: { result: AnalysisResult; jobId: string }
               </p>
             )}
           </div>
-          <TVIRing score={result.tvi_score} size={compressed ? 'sm' : 'lg'} />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 10 }}>
+            <TVIRing score={result.tvi_score} size={compressed ? 'sm' : 'lg'} />
+            {!compressed && result.id && (
+              <SaveToLibraryButton analysisId={result.id} />
+            )}
+          </div>
         </div>
       </div>
 

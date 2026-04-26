@@ -37,6 +37,7 @@ interface NavLink { label: string; href: string; match: (p: string) => boolean; 
 const NAV_LINKS: NavLink[] = [
   { label: 'Analyse', href: '/analyse', match: (p) => p.startsWith('/analyse') },
   { label: 'Map',     href: '/map',     match: (p) => p.startsWith('/map') },
+  { label: 'Library', href: '/library', match: (p) => p.startsWith('/library') || p.startsWith('/compare') },
 ];
 
 // ─── Component ────────────────────────────────────────────────────────────────
