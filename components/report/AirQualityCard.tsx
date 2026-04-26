@@ -21,6 +21,7 @@
  * No emojis — glyphs are either typographic arrows or filled shapes via CSS.
  */
 
+import { useState } from 'react';
 import {
   aqiConsequence,
   pollutantRows,
@@ -78,6 +79,8 @@ function trendGlyph(trend: number | null): { symbol: string; colour: string; lab
 }
 
 export function AirQualityCard({ data }: AirQualityCardProps) {
+  const [expanded, setExpanded] = useState(false);
+
   // ── UNAVAILABLE: no nearby station with a 12-month mean ──────────────────
   if (!data) {
     return (
@@ -219,8 +222,27 @@ export function AirQualityCard({ data }: AirQualityCardProps) {
         </div>
       </div>
 
+      {/* ── Show detail toggle — per analysis-page-UX-restructure CHANGE 6.
+            Collapsed AQ card = just the AQI panel + consequence title.
+            Expanded reveals the per-pollutant WHO-guideline breakdown and
+            the full consequence body + action text. */}
+      <button
+        type="button"
+        onClick={() => setExpanded(v => !v)}
+        aria-expanded={expanded}
+        style={{
+          alignSelf: 'flex-start',
+          fontFamily: 'var(--font-dm-sans)', fontSize: 12, fontWeight: 500,
+          color: 'var(--text-mid)', background: 'transparent',
+          border: '1px solid var(--border)', borderRadius: 8,
+          padding: '5px 10px', cursor: 'pointer',
+        }}
+      >
+        {expanded ? 'Hide detail ↑' : 'Show detail ↓'}
+      </button>
+
       {/* ── Pollutant breakdown — per-row bars vs WHO guideline ───────── */}
-      {rows.length > 0 && (
+      {expanded && rows.length > 0 && (
         <div style={{
           borderRadius: 8,
           border:       '1px solid rgba(42, 64, 96, 0.25)',
@@ -336,26 +358,30 @@ export function AirQualityCard({ data }: AirQualityCardProps) {
         }}>
           {consequence.title}
         </p>
-        <p style={{
-          fontFamily: 'var(--font-dm-sans)',
-          fontSize:   13,
-          color:      '#C5D5E8',
-          lineHeight: 1.6,
-          margin:     0,
-        }}>
-          {consequence.body}
-        </p>
-        {consequence.action && (
-          <p style={{
-            fontFamily: 'var(--font-dm-sans)',
-            fontSize:   13,
-            color:      '#C5D5E8',
-            lineHeight: 1.6,
-            marginTop:  8,
-            marginBottom: 0,
-          }}>
-            {consequence.action}
-          </p>
+        {expanded && (
+          <>
+            <p style={{
+              fontFamily: 'var(--font-dm-sans)',
+              fontSize:   13,
+              color:      '#C5D5E8',
+              lineHeight: 1.6,
+              margin:     0,
+            }}>
+              {consequence.body}
+            </p>
+            {consequence.action && (
+              <p style={{
+                fontFamily: 'var(--font-dm-sans)',
+                fontSize:   13,
+                color:      '#C5D5E8',
+                lineHeight: 1.6,
+                marginTop:  8,
+                marginBottom: 0,
+              }}>
+                {consequence.action}
+              </p>
+            )}
+          </>
         )}
       </div>
     </section>

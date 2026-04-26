@@ -10,29 +10,49 @@
  * Transaction mode multiplexes a pool of real connections across many
  * clients, which is what Vercel Fluid Compute needs.
  */
-import postgres from 'postgres'
+import postgres, { type Sql } from 'postgres'
 
-const url = process.env.DATABASE_URL_POOLER || process.env.DATABASE_URL
+// Lazy proxy: build-time page-data collection on Vercel evaluates this module
+// without runtime env vars, so we must NOT throw or open a connection at
+// import time. The real client is constructed on first query.
+let _sql: Sql | null = null
 
-if (!url) {
-  throw new Error('DATABASE_URL or DATABASE_URL_POOLER must be set')
+function getSql(): Sql {
+  if (_sql) return _sql
+
+  const url = process.env.DATABASE_URL_POOLER || process.env.DATABASE_URL
+  if (!url) {
+    throw new Error('DATABASE_URL or DATABASE_URL_POOLER must be set')
+  }
+
+  const isPooler = url.includes('pooler.supabase.com')
+
+  _sql = postgres(url, {
+    ssl: 'require',
+    max: 6,
+    idle_timeout: 5,
+    connect_timeout: 10,
+    // Supabase Supavisor (pooler) doesn't support prepared statements
+    prepare: !isPooler,
+    connection: {
+      statement_timeout: 30000,  // 30s cap per query
+    },
+  })
+  return _sql
 }
 
-// For Next.js serverless: keep connection count low.
-// ssl: 'require' works with Supabase direct + pooler connections.
-const isPooler = url.includes('pooler.supabase.com')
-
-const sql = postgres(url, {
-  ssl: 'require',
-  max: 6,
-  idle_timeout: 5,      // close idle connections quickly — prevents stale pooler connections
-  connect_timeout: 10,
-  // Supabase Supavisor (pooler) doesn't support prepared statements
-  prepare: !isPooler,
-  // statement_timeout is a session-level Postgres parameter (not a postgres.js constructor option)
-  connection: {
-    statement_timeout: 30000,  // 30s cap per query — prevents infinite hang on cold DB wake-up
+// Proxy forwards every call/property access to the lazily-created client so
+// existing `sql\`...\`` and `sql.unsafe(...)` call sites keep working.
+const sql = new Proxy(function () {} as unknown as Sql, {
+  apply(_t, _thisArg, args: unknown[]) {
+    const client = getSql() as unknown as (...a: unknown[]) => unknown
+    return client(...args)
   },
-})
+  get(_t, prop) {
+    const client = getSql() as unknown as Record<string | symbol, unknown>
+    const value = client[prop]
+    return typeof value === 'function' ? (value as (...a: unknown[]) => unknown).bind(client) : value
+  },
+}) as Sql
 
 export default sql
