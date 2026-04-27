@@ -82,12 +82,15 @@ async function getUserTier(): Promise<string> {
 // ---------------------------------------------------------------------------
 
 interface HealthCentre {
-  nombre:       string;
-  tipo:         string;
-  is_24h:       boolean;
-  distance_m:   number;
-  provincia:    string | null;
-  municipio:    string | null;
+  nombre:                string;
+  tipo:                  string;
+  is_24h:                boolean;
+  distance_m:            number;
+  provincia:             string | null;
+  municipio:             string | null;
+  surgery_wait_days:     number | null;
+  wait_recorded_quarter: string | null;
+  acsa_accreditation:    'avanzada' | 'optima' | 'excelente' | null;
 }
 
 interface WaitingTimes {
@@ -126,7 +129,10 @@ async function getHealthData(postcode: string): Promise<{
           (SELECT centroid::geography FROM postal_zones WHERE codigo_postal = ${postcode})
         )::numeric, 0) AS distance_m,
         provincia,
-        municipio
+        municipio,
+        surgery_wait_days,
+        wait_recorded_quarter,
+        acsa_accreditation
       FROM health_centres
       WHERE ST_DWithin(
         geom,
@@ -207,6 +213,27 @@ function walkTime(m: number): string {
   const mins = Math.round(m / 80);
   if (mins < 1) return '< 1 min walk';
   return `${mins} min walk`;
+}
+
+// CHI-385: ACSA accreditation copy + badge colour
+const ACSA_LABEL: Record<'avanzada' | 'optima' | 'excelente', { text: string; bg: string; fg: string }> = {
+  avanzada:  { text: 'ACSA Avanzada',  bg: 'rgba(52, 201, 122, 0.12)', fg: '#1F8E54' },
+  optima:    { text: 'ACSA Óptima',    bg: 'rgba(52, 201, 122, 0.20)', fg: '#147a44' },
+  excelente: { text: 'ACSA Excelente', bg: 'rgba(13, 43, 78, 0.10)',   fg: '#0D2B4E' },
+};
+
+function AcsaBadge({ level }: { level: 'avanzada' | 'optima' | 'excelente' | null }) {
+  if (!level) return null;
+  const cfg = ACSA_LABEL[level];
+  return (
+    <span style={{
+      display: 'inline-block', marginTop: 6, padding: '2px 8px', borderRadius: 4,
+      fontSize: 10, fontWeight: 700, letterSpacing: '0.05em',
+      background: cfg.bg, color: cfg.fg,
+    }}>
+      {cfg.text}
+    </span>
+  );
 }
 
 function scoreColour(score: number): string {
@@ -403,6 +430,7 @@ export default async function HealthReportPage({ params, searchParams }: Props) 
                   <p style={{ fontSize: 12, color: '#8A9BB0', marginTop: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {hospital.nombre}
                   </p>
+                  <AcsaBadge level={hospital.acsa_accreditation} />
                 </>
               ) : (
                 <p style={{ fontSize: 13, color: '#4A6080', marginTop: 4 }}>No data</p>
@@ -440,6 +468,38 @@ export default async function HealthReportPage({ params, searchParams }: Props) 
 
           </div>
         </section>
+
+        {/* ── Quality at nearest hospital (CHI-385) ── */}
+        {hospital && (hospital.surgery_wait_days != null || hospital.acsa_accreditation) && (
+          <section style={{ marginBottom: 40 }}>
+            <h2 style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#8A9BB0', textTransform: 'uppercase', marginBottom: 16 }}>
+              Quality at {hospital.nombre}
+            </h2>
+            <div style={{ background: 'var(--surface-2)', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 10, padding: '16px 18px' }}>
+              {hospital.surgery_wait_days != null && (
+                <DataRow
+                  label="Surgical wait at this facility"
+                  value={`~${hospital.surgery_wait_days} days`}
+                />
+              )}
+              {hospital.acsa_accreditation && (
+                <DataRow
+                  label="Quality accreditation"
+                  value={ACSA_LABEL[hospital.acsa_accreditation].text}
+                  mono={false}
+                />
+              )}
+              <p style={{ fontSize: 11, color: '#4A6080', marginTop: 12, lineHeight: 1.5 }}>
+                {hospital.surgery_wait_days != null && hospital.wait_recorded_quarter
+                  ? `Wait figure published ${hospital.wait_recorded_quarter} by SAS. `
+                  : ''}
+                {hospital.acsa_accreditation
+                  ? 'Accreditation by Agencia de Calidad Sanitaria de Andalucía — display only, not factored into the score.'
+                  : ''}
+              </p>
+            </div>
+          </section>
+        )}
 
         {/* ── Waiting times ── */}
         <section style={{ marginBottom: 40 }}>
@@ -487,13 +547,17 @@ export default async function HealthReportPage({ params, searchParams }: Props) 
           </section>
         )}
 
-        {/* ── Data source footer ── */}
+        {/* ── Data source footer (CHI-385) ── */}
         <footer style={{ borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: 20, marginTop: 20 }}>
           <p style={{ fontSize: 11, color: '#4A6080', lineHeight: 1.6 }}>
-            Health facility locations: RESC (Registro de Establecimientos Sanitarios Autorizados de Cataluña) and regional equivalents, sourced via OSM.
-            Distances measured from postcode centroid.
-            Waiting times: MSCBS Lista de Espera Quirúrgica (quarterly) + regional GP supplements (Andalucía, Madrid).
-            Data is CCAA-level — individual health area figures may differ.
+            Health Security combines distance to your nearest GP and 24h emergency facility, pharmacy density,
+            and surgery waiting times at the nearest hospital where published.
+            Facility list for Málaga province is curated from the public SAS directory
+            (Servicio Andaluz de Salud, distrito sanitario pages).
+            Distances measured from the postcode centroid.
+            Surgery wait days come from the SAS quarterly publication; ACSA accreditation comes from
+            the Agencia de Calidad Sanitaria de Andalucía and is shown for context only — it does not change the score.
+            Patient satisfaction, mortality and infection rates are not yet included.
           </p>
         </footer>
 
