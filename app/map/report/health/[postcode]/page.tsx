@@ -115,26 +115,40 @@ async function getHealthData(postcode: string): Promise<{
   pharmacies:    number;
   zone:          ZoneScore | null;
 }> {
+  // Nearest-of-each-type. Using LIMIT 30 across all types fails in dense urban
+  // centres (Málaga, Madrid) where 30 centros_salud are closer than any
+  // hospital — the hospital row never makes it back to JS. Three separate
+  // ordered LIMIT 1 subqueries return one row per category instead.
   const [centresRows, pharmacyRows, zoneRows] = await Promise.all([
     db`
-      SELECT
-        nombre,
-        tipo,
-        is_24h,
-        ROUND(ST_Distance(
-          geom,
-          (SELECT centroid::geography FROM postal_zones WHERE codigo_postal = ${postcode})
-        )::numeric, 0) AS distance_m,
-        provincia,
-        municipio
-      FROM health_centres
-      WHERE ST_DWithin(
-        geom,
-        (SELECT centroid::geography FROM postal_zones WHERE codigo_postal = ${postcode}),
-        25000
+      WITH pc AS (
+        SELECT centroid::geography AS g FROM postal_zones WHERE codigo_postal = ${postcode}
       )
-      ORDER BY distance_m
-      LIMIT 30`,
+      SELECT * FROM (
+        (SELECT nombre, tipo, is_24h,
+                ROUND(ST_Distance(geom, pc.g)::numeric, 0) AS distance_m,
+                provincia, municipio
+           FROM health_centres, pc
+          WHERE tipo = 'centro_salud'
+            AND ST_DWithin(geom, pc.g, 25000)
+          ORDER BY geom <-> pc.g LIMIT 1)
+        UNION ALL
+        (SELECT nombre, tipo, is_24h,
+                ROUND(ST_Distance(geom, pc.g)::numeric, 0) AS distance_m,
+                provincia, municipio
+           FROM health_centres, pc
+          WHERE tipo = 'hospital'
+            AND ST_DWithin(geom, pc.g, 50000)
+          ORDER BY geom <-> pc.g LIMIT 1)
+        UNION ALL
+        (SELECT nombre, tipo, is_24h,
+                ROUND(ST_Distance(geom, pc.g)::numeric, 0) AS distance_m,
+                provincia, municipio
+           FROM health_centres, pc
+          WHERE is_24h = TRUE
+            AND ST_DWithin(geom, pc.g, 50000)
+          ORDER BY geom <-> pc.g LIMIT 1)
+      ) AS combined`,
 
     db`
       SELECT COUNT(*)::int AS cnt
@@ -169,6 +183,8 @@ async function getWaitingTimes(provincia: string | null): Promise<WaitingTimes |
   if (!ccaa) return null;
 
   try {
+    // CCAA names are stored inconsistently (e.g. 'ANDALUCÍA' vs 'Andalucía') —
+    // case-fold both sides so lookups don't silently miss.
     const rows = await db`
       SELECT
         comunidad_autonoma,
@@ -178,7 +194,7 @@ async function getWaitingTimes(provincia: string | null): Promise<WaitingTimes |
         surgery_waiting_list::int,
         recorded_quarter::text
       FROM health_waiting_times
-      WHERE comunidad_autonoma = ${ccaa}
+      WHERE LOWER(comunidad_autonoma) = LOWER(${ccaa})
       ORDER BY recorded_quarter DESC
       LIMIT 1`;
     return (rows[0] as unknown as WaitingTimes) ?? null;
@@ -490,9 +506,10 @@ export default async function HealthReportPage({ params, searchParams }: Props) 
         {/* ── Data source footer ── */}
         <footer style={{ borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: 20, marginTop: 20 }}>
           <p style={{ fontSize: 11, color: '#4A6080', lineHeight: 1.6 }}>
-            Health facility locations: RESC (Registro de Establecimientos Sanitarios Autorizados de Cataluña) and regional equivalents, sourced via OSM.
+            Health facility locations: OpenStreetMap (community-tagged), supplemented by regional registries where available.
+            Facility classifications (centro de salud / hospital / 24h urgencias) reflect OSM tags and may not always match the public-system label.
             Distances measured from postcode centroid.
-            Waiting times: MSCBS Lista de Espera Quirúrgica (quarterly) + regional GP supplements (Andalucía, Madrid).
+            Waiting times: MSCBS Lista de Espera (quarterly) + regional supplements where published.
             Data is CCAA-level — individual health area figures may differ.
           </p>
         </footer>
