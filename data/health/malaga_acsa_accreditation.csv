@@ -1,6 +1,5 @@
 nombre,acsa_accreditation,source_url
-Hospital Costa del Sol,excelente,https://www.juntadeandalucia.es/agenciadecalidadsanitaria/
-Hospital Clínico Universitario Virgen de la Victoria,optima,https://www.juntadeandalucia.es/agenciadecalidadsanitaria/
-Hospital Regional Universitario de Málaga (Carlos Haya),optima,https://www.juntadeandalucia.es/agenciadecalidadsanitaria/
-Hospital Comarcal de Antequera,avanzada,https://www.juntadeandalucia.es/agenciadecalidadsanitaria/
-Hospital de la Axarquía,avanzada,https://www.juntadeandalucia.es/agenciadecalidadsanitaria/
+# ACSA accreditation per facility — populate from the live ACSA registry:
+# https://www.sspa.juntadeandalucia.es/agenciadecalidadsanitaria/certificacion-de-calidad/entidades-certificadas/?provincia=29&ambito=18&sector=SEC_SANITARIO
+# Allowed levels: avanzada | optima | excelente
+# Empty rows are skipped by the ingest script.
