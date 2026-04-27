@@ -1,0 +1,5 @@
+nombre,acsa_accreditation,source_url
+# ACSA accreditation per facility — populate from the live ACSA registry:
+# https://www.sspa.juntadeandalucia.es/agenciadecalidadsanitaria/certificacion-de-calidad/entidades-certificadas/?provincia=29&ambito=18&sector=SEC_SANITARIO
+# Allowed levels: avanzada | optima | excelente
+# Empty rows are skipped by the ingest script.

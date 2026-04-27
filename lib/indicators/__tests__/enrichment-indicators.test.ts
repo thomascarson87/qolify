@@ -397,6 +397,52 @@ describe('calcHealthSecurity — waiting time update', () => {
     expect(waitAlert).toBeDefined()
     expect(waitAlert?.type).toBe('amber')
   })
+
+  // CHI-385 — facility-level surgery wait overrides CCAA-level GP wait
+  it('prefers facility surgery wait over CCAA GP wait when present', async () => {
+    const sql = mockSql([{
+      gp_dist_m: 350, gp_nombre: 'CS Las Flores',
+      er_dist_m: 2000, er_nombre: 'Hospital Regional',
+      hosp_surgery_wait_days: 80,
+      hosp_wait_quarter: '2025-Q4',
+      hosp_nombre: 'Hospital Costa del Sol',
+      pharmacy_count: 3,
+      avg_days_gp: 4, avg_days_specialist: 45, avg_days_surgery: 67,
+      wait_health_area: 'Málaga-Centro',
+    }])
+    const result = await calcHealthSecurity(sql, MALAGA)
+    expect(result.details.wait_source).toBe('facility_surgery')
+    expect(result.details.facility_surgery_wait_days).toBe(80)
+    expect(result.details.facility_wait_hospital).toBe('Hospital Costa del Sol')
+    expect(result.details.facility_wait_quarter).toBe('2025-Q4')
+    // wait_score for 80d surgery: 100 - (80-30)*0.5 = 75 (vs CCAA-GP 4d → 68)
+    expect(result.score).toBeTypeOf('number')
+  })
+
+  it('falls back to CCAA-GP wait when no facility wait published', async () => {
+    const sql = mockSql([{
+      gp_dist_m: 350, gp_nombre: 'CS', er_dist_m: 2000, er_nombre: 'H',
+      hosp_surgery_wait_days: null, hosp_wait_quarter: null, hosp_nombre: null,
+      pharmacy_count: 3,
+      avg_days_gp: 4, avg_days_specialist: null, avg_days_surgery: null,
+      wait_health_area: 'Málaga-Centro',
+    }])
+    const result = await calcHealthSecurity(sql, MALAGA)
+    expect(result.details.wait_source).toBe('ccaa_gp')
+    expect(result.details.facility_surgery_wait_days).toBeNull()
+  })
+
+  it('uses neutral wait when neither facility nor CCAA wait available', async () => {
+    const sql = mockSql([{
+      gp_dist_m: 350, gp_nombre: 'CS', er_dist_m: 2000, er_nombre: 'H',
+      hosp_surgery_wait_days: null, hosp_wait_quarter: null, hosp_nombre: null,
+      pharmacy_count: 3,
+      avg_days_gp: null, avg_days_specialist: null, avg_days_surgery: null,
+      wait_health_area: null,
+    }])
+    const result = await calcHealthSecurity(sql, MALAGA)
+    expect(result.details.wait_source).toBe('none')
+  })
 })
 
 // ── Education Opportunity (CHI-377 diagnostic + bilingual update) ─────────────

@@ -1,0 +1,41 @@
+nombre,tipo,is_24h,lat,lng,municipio,distrito_sanitario,source_url,notes
+Hospital Regional Universitario de Málaga (Carlos Haya),hospital,true,36.7295,-4.4406,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/hrum/,Largest public hospital in Málaga; emergencias 24h
+Hospital Materno-Infantil,hospital,true,36.7287,-4.4421,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/hrum/,Part of HRU Málaga complex; paediatric and obstetric urgencias
+Hospital Civil,hospital,false,36.7330,-4.4351,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/hrum/,Part of HRU Málaga complex; specialty consultations
+Hospital Clínico Universitario Virgen de la Victoria,hospital,true,36.7170,-4.4767,Málaga,Málaga,https://www.huvv.es/,Public university hospital; full 24h emergencias
+Hospital Costa del Sol,hospital,true,36.5208,-4.8987,Marbella,Costa del Sol,https://www.hcs.es/,Public hospital serving western Costa del Sol
+Hospital de la Axarquía,hospital,true,36.7888,-4.0987,Vélez-Málaga,La Axarquía,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/haxarquia/,Public hospital serving eastern Málaga province
+Hospital Comarcal de Antequera,hospital,true,37.0235,-4.5546,Antequera,Antequera,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/hcantequera/,Public comarcal hospital
+Hospital Comarcal de la Serranía,hospital,true,36.7456,-5.1670,Ronda,Serranía,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/hserrania/,Public comarcal hospital serving Ronda and surrounds
+Centro de Salud Victoria,centro_salud,false,36.7275,-4.4115,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,Public GP centre — currently mislabelled clinica in OSM
+Centro de Salud El Palo,centro_salud,false,36.7204,-4.3617,Málaga,Málaga-Este,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud Limonar,centro_salud,false,36.7235,-4.3942,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud La Roca,centro_salud,false,36.7200,-4.4640,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud Trinidad,centro_salud,false,36.7281,-4.4428,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud Capuchinos,centro_salud,false,36.7322,-4.4272,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud Tiro de Pichón,centro_salud,false,36.7050,-4.4520,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud Puerta Blanca,centro_salud,false,36.6938,-4.4763,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud Carranque,centro_salud,false,36.7227,-4.4515,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud Cruz de Humilladero,centro_salud,false,36.7146,-4.4416,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud Delicias,centro_salud,false,36.6965,-4.4504,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud Miraflores de los Ángeles,centro_salud,false,36.7345,-4.4118,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud San Andrés Torcal,centro_salud,false,36.6996,-4.4374,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud Alameda Perchel,centro_salud,false,36.7197,-4.4340,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud Portada Alta,centro_salud,false,36.7183,-4.4720,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud Puerto de la Torre,centro_salud,false,36.7479,-4.5135,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud Campanillas,centro_salud,false,36.7308,-4.5567,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud Churriana,centro_salud,false,36.6680,-4.4983,Málaga,Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dsmalaga/,
+Centro de Salud Las Lagunas,centro_salud,false,36.5290,-4.6363,Mijas,Costa del Sol,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dccostadelsol/,
+Centro de Salud Fuengirola Oeste,centro_salud,false,36.5400,-4.6273,Fuengirola,Costa del Sol,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dccostadelsol/,
+Centro de Salud Las Albarizas,centro_salud,false,36.5145,-4.8825,Marbella,Costa del Sol,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dccostadelsol/,
+Centro de Salud San Pedro de Alcántara,centro_salud,false,36.4875,-4.9881,Marbella,Costa del Sol,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dccostadelsol/,
+Centro de Salud Estepona,centro_salud,false,36.4280,-5.1455,Estepona,Costa del Sol,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dccostadelsol/,
+Centro de Salud Torremolinos La Carihuela,centro_salud,false,36.6230,-4.5021,Torremolinos,Costa del Sol,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dccostadelsol/,
+Centro de Salud Benalmádena,centro_salud,false,36.5985,-4.5167,Benalmádena,Costa del Sol,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dccostadelsol/,
+Centro de Salud Vélez-Málaga Sur,centro_salud,false,36.7780,-4.1015,Vélez-Málaga,La Axarquía,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/daxarquia/,
+Centro de Salud Torre del Mar,centro_salud,false,36.7382,-4.0937,Vélez-Málaga,La Axarquía,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/daxarquia/,
+Centro de Salud Nerja,centro_salud,false,36.7530,-3.8768,Nerja,La Axarquía,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/daxarquia/,
+Centro de Salud Antequera Centro,centro_salud,false,37.0192,-4.5605,Antequera,Norte de Málaga,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dnortemalaga/,
+Centro de Salud Ronda Norte,centro_salud,false,36.7470,-5.1685,Ronda,Serranía,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dnortemalaga/,
+Centro de Salud Coín,centro_salud,false,36.6595,-4.7578,Coín,Valle del Guadalhorce,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dccostadelsol/,
+Centro de Salud Álora,centro_salud,false,36.8230,-4.7053,Álora,Valle del Guadalhorce,https://www.sspa.juntadeandalucia.es/servicioandaluzdesalud/dccostadelsol/,

@@ -7,6 +7,10 @@
  * CTE consolidation (CHI-334): 3 separate queries merged into 1.
  * QoL Enrichment Layer (CHI-377): Added waiting time component from
  * health_waiting_times (avg_days_gp) matched by comunidad_autonoma.
+ * Facility quality (CHI-385): Wait component prefers facility-level
+ * surgery_wait_days at the nearest hospital when present, falls back to
+ * CCAA average otherwise. ACSA accreditation is display-only on the
+ * deep-dive; it does NOT influence the score.
  */
 import type { Sql } from 'postgres'
 import type { PropertyInput, IndicatorResult, Alert } from './types'
@@ -18,15 +22,18 @@ export async function calcHealthSecurity(
 ): Promise<IndicatorResult & { details: Record<string, unknown> }> {
   const alerts: Alert[] = []
 
-  // --- Single CTE: nearest GP + nearest 24h ER + pharmacy count + waiting times ---
+  // --- Single CTE: nearest GP + nearest 24h ER + nearest hospital quality + pharmacy count + waiting times ---
   const [row] = await sql<{
-    gp_dist_m:           number | null;  gp_nombre:         string | null
-    er_dist_m:           number | null;  er_nombre:         string | null
-    pharmacy_count:      number
-    avg_days_gp:         number | null
-    avg_days_specialist: number | null
-    avg_days_surgery:    number | null
-    wait_health_area:    string | null
+    gp_dist_m:               number | null;  gp_nombre:         string | null
+    er_dist_m:               number | null;  er_nombre:         string | null
+    hosp_surgery_wait_days:  number | null
+    hosp_wait_quarter:       string | null
+    hosp_nombre:             string | null
+    pharmacy_count:          number
+    avg_days_gp:             number | null
+    avg_days_specialist:     number | null
+    avg_days_surgery:        number | null
+    wait_health_area:        string | null
   }[]>`
     WITH
       gp AS (
@@ -44,6 +51,19 @@ export async function calcHealthSecurity(
           nombre
         FROM health_centres
         WHERE is_24h = TRUE
+        ORDER BY geom <-> ST_SetSRID(ST_MakePoint(${property.lng}, ${property.lat}), 4326)::GEOGRAPHY
+        LIMIT 1
+      ),
+      -- Nearest hospital with a published surgery wait (CHI-385).
+      -- Used to override the CCAA-level wait when facility data is present.
+      nearest_hosp_with_wait AS (
+        SELECT
+          surgery_wait_days,
+          wait_recorded_quarter,
+          nombre
+        FROM health_centres
+        WHERE tipo = 'hospital'
+          AND surgery_wait_days IS NOT NULL
         ORDER BY geom <-> ST_SetSRID(ST_MakePoint(${property.lng}, ${property.lat}), 4326)::GEOGRAPHY
         LIMIT 1
       ),
@@ -71,36 +91,58 @@ export async function calcHealthSecurity(
         LIMIT 1
       )
     SELECT
-      gp.dist_m             AS gp_dist_m,    gp.nombre            AS gp_nombre,
-      er.dist_m             AS er_dist_m,    er.nombre            AS er_nombre,
-      pharm.count           AS pharmacy_count,
-      wait.avg_days_gp      AS avg_days_gp,
-      wait.avg_days_specialist AS avg_days_specialist,
-      wait.avg_days_surgery AS avg_days_surgery,
-      wait.health_area_name AS wait_health_area
+      gp.dist_m                          AS gp_dist_m,
+      gp.nombre                          AS gp_nombre,
+      er.dist_m                          AS er_dist_m,
+      er.nombre                          AS er_nombre,
+      nearest_hosp_with_wait.surgery_wait_days     AS hosp_surgery_wait_days,
+      nearest_hosp_with_wait.wait_recorded_quarter AS hosp_wait_quarter,
+      nearest_hosp_with_wait.nombre                AS hosp_nombre,
+      pharm.count                        AS pharmacy_count,
+      wait.avg_days_gp                   AS avg_days_gp,
+      wait.avg_days_specialist           AS avg_days_specialist,
+      wait.avg_days_surgery              AS avg_days_surgery,
+      wait.health_area_name              AS wait_health_area
     FROM (SELECT 1) dummy
-    LEFT JOIN gp    ON TRUE
-    LEFT JOIN er    ON TRUE
+    LEFT JOIN gp                     ON TRUE
+    LEFT JOIN er                     ON TRUE
+    LEFT JOIN nearest_hosp_with_wait ON TRUE
     CROSS JOIN pharm
-    LEFT JOIN wait  ON TRUE
+    LEFT JOIN wait                   ON TRUE
   `
 
   // postgres.js returns DECIMAL columns as strings — coerce before arithmetic/.toFixed()
-  const gpDistM    = row?.gp_dist_m ? Math.round(row.gp_dist_m) : null
-  const erDistM    = row?.er_dist_m ? Math.round(row.er_dist_m) : null
-  const avgDaysGp  = row?.avg_days_gp != null ? Number(row.avg_days_gp) : null
+  const gpDistM     = row?.gp_dist_m ? Math.round(row.gp_dist_m) : null
+  const erDistM     = row?.er_dist_m ? Math.round(row.er_dist_m) : null
+  const avgDaysGp   = row?.avg_days_gp != null ? Number(row.avg_days_gp) : null
+  const ccaaSurgery = row?.avg_days_surgery != null ? Number(row.avg_days_surgery) : null
+  const facilitySurgery = row?.hosp_surgery_wait_days != null ? Number(row.hosp_surgery_wait_days) : null
 
   const gpScore    = distanceToScore(gpDistM,  300,  3000)
   const erScore    = distanceToScore(erDistM, 1000,  8000)
   const pharmScore = Math.min((row?.pharmacy_count ?? 0) * 25, 100)
 
-  // Waiting time score: 0 days = 100, 12+ days = 4
-  // Neutral 60 when no data available (most areas < 5 days)
-  const waitScore  = avgDaysGp != null
-    ? Math.max(0, 100 - avgDaysGp * 8)
-    : 60
+  // Wait component (CHI-385):
+  //   1. Prefer facility-level surgery wait at the nearest hospital that
+  //      publishes one (SAS quarterly). Surgery waits run 30–200+ days,
+  //      so anchor the curve at 30/200 to keep scores legible.
+  //   2. Else use CCAA-level GP wait (most areas < 5 days, >12 = poor).
+  //   3. Else neutral 60.
+  let waitScore: number
+  let waitSource: 'facility_surgery' | 'ccaa_gp' | 'none'
+  if (facilitySurgery != null) {
+    waitScore = Math.max(0, Math.min(100, 100 - (facilitySurgery - 30) * 0.5))
+    waitSource = 'facility_surgery'
+  } else if (avgDaysGp != null) {
+    waitScore = Math.max(0, 100 - avgDaysGp * 8)
+    waitSource = 'ccaa_gp'
+  } else {
+    waitScore = 60
+    waitSource = 'none'
+  }
 
-  // Updated weights to include waiting time component (CHI-377)
+  // Weights unchanged from CHI-377 — wait now uses a better source when available,
+  // weight stays 0.15 to avoid over-tuning on partial coverage.
   const score = Math.round(
     gpScore    * 0.35 +
     erScore    * 0.35 +
@@ -131,8 +173,12 @@ export async function calcHealthSecurity(
       pharmacy_count_500m:      row?.pharmacy_count ?? 0,
       avg_days_gp_wait:         avgDaysGp,
       avg_days_specialist_wait: row?.avg_days_specialist != null ? Number(row.avg_days_specialist) : null,
-      avg_days_surgery:         row?.avg_days_surgery    != null ? Number(row.avg_days_surgery)    : null,
+      avg_days_surgery:         ccaaSurgery,
       wait_health_area:         row?.wait_health_area    ?? null,
+      facility_surgery_wait_days: facilitySurgery,
+      facility_wait_quarter:    row?.hosp_wait_quarter ?? null,
+      facility_wait_hospital:   row?.hosp_nombre ?? null,
+      wait_source:              waitSource,
     },
     alerts,
   }
