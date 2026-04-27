@@ -148,18 +148,29 @@ export const INDICATOR_REGISTRY: IndicatorMeta[] = [
     category: 'health',
     live:     true,
     summarise(d) {
-      const gpM = d.nearest_gp_m as number | null
-      const erM = d.nearest_er_m as number | null
+      const gpM   = d.nearest_gp_m            as number | null
+      const erM   = d.nearest_er_m            as number | null
+      const pharm = d.pharmacy_count_500m     as number | null
+      const wait  = d.avg_days_gp_wait        as number | null
       if (gpM == null) return 'Health facility data not available for this location.'
-      return `Nearest GP ${gpM}m away${erM != null ? `, A&E at ${erM < 1000 ? erM + 'm' : (erM / 1000).toFixed(1) + 'km'}` : ''}. ${gpM < 300 ? 'Excellent' : gpM < 600 ? 'Good' : 'Moderate'} healthcare access.`
+      const access = gpM < 300 ? 'Excellent' : gpM < 600 ? 'Good' : 'Moderate'
+      const erTxt  = erM != null ? `, 24h A&E at ${erM < 1000 ? erM + 'm' : (erM / 1000).toFixed(1) + 'km'}` : ''
+      const phTxt  = pharm != null && pharm > 0 ? `, ${pharm} pharmac${pharm === 1 ? 'y' : 'ies'} within 500m` : ''
+      const wtTxt  = wait != null ? ` Regional GP wait: ~${Math.round(wait)} days.` : ''
+      return `Nearest GP ${gpM < 1000 ? gpM + 'm' : (gpM / 1000).toFixed(1) + 'km'} away${erTxt}${phTxt}. ${access} healthcare access.${wtTxt}`
     },
     dataRows(d) {
+      const gpName = d.nearest_gp_nombre as string | null
+      const erName = d.nearest_er_nombre as string | null
+      const area   = d.wait_health_area  as string | null
       return [
-        { label: 'Nearest GP',              value: fmtDist(d.nearest_gp_m)           },
-        { label: 'Nearest A&E',             value: fmtDist(d.nearest_er_m)           },
-        { label: 'Pharmacies (500m)',        value: fmt(d.pharmacy_count_500m)        },
-        { label: 'GP wait (days)',           value: d.avg_days_gp_wait != null ? `~${d.avg_days_gp_wait}d` : '—' },
-        { label: 'Specialist wait (days)',   value: d.avg_days_specialist_wait != null ? `~${d.avg_days_specialist_wait}d` : '—' },
+        { label: 'Nearest GP',              value: fmtDist(d.nearest_gp_m) + (gpName ? ` · ${gpName}` : '') },
+        { label: 'Nearest 24h A&E',         value: fmtDist(d.nearest_er_m) + (erName ? ` · ${erName}` : '') },
+        { label: 'Pharmacies (500m)',        value: fmt(d.pharmacy_count_500m) },
+        { label: 'GP appointment wait',      value: d.avg_days_gp_wait         != null ? `~${Math.round(Number(d.avg_days_gp_wait))} days`         : '—' },
+        { label: 'Specialist wait',          value: d.avg_days_specialist_wait != null ? `~${Math.round(Number(d.avg_days_specialist_wait))} days` : '—' },
+        { label: 'Surgery wait',             value: d.avg_days_surgery         != null ? `~${Math.round(Number(d.avg_days_surgery))} days`         : '—' },
+        { label: 'Wait data region',         value: area ?? '—' },
       ]
     },
   },
